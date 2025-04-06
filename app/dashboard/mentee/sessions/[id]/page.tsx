@@ -16,8 +16,9 @@ import { auth } from "@/lib/auth";
 export default async function SessionDetailsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await auth();
   if (!session || session.user.role !== "user") {
     notFound();
@@ -32,7 +33,7 @@ export default async function SessionDetailsPage({
   }
 
   // Find the session
-  const sessionRecord = await Session.findById(params.id);
+  const sessionRecord = await Session.findById(id);
   if (!sessionRecord || !sessionRecord.menteeId.equals(currentUser._id)) {
     notFound();
   }
@@ -121,7 +122,7 @@ export default async function SessionDetailsPage({
         <div>
           {sessionRecord.status === "pending" && !isPaid ? (
             <PaymentForm
-              sessionId={params.id}
+              sessionId={id}
               amount={sessionRecord.price}
               mentorName={mentor.name}
             />
