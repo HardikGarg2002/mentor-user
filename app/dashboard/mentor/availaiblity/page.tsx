@@ -103,6 +103,7 @@ export default function MentorAvailability() {
 
   useEffect(() => {
     fetchAvailability();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   // Handle recurring day toggle

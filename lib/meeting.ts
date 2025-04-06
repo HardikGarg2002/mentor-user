@@ -54,6 +54,7 @@ export async function getMeetingsByTrainer(
   await connectDB();
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = { trainerId };
     if (status) {
       query.status = status;
@@ -75,6 +76,7 @@ export async function getMeetingsByUser(
   await connectDB();
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = { bookedBy: userId };
     if (status) {
       query.status = status;
