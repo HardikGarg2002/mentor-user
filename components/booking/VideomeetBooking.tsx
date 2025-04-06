@@ -8,6 +8,7 @@ const BookVideoCallDialog = () => {
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedSlot, setSelectedSlot] = useState("");
   const [isBooking, setIsBooking] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [meetingLink, setMeetingLink] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
@@ -57,7 +58,7 @@ const BookVideoCallDialog = () => {
         "Saturday",
       ].indexOf(selectedDay);
 
-      let scheduledDate = new Date(today);
+      const scheduledDate = new Date(today);
       scheduledDate.setDate(
         today.getDate() + ((dayOfWeekIndex - today.getDay() + 7) % 7)
       ); // Next selected day

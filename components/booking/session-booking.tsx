@@ -60,6 +60,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
     };
 
     fetchSlots();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
 
   // Fetch available slots via Server Actions

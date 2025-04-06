@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import Session from "@/models/Session";
@@ -111,11 +111,12 @@ export async function getPaymentsByUser() {
         ? { recipientId: currentUser._id }
         : { userId: currentUser._id };
 
-    const payments = await Payment.find(query)
+    const payments = (await Payment.find(query)
       .sort({ paymentDate: -1 })
       .populate("sessionId")
       .populate("userId", "name")
-      .populate("recipientId", "name");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .populate("recipientId", "name")) as any;
 
     return payments.map((payment) => ({
       id: payment._id.toString(),

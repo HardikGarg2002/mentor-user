@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 // import Mentor from "@/models/Mentor";
-import { getMentorById } from "@/lib/mentors";
+// import { getMentorById } from "@/lib/mentors";
 // import BookVideoCallDialog from "@/components/booking/VideomeetBooking";
 
 export default async function MentorDashboard() {
@@ -130,7 +130,7 @@ export default async function MentorDashboard() {
         return <Badge>{status}</Badge>;
     }
   };
-  const mentor = await getMentorById("67d4709d9d1e7c742b328ade");
+  // const mentor = await getMentorById("67d4709d9d1e7c742b328ade");
 
   return (
     <div className="container mx-auto px-4 py-8">

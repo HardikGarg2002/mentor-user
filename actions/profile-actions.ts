@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import Session from "@/models/Session";
@@ -24,10 +24,11 @@ export async function getUserProfile() {
     let sessions = [];
     if (user.role === "mentor") {
       // Get sessions where user is mentor
-      const sessionDocs = await Session.find({ mentorId: user._id })
+      const sessionDocs = (await Session.find({ mentorId: user._id })
         .sort({ date: -1 })
         .populate("menteeId", "name")
-        .limit(10);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .limit(10)) as any;
 
       sessions = sessionDocs.map((session) => ({
         id: session._id.toString(),
@@ -41,10 +42,11 @@ export async function getUserProfile() {
       }));
     } else {
       // Get sessions where user is mentee
-      const sessionDocs = await Session.find({ menteeId: user._id })
+      const sessionDocs = (await Session.find({ menteeId: user._id })
         .sort({ date: -1 })
         .populate("mentorId", "name")
-        .limit(10);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .limit(10)) as any;
 
       sessions = sessionDocs.map((session) => ({
         id: session._id.toString(),

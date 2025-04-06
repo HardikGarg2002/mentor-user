@@ -49,7 +49,6 @@ export function PaymentForm({
           title: "Payment Failed",
           description:
             result.error || "There was an error processing your payment.",
-          variant: "destructive",
         });
       }
     } catch (error) {
@@ -57,7 +56,6 @@ export function PaymentForm({
       toast({
         title: "Payment Error",
         description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
       });
     } finally {
       setIsProcessing(false);
