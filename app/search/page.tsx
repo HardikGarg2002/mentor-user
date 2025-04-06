@@ -1,12 +1,14 @@
 import { SearchBar } from "@/components/search/search-bar";
 import { SearchResults } from "@/components/search/search-results";
 
-export default function SearchPage({
+export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const query = typeof searchParams.q === "string" ? searchParams.q : "";
+  const inputSearchParams = await searchParams;
+  const query =
+    typeof inputSearchParams.q === "string" ? inputSearchParams.q : "";
 
   return (
     <div className="container mx-auto px-4 py-12">

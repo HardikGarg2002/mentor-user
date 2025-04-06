@@ -369,7 +369,6 @@ export default function MentorAvailability() {
                 ([dateA], [dateB]) =>
                   new Date(dateA).getTime() - new Date(dateB).getTime()
               )
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .map(([date, slots]: any) => (
                 <Card key={date}>
                   <CardHeader>
