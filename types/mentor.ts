@@ -3,6 +3,8 @@
  * Types related to mentor profiles and capabilities
  */
 
+import mongoose from "mongoose";
+
 // Pricing structure for mentor sessions
 export interface MentorPricing {
   chat: number;
@@ -59,4 +61,30 @@ export interface MentorFilters {
   maxPrice?: number;
   minRating?: number;
   search?: string;
+}
+
+export interface IMentor extends Document {
+  userId: mongoose.Types.ObjectId;
+  title: string;
+  about: string;
+  specialties: string[];
+  experience: {
+    company: string;
+    role: string;
+    period: string;
+  }[];
+  education: {
+    institution: string;
+    degree: string;
+    year: string;
+  }[];
+  pricing: {
+    chat: number;
+    video: number;
+    call: number;
+  };
+  rating: number;
+  reviewCount: number;
+  createdAt: Date;
+  updatedAt: Date;
 }

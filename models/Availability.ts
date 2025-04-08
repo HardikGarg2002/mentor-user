@@ -1,7 +1,7 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
 
 export interface IMentorWeeklyAvailability extends Document {
-  mentorUserId: mongoose.Types.ObjectId;
+  mentorId: mongoose.Types.ObjectId;
   dayOfWeek: number; // 0 (Sunday) to 6 (Saturday)
   startTime: string; // "10:00"
   endTime: string; // "11:00"
@@ -12,7 +12,7 @@ export interface IMentorWeeklyAvailability extends Document {
 
 const MentorWeeklyAvailabilitySchema = new Schema<IMentorWeeklyAvailability>(
   {
-    mentorUserId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    mentorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     dayOfWeek: { type: Number, required: true, min: 0, max: 6 },
     startTime: { type: String, required: true },
     endTime: { type: String, required: true },

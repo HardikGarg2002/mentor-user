@@ -2,6 +2,7 @@
  * Session Types
  * Types related to mentoring session formats and interactions
  */
+import mongoose, { type Document } from "mongoose";
 
 // Session types available for booking
 export type SessionType = "chat" | "video" | "call";
@@ -10,24 +11,21 @@ export type SessionType = "chat" | "video" | "call";
 export type SessionStatus = "pending" | "confirmed" | "completed" | "cancelled";
 
 // Basic session information
-export interface SessionInfo {
-  id: string;
-  mentorId: string;
-  menteeId: string;
-  type: SessionType;
-  date: string;
+
+export interface ISession extends Document {
+  mentorId: mongoose.Types.ObjectId;
+  menteeId: mongoose.Types.ObjectId;
+  paymentId?: mongoose.Types.ObjectId;
+  meeting_type: SessionType;
+  date: Date;
   startTime: string;
   endTime: string;
   duration: number; // in minutes
+  timezone: string;
   status: SessionStatus;
   price: number;
-  timezone: string;
-}
-
-// Display-friendly session info (with names)
-export interface SessionDisplay extends SessionInfo {
-  mentorName?: string;
-  mentorImage?: string;
-  menteeName?: string;
-  menteeImage?: string;
+  rating?: number;
+  review?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

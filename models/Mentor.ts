@@ -1,30 +1,5 @@
-import mongoose, { Schema, type Document, type Model } from "mongoose";
-
-export interface IMentor extends Document {
-  userId: mongoose.Types.ObjectId;
-  title: string;
-  about: string;
-  specialties: string[];
-  experience: {
-    company: string;
-    role: string;
-    period: string;
-  }[];
-  education: {
-    institution: string;
-    degree: string;
-    year: string;
-  }[];
-  pricing: {
-    chat: number;
-    video: number;
-    call: number;
-  };
-  rating: number;
-  reviewCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { IMentor } from "@/types";
+import mongoose, { Schema, type Model } from "mongoose";
 
 const MentorSchema = new Schema<IMentor>(
   {
