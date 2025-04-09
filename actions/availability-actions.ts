@@ -2,118 +2,171 @@
 
 import { revalidatePath } from "next/cache";
 import connectDB from "@/lib/db";
-import AvailabilitySlot from "@/models/Availability";
+import MentorWeeklyAvailability from "@/models/Availability";
 import User from "@/models/User";
-import { parseISO, addDays, getDay } from "date-fns";
+// import { addDays, getDay, format, parse } from "date-fns";
 import { auth } from "@/lib/auth";
+import { z } from "zod";
+// import { convertTimeToMinutes } from "@/lib/availability";
 
-export type AvailabilityFormData = {
-  date: string;
-  startTime: string;
-  endTime: string;
-  isRecurring: boolean;
-  recurringDays?: number[];
-  duration?: number;
-};
+// Validation schema for time slots
+export const timeSlotSchema = z.object({
+  startTime: z
+    .string()
+    .regex(
+      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Invalid time format. Use HH:MM"
+    ),
+  endTime: z
+    .string()
+    .regex(
+      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Invalid time format. Use HH:MM"
+    ),
+});
+
+// Validation schema for adding a time slot
+const addTimeSlotSchema = z.object({
+  dayOfWeek: z.number().min(0).max(6),
+  startTime: z
+    .string()
+    .regex(
+      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Invalid time format. Use HH:MM"
+    ),
+  endTime: z
+    .string()
+    .regex(
+      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Invalid time format. Use HH:MM"
+    ),
+  timezone: z.string().optional(),
+});
+
+export type TimeSlotFormData = z.infer<typeof addTimeSlotSchema>;
 
 /**
- * Add new availability slots for a mentor
+ * Add a new time slot to a mentor's weekly availability
  */
-export async function addAvailabilitySlot(formData: AvailabilityFormData) {
+export async function addTimeSlot(formData: TimeSlotFormData) {
   const session = await auth();
   if (!session || session.user.role !== "mentor") {
     return {
+      success: false,
       error: "Unauthorized",
     };
   }
 
   try {
+    // Validate form data
+    const validatedData = addTimeSlotSchema.parse(formData);
+
+    // Validate that start time is before end time
+    // const startMinutes = convertTimeToMinutes(validatedData.startTime);
+    // const endMinutes = convertTimeToMinutes(validatedData.endTime);
+    const startMinutes = validatedData.startTime;
+    const endMinutes = validatedData.endTime;
+
+    // if (startMinutes >= endMinutes) {
+    //   return {
+    //     success: false,
+    //     error: "End time must be after start time",
+    //   };
+    // }
+
     await connectDB();
 
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
       return {
+        success: false,
         error: "User not found",
       };
     }
 
-    const dateObj = parseISO(formData.date);
-
-    // Create the initial slot
-    const newSlot = new AvailabilitySlot({
+    // Check for overlapping time slots
+    const existingSlots = await MentorWeeklyAvailability.find({
       mentorId: user._id,
-      date: dateObj,
-      startTime: formData.startTime,
-      endTime: formData.endTime,
-      isRecurring: formData.isRecurring,
-      recurringDays: formData.recurringDays,
+      dayOfWeek: validatedData.dayOfWeek,
     });
 
-    await newSlot.save();
+    const isOverlapping = existingSlots.some((slot) => {
+      // const slotStartMinutes = convertTimeToMinutes(slot.startTime);
+      // const slotEndMinutes = convertTimeToMinutes(slot.endTime);
 
-    // If recurring, create slots for future dates (for the next 12 weeks)
-    if (formData.isRecurring && formData.recurringDays?.length) {
-      const dayOfWeek = getDay(dateObj);
-      const slots = [];
-      console.log("days of week", dayOfWeek);
-      // Add the recurring slot for the next 12 weeks
-      for (let i = 1; i <= 84; i++) {
-        // 84 days = 12 weeks
-        const futureDate = addDays(dateObj, i);
-        const futureDayOfWeek = getDay(futureDate);
+      const slotStartMinutes = slot.startTime;
+      const slotEndMinutes = slot.endTime;
 
-        // Only add if the day of week matches the recurring days
-        if (formData.recurringDays.includes(futureDayOfWeek)) {
-          slots.push({
-            mentorId: user._id,
-            date: futureDate,
-            startTime: formData.startTime,
-            endTime: formData.endTime,
-            isRecurring: true,
-            recurringDays: formData.recurringDays,
-          });
-        }
-      }
+      return (
+        (startMinutes >= slotStartMinutes && startMinutes < slotEndMinutes) ||
+        (endMinutes > slotStartMinutes && endMinutes <= slotEndMinutes) ||
+        (startMinutes <= slotStartMinutes && endMinutes >= slotEndMinutes)
+      );
+    });
 
-      // Insert many slots at once
-      if (slots.length > 0) {
-        await AvailabilitySlot.insertMany(slots, { ordered: false });
-        // Using ordered: false to continue if there are duplicates
-      }
+    if (isOverlapping) {
+      return {
+        success: false,
+        error: "Time slot overlaps with an existing slot",
+      };
     }
+
+    // Create new time slot
+    const newTimeSlot = new MentorWeeklyAvailability({
+      mentorId: user._id,
+      dayOfWeek: validatedData.dayOfWeek,
+      startTime: validatedData.startTime,
+      endTime: validatedData.endTime,
+      timezone: validatedData.timezone || "Asia/Calcutta",
+    });
+
+    await newTimeSlot.save();
 
     revalidatePath("/dashboard/mentor/availability");
 
     return {
       success: true,
+      timeSlot: {
+        id: newTimeSlot._id.toString(),
+        dayOfWeek: newTimeSlot.dayOfWeek,
+        startTime: newTimeSlot.startTime,
+        endTime: newTimeSlot.endTime,
+        timezone: newTimeSlot.timezone,
+      },
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error("Error adding availability slot:", error);
+  } catch (error) {
+    console.error("Error adding time slot:", error);
 
-    // Check if it's a duplicate key error
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: error.errors[0].message,
+      };
+    }
+
+    // Check for duplicate key error
     if (error.code === 11000) {
       return {
-        error: "Time slot already exists",
+        success: false,
+        error: "This time slot already exists",
       };
     }
 
     return {
-      error: "Failed to add availability slot",
+      success: false,
+      error: "Failed to add time slot",
     };
   }
 }
 
 /**
- * Delete an availability slot
+ * Delete a time slot from a mentor's weekly availability
  */
-export async function deleteAvailabilitySlot(
-  slotId: string,
-  deleteRecurring = false
-) {
+export async function deleteTimeSlot(timeSlotId: string) {
   const session = await auth();
   if (!session || session.user.role !== "mentor") {
     return {
+      success: false,
       error: "Unauthorized",
     };
   }
@@ -124,35 +177,25 @@ export async function deleteAvailabilitySlot(
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
       return {
+        success: false,
         error: "User not found",
       };
     }
 
-    const slot = await AvailabilitySlot.findOne({
-      _id: slotId,
+    // Find and delete the time slot
+    const timeSlot = await MentorWeeklyAvailability.findOne({
+      _id: timeSlotId,
       mentorId: user._id,
     });
 
-    if (!slot) {
+    if (!timeSlot) {
       return {
-        error: "Slot not found",
+        success: false,
+        error: "Time slot not found",
       };
     }
 
-    if (deleteRecurring && slot.isRecurring) {
-      // Delete all future recurring slots with the same pattern
-      await AvailabilitySlot.deleteMany({
-        mentorId: user._id,
-        startTime: slot.startTime,
-        endTime: slot.endTime,
-        isRecurring: true,
-        recurringDays: { $all: slot.recurringDays },
-        date: { $gte: new Date() },
-      });
-    } else {
-      // Delete just this slot
-      await AvailabilitySlot.deleteOne({ _id: slotId });
-    }
+    await timeSlot.deleteOne();
 
     revalidatePath("/dashboard/mentor/availability");
 
@@ -160,54 +203,18 @@ export async function deleteAvailabilitySlot(
       success: true,
     };
   } catch (error) {
-    console.error("Error deleting availability slot:", error);
+    console.error("Error deleting time slot:", error);
     return {
-      error: "Failed to delete availability slot",
+      success: false,
+      error: "Failed to delete time slot",
     };
   }
 }
 
 /**
- * Get available slots for a mentor on a specific date
+ * Get all time slots for a mentor's weekly availability
  */
-export async function getAvailableSlotsForDate(mentorId: string, date: string) {
-  try {
-    await connectDB();
-
-    const dateObj = parseISO(date);
-
-    // Set time to start of day
-    dateObj.setHours(0, 0, 0, 0);
-
-    // Set time to end of day
-    const endOfDay = new Date(dateObj);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const slots = await AvailabilitySlot.find({
-      mentorId,
-      date: {
-        $gte: dateObj,
-        $lte: endOfDay,
-      },
-      isBooked: false,
-    }).sort({ startTime: 1 });
-
-    return slots.map((slot) => ({
-      id: slot._id.toString(),
-      startTime: slot.startTime,
-      endTime: slot.endTime,
-      date: slot.date.toISOString(),
-    }));
-  } catch (error) {
-    console.error("Error getting available slots:", error);
-    return [];
-  }
-}
-
-/**
- * Get all availability slots for a mentor
- */
-export async function getMentorAvailability(showPast = false) {
+export async function getMentorWeeklyAvailability() {
   const session = await auth();
   if (!session || session.user.role !== "mentor") {
     return [];
@@ -221,31 +228,43 @@ export async function getMentorAvailability(showPast = false) {
       return [];
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query: any = {
+    const timeSlots = await MentorWeeklyAvailability.find({
       mentorId: user._id,
-    };
+    }).sort({ dayOfWeek: 1, startTime: 1 });
 
-    if (!showPast) {
-      query.date = { $gte: new Date() };
-    }
-
-    const slots = await AvailabilitySlot.find(query).sort({
-      date: 1,
-      startTime: 1,
-    });
-
-    return slots.map((slot) => ({
+    return timeSlots.map((slot) => ({
       id: slot._id.toString(),
-      date: slot.date.toISOString(),
+      dayOfWeek: slot.dayOfWeek,
       startTime: slot.startTime,
       endTime: slot.endTime,
-      isBooked: slot.isBooked,
-      isRecurring: slot.isRecurring,
-      recurringDays: slot.recurringDays || [],
+      timezone: slot.timezone,
     }));
   } catch (error) {
-    console.error("Error getting mentor availability:", error);
+    console.error("Error getting mentor weekly availability:", error);
+    return [];
+  }
+}
+
+/**
+ * Get available time slots for a specific mentor
+ */
+export async function getMentorAvailabilityById(mentorId: string) {
+  try {
+    await connectDB();
+
+    const timeSlots = await MentorWeeklyAvailability.find({
+      mentorId,
+    }).sort({ dayOfWeek: 1, startTime: 1 });
+
+    return timeSlots.map((slot) => ({
+      id: slot._id.toString(),
+      dayOfWeek: slot.dayOfWeek,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      timezone: slot.timezone,
+    }));
+  } catch (error) {
+    console.error("Error getting mentor availability by ID:", error);
     return [];
   }
 }

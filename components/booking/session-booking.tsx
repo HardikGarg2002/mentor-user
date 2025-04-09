@@ -24,7 +24,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { bookSession } from "@/actions/booking-actions";
 import type { MentorProfile } from "@/types/mentor";
-import { getAvailableSlotsForDate } from "@/actions/availability-actions";
+// import { getAvailableSlotsForDate } from "@/actions/availability-actions";
 import SessionTypeSelector from "./SessionTypeSelector";
 
 type SessionBookingProps = {
@@ -73,10 +73,10 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
     }[]
   > => {
     if (!selectedDate) return [];
-    return await getAvailableSlotsForDate(
-      mentor.userId,
-      selectedDate.toISOString()
-    );
+    // return await getAvailableSlotsForDate(
+    //   mentor.userId,
+    //   selectedDate.toISOString()
+    // );
   };
 
   // Update URL params

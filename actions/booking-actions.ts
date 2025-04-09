@@ -41,11 +41,11 @@ export async function bookSession(formData: BookingFormData) {
       };
     }
 
-    if (slot.isBooked) {
-      return {
-        error: "This time slot is already booked",
-      };
-    }
+    // if (slot.isBooked) {
+    //   return {
+    //     error: "This time slot is already booked",
+    //   };
+    // }
 
     // Get the mentor profile to get pricing
     const mentorProfile = await Mentor.findOne({ userId: formData.mentorId });
@@ -83,7 +83,7 @@ export async function bookSession(formData: BookingFormData) {
       mentorId: formData.mentorId,
       menteeId: user._id,
       type: formData.type,
-      date: slot.date,
+      // date: slot.date,
       startTime: slot.startTime,
       endTime: slot.endTime,
       duration,
@@ -95,7 +95,7 @@ export async function bookSession(formData: BookingFormData) {
     await newSession.save();
 
     // Mark the availability slot as booked
-    slot.isBooked = true;
+    // slot.isBooked = true;
     await slot.save();
 
     revalidatePath(`/mentors/${formData.mentorId}`);
@@ -169,7 +169,7 @@ export async function updateSessionStatus(
       });
 
       if (slot) {
-        slot.isBooked = false;
+        // slot.isBooked = false;
         await slot.save();
       }
     }
