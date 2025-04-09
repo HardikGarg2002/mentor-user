@@ -5,8 +5,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SessionBooking from "@/components/booking/session-booking";
 import { StartChatButton } from "@/components/chat/start-chat-button";
-import { getMentorById } from "@/lib/mentors";
+import { getMentorByUserId } from "@/lib/mentors";
 import { notFound } from "next/navigation";
+import { getMentorWeeklyAvailabilityById } from "@/actions/availability-actions";
+
+const DAYS_OF_WEEK = [
+  { value: 1, label: "Monday" },
+  { value: 2, label: "Tuesday" },
+  { value: 3, label: "Wednesday" },
+  { value: 4, label: "Thursday" },
+  { value: 5, label: "Friday" },
+  { value: 6, label: "Saturday" },
+  { value: 7, label: "Sunday" },
+];
+
+function formatTimeDisplay(time: string) {
+  const [hours, minutes] = time.split(":");
+  const formattedHours = parseInt(hours, 10) % 12 || 12;
+  const amPm = parseInt(hours, 10) < 12 ? "AM" : "PM";
+  return `${formattedHours}:${minutes} ${amPm}`;
+}
 
 export default async function MentorProfile({
   params,
@@ -14,14 +32,12 @@ export default async function MentorProfile({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  console.log("id from params", id);
-  const mentor = await getMentorById(id);
+  const mentor = await getMentorByUserId(id);
   if (!mentor) {
     notFound();
   }
   const mentorData = JSON.parse(JSON.stringify(mentor));
   const slots = await getMentorWeeklyAvailabilityById({ mentorId: id });
-  console.log("Slots:", slots);
 
   // Mock reviews data - in a real app, this would come from a database
   const reviews = [
@@ -201,13 +217,21 @@ export default async function MentorProfile({
                   <Calendar className="h-5 w-5 mr-2" /> Availability
                 </h3>
                 <ul className="space-y-3">
-                  Show time slots
-                  {/* {mentor.availability.map((avail, index) => (
+                  {slots.map((slot, index) => (
                     <li key={index} className="text-sm">
-                      <span className="font-medium">{avail.day}:</span>{" "}
-                      {avail.slots.join(", ")}
+                      <span className="font-medium">
+                        {DAYS_OF_WEEK.find(
+                          (day) => day.value === slot.dayOfWeek
+                        )?.label || "Unknown Day"}
+                        :
+                      </span>{" "}
+                      {formatTimeDisplay(slot.startTime)} -{" "}
+                      {formatTimeDisplay(slot.endTime)}
+                      <span className="text-gray-500 ml-2">
+                        ({slot.timezone})
+                      </span>
                     </li>
-                  ))} */}
+                  ))}
                 </ul>
               </div>
             </CardContent>
