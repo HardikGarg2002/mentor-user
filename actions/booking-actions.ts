@@ -16,7 +16,7 @@ const bookingSchema = z.object({
   startTime: z.string(), // HH:MM
   endTime: z.string(), // HH:MM
   availabilityId: z.string(), // ID of the weekly availability slot
-  type: z.enum(["chat", "video", "call"]),
+  meeting_type: z.enum(["chat", "video", "call"]),
   duration: z.number().min(30).max(240), // in minutes
   timezone: z.string(),
 });
@@ -110,7 +110,7 @@ export async function bookSession(formData: BookingFormData) {
       };
     }
 
-    const hourlyRate = mentorProfile.pricing[validatedData.type];
+    const hourlyRate = mentorProfile.pricing[validatedData.meeting_type];
     const price = (validatedData.duration / 60) * hourlyRate;
 
     // Create the booking record
@@ -120,7 +120,7 @@ export async function bookSession(formData: BookingFormData) {
       date: validatedData.date,
       startTime: validatedData.startTime,
       endTime: validatedData.endTime,
-      type: validatedData.type,
+      meeting_type: validatedData.meeting_type,
       duration: validatedData.duration,
       timezone: validatedData.timezone,
       price: price,
