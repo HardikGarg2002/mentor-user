@@ -10,6 +10,12 @@ interface PageProps {
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
+const getPlaceholderImage = (name: string) => {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    name
+  )}&background=random`;
+};
+
 export default async function MentorsList({ searchParams }: PageProps) {
   const page =
     typeof searchParams.page === "string"
@@ -86,7 +92,7 @@ export default async function MentorsList({ searchParams }: PageProps) {
           <div className="flex flex-col md:flex-row gap-6">
             <div className="relative h-24 w-24 rounded-full overflow-hidden">
               <Image
-                src={mentor.image || "/placeholder.svg?height=200&width=200"}
+                src={mentor.image || getPlaceholderImage(mentor.name)}
                 alt={mentor.name}
                 fill
                 className="object-cover"
@@ -136,7 +142,7 @@ export default async function MentorsList({ searchParams }: PageProps) {
                 </div>
               </div>
 
-              <Link href={`/mentors/${mentor.id}`}>
+              <Link href={`/mentors/${mentor.userId}`}>
                 <Button className="w-full">View Profile</Button>
               </Link>
             </div>

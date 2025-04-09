@@ -10,13 +10,20 @@ type MentorCardProps = {
   mentor: MentorListItem;
 };
 
+const getPlaceholderImage = (name: string) => {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    name
+  )}&background=random`;
+};
+
 export function MentorCard({ mentor }: MentorCardProps) {
+  console.log("mentor id in mentor card", mentor.userId);
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
       <CardContent className="p-0">
         <div className="relative h-48 w-full">
           <Image
-            src={mentor.image || "/placeholder.svg"}
+            src={mentor.image || getPlaceholderImage(mentor.name)}
             alt={mentor.name}
             fill
             className="object-cover"
@@ -61,7 +68,7 @@ export function MentorCard({ mentor }: MentorCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-6 pt-0">
-        <Link href={`/mentors/${mentor.id}`} className="w-full">
+        <Link href={`/mentors/${mentor.userId}`} className="w-full">
           <Button className="w-full">View Profile</Button>
         </Link>
       </CardFooter>
