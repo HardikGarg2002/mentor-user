@@ -1,7 +1,21 @@
+"use client";
+
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function HeroSection() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/mentors?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
     <section className="bg-gradient-to-r from-primary to-primary/80 text-white py-20">
       <div className="container mx-auto px-4">
@@ -13,18 +27,20 @@ export default function HeroSection() {
             Connect with industry experts who can help you grow your skills and
             advance your career
           </p>
-          <div className="relative max-w-xl mx-auto">
+          <form onSubmit={handleSearch} className="relative max-w-xl mx-auto">
             <div className="flex items-center bg-white rounded-lg overflow-hidden shadow-lg">
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by skill, industry, or name..."
                 className="w-full py-4 px-6 text-gray-700 focus:outline-none"
               />
-              <Button className="m-1" size="icon">
+              <Button type="submit" className="m-1" size="icon">
                 <Search className="h-5 w-5" />
               </Button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </section>
