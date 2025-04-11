@@ -12,6 +12,7 @@ export async function getMentors({
   maxPrice,
   minRating,
   search,
+  limit = MENTORS_PER_PAGE,
 }: {
   page?: number;
   specialties?: string[];
@@ -19,6 +20,7 @@ export async function getMentors({
   maxPrice?: number;
   minRating?: number;
   search?: string;
+  limit?: number;
 }) {
   await connectDB();
 
@@ -60,9 +62,9 @@ export async function getMentors({
 
   // Get mentors with pagination
   const mentorDocs = await Mentor.find(query)
-    .sort({ rating: -1 })
-    .skip((page - 1) * MENTORS_PER_PAGE)
-    .limit(MENTORS_PER_PAGE);
+    .sort({ rating: -1, reviewCount: -1 }) // Sort by rating first, then by number of reviews
+    .skip((page - 1) * limit)
+    .limit(limit);
 
   // Get user information for each mentor
   const userIds = mentorDocs.map((mentor) => mentor.userId);
@@ -73,7 +75,6 @@ export async function getMentors({
     const user = users.find(
       (u) => u._id.toString() === mentor.userId.toString()
     );
-
     return {
       id: mentor._id.toString(),
       userId: mentor.userId.toString(),
@@ -110,10 +111,12 @@ export async function getMentors({
   };
 }
 
-export async function getMentorById(id: string): Promise<MentorProfile | null> {
+export async function getMentorByUserId(
+  userId: string
+): Promise<MentorProfile | null> {
   await connectDB();
 
-  const mentor = await Mentor.findById(id);
+  const mentor = await Mentor.findOne({ userId });
 
   if (!mentor) {
     return null;
@@ -136,7 +139,6 @@ export async function getMentorById(id: string): Promise<MentorProfile | null> {
     experience: mentor.experience,
     education: mentor.education,
     pricing: mentor.pricing,
-    availability: mentor.availability,
     rating: mentor.rating,
     reviewCount: mentor.reviewCount,
   };
