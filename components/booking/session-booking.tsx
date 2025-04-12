@@ -24,52 +24,23 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { bookSession, getMentorBookedSlots } from "@/actions/booking-actions";
 import { getMentorAvailabilityById } from "@/actions/availability-actions";
-import type { MentorProfile } from "@/types/mentor";
 import SessionTypeSelector from "./SessionTypeSelector";
 import { format, getDay, parseISO } from "date-fns";
-import { SessionType } from "./SessionTypeSelector";
+
+// Import types from the central types system
+import {
+  WeeklyAvailabilitySlot,
+  BookedSlot,
+  TimeSlot,
+  DURATION_OPTIONS,
+  timeToMinutes,
+  SessionType,
+  MentorProfile,
+} from "@/types";
 
 type SessionBookingProps = {
   mentor: MentorProfile;
 };
-
-// Duration options (in minutes)
-const DURATION_OPTIONS = [
-  { value: "30", label: "30 minutes" },
-  { value: "60", label: "1 hour" },
-  { value: "90", label: "1.5 hours" },
-  { value: "120", label: "2 hours" },
-];
-
-// Helper to convert time from "HH:MM" format to minutes since midnight
-function timeToMinutes(time: string): number {
-  const [hours, minutes] = time.split(":").map(Number);
-  return hours * 60 + minutes;
-}
-
-interface WeeklyAvailabilitySlot {
-  id: string;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
-  timezone: string;
-}
-
-interface BookedSlot {
-  date: string;
-  startTime: string;
-  endTime: string;
-}
-
-interface TimeSlot {
-  id: string;
-  startTime: string;
-  endTime: string;
-  rawStartTime: string;
-  rawEndTime: string;
-  isBooked: boolean;
-  duration: number;
-}
 
 // Generate time slots from weekly availability for a specific date
 function generateTimeSlotsForDate(

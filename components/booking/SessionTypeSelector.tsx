@@ -1,12 +1,11 @@
 "use client";
 
 import { MessageCircle, Phone, Video } from "lucide-react";
-
-export type SessionType = "chat" | "video" | "call";
+import { SessionType, MentorPricing } from "@/types";
 
 type Props = {
   selectedType: SessionType;
-  pricing: { chat: number; video: number; call: number };
+  pricing: MentorPricing;
   setSelectedType: (type: SessionType) => void;
 };
 
@@ -18,6 +17,7 @@ export default function SessionTypeSelector({
   const updateType = (type: SessionType) => {
     setSelectedType(type);
   };
+
   const iconClassName = "h-5 w-5 mr-3 text-primary";
 
   const types = [

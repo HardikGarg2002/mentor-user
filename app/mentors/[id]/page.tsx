@@ -20,6 +20,8 @@ export default async function MentorProfile({
     notFound();
   }
   const mentorData = JSON.parse(JSON.stringify(mentor));
+  const slots = await getMentorWeeklyAvailabilityById({ mentorId: id });
+  console.log("Slots:", slots);
 
   // Mock reviews data - in a real app, this would come from a database
   const reviews = [
@@ -199,12 +201,13 @@ export default async function MentorProfile({
                   <Calendar className="h-5 w-5 mr-2" /> Availability
                 </h3>
                 <ul className="space-y-3">
-                  {mentor.availability.map((avail, index) => (
+                  Show time slots
+                  {/* {mentor.availability.map((avail, index) => (
                     <li key={index} className="text-sm">
                       <span className="font-medium">{avail.day}:</span>{" "}
                       {avail.slots.join(", ")}
                     </li>
-                  ))}
+                  ))} */}
                 </ul>
               </div>
             </CardContent>

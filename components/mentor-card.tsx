@@ -1,26 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { MentorListItem } from "@/types";
 
-type Mentor = {
-  id: string;
-  name: string;
-  title: string;
-  image?: string;
-  rating: number;
-  reviewCount: number;
-  specialties: string[];
-  pricing: {
-    chat: number;
-    video: number;
-    call: number;
-  };
+type MentorCardProps = {
+  mentor: MentorListItem;
 };
 
-export function MentorCard({ mentor }: { mentor: Mentor }) {
+export function MentorCard({ mentor }: MentorCardProps) {
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
       <CardContent className="p-0">

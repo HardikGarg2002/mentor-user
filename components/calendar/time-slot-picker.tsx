@@ -10,16 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-export type TimeSlot = {
-  id: string;
-  startTime: string;
-  endTime: string;
-  isBooked?: boolean;
-  duration?: number;
-  rawStartTime?: string;
-  rawEndTime?: string;
-};
+import { TimeSlot } from "@/types";
 
 type TimeSlotPickerProps = {
   selectedSlotId?: string | null;
