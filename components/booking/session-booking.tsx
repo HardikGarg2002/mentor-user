@@ -154,8 +154,8 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
       try {
         // Fetch both availability and booked slots in parallel
         const [availabilityData, bookedSlotsData] = await Promise.all([
-          getMentorAvailabilityById(mentor.mentorId),
-          getMentorBookedSlots(mentor.mentorId),
+          getMentorAvailabilityById(mentor.userId),
+          getMentorBookedSlots(mentor.userId),
         ]);
 
         setWeeklyAvailability(availabilityData);
@@ -181,7 +181,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
     };
 
     fetchMentorData();
-  }, [mentor.mentorId]);
+  }, [mentor.userId]);
 
   // Generate time slots when date or availability changes
   useEffect(() => {
@@ -230,12 +230,12 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
     startTransition(async () => {
       try {
         const result = await bookSession({
-          mentorId: mentor.mentorId,
+          mentorId: mentor.userId,
           date: dateStr,
           startTime,
           endTime,
           availabilityId,
-          type: selectedType,
+          meeting_type: selectedType,
           duration: parseInt(selectedDuration),
           timezone,
         });
