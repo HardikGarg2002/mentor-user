@@ -1,38 +1,42 @@
-import mongoose, { Schema, type Document, type Model } from "mongoose"
+import mongoose, { Schema, type Document, type Model } from "mongoose";
 
-export interface IAvailabilitySlot extends Document {
-  mentorId: mongoose.Types.ObjectId
-  date: Date
-  startTime: string
-  endTime: string
-  isBooked: boolean
-  isRecurring: boolean
-  recurringDays?: number[] // 0 = Sunday, 1 = Monday, etc.
-  createdAt: Date
-  updatedAt: Date
+export interface IMentorWeeklyAvailability extends Document {
+  mentorUserId: mongoose.Types.ObjectId;
+  dayOfWeek: number; // 0 (Sunday) to 6 (Saturday)
+  startTime: string; // "10:00"
+  endTime: string; // "11:00"
+  timezone: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const AvailabilitySlotSchema = new Schema<IAvailabilitySlot>(
+const MentorWeeklyAvailabilitySchema = new Schema<IMentorWeeklyAvailability>(
   {
-    mentorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    date: { type: Date, required: true },
+    mentorUserId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    dayOfWeek: { type: Number, required: true, min: 0, max: 6 },
     startTime: { type: String, required: true },
     endTime: { type: String, required: true },
-    isBooked: { type: Boolean, default: false },
-    isRecurring: { type: Boolean, default: false },
-    recurringDays: [{ type: Number, min: 0, max: 6 }],
+    timezone: {
+      type: String,
+      default: "Asia/Calcutta",
+    },
   },
   {
     timestamps: true,
-  },
-)
+  }
+);
 
-// Create a compound index to ensure unique slots per mentor per time
-AvailabilitySlotSchema.index({ mentorId: 1, date: 1, startTime: 1 }, { unique: true })
+MentorWeeklyAvailabilitySchema.index(
+  { mentorId: 1, dayOfWeek: 1, startTime: 1 },
+  { unique: true }
+);
 
-const AvailabilitySlot =
-  (mongoose.models.AvailabilitySlot as Model<IAvailabilitySlot>) ||
-  mongoose.model<IAvailabilitySlot>("AvailabilitySlot", AvailabilitySlotSchema)
+const MentorWeeklyAvailability =
+  (mongoose.models
+    .MentorWeeklyAvailability as Model<IMentorWeeklyAvailability>) ||
+  mongoose.model<IMentorWeeklyAvailability>(
+    "MentorWeeklyAvailability",
+    MentorWeeklyAvailabilitySchema
+  );
 
-export default AvailabilitySlot
-
+export default MentorWeeklyAvailability;

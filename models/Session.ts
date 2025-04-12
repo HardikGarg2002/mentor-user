@@ -1,27 +1,27 @@
-import mongoose, { Schema, type Document, type Model } from "mongoose"
+import mongoose, { Schema, type Document, type Model } from "mongoose";
 
 export interface ISession extends Document {
-  mentorId: mongoose.Types.ObjectId
-  menteeId: mongoose.Types.ObjectId
-  type: "chat" | "video" | "call"
-  date: Date
-  startTime: string
-  endTime: string
-  duration: number // in minutes
-  timezone: string
-  status: "pending" | "confirmed" | "completed" | "cancelled"
-  price: number
-  rating?: number
-  review?: string
-  createdAt: Date
-  updatedAt: Date
+  mentorId: mongoose.Types.ObjectId;
+  menteeId: mongoose.Types.ObjectId;
+  meeting_type: "chat" | "video" | "call";
+  date: Date;
+  startTime: string;
+  endTime: string;
+  duration: number; // in minutes
+  timezone: string;
+  status: "pending" | "confirmed" | "completed" | "cancelled";
+  price: number;
+  rating?: number;
+  review?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const SessionSchema = new Schema<ISession>(
   {
     mentorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     menteeId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    type: {
+    meeting_type: {
       type: String,
       enum: ["chat", "video", "call"],
       required: true,
@@ -42,11 +42,12 @@ const SessionSchema = new Schema<ISession>(
   },
   {
     timestamps: true,
-  },
-)
+  }
+);
 
 // Prevent model overwrite error in development due to hot reloading
-const Session = (mongoose.models.Session as Model<ISession>) || mongoose.model<ISession>("Session", SessionSchema)
+const Session =
+  (mongoose.models.Session as Model<ISession>) ||
+  mongoose.model<ISession>("Session", SessionSchema);
 
-export default Session
-
+export default Session;
