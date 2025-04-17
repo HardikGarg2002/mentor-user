@@ -15,7 +15,7 @@ export interface UserSession {
 
 export interface IUser extends UserSession {
   _id?: string | mongoose.Types.ObjectId;
-  emailVerified?: Date;
+  emailVerified?: boolean;
   password: string;
   createdAt: Date;
   updatedAt: Date;
