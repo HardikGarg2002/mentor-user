@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SessionBooking from "@/components/booking/session-booking";
+import SessionBooking2 from "@/components/booking/session-booking2";
 import { StartChatButton } from "@/components/chat/start-chat-button";
 import { getMentorByUserId } from "@/lib/mentors";
 import { notFound } from "next/navigation";
@@ -66,6 +67,13 @@ export default async function MentorProfile({
         "They provided excellent career advice and helped me prepare for my interviews. Their feedback on my resume was particularly helpful.",
     },
   ];
+
+  // Extract only the mentor properties needed by SessionBooking
+  const bookingMentorData = {
+    userId: mentorData.userId,
+    name: mentorData.name,
+    pricing: mentorData.pricing,
+  };
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -211,7 +219,10 @@ export default async function MentorProfile({
               <CardTitle>Book a Session</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <SessionBooking mentor={mentorData} />
+              <div className="flex flex-col gap-4">
+                <SessionBooking mentor={bookingMentorData} />
+                <SessionBooking2 mentor={bookingMentorData} />
+              </div>
               <div>
                 <h3 className="font-medium mb-3 flex items-center">
                   <Calendar className="h-5 w-5 mr-2" /> Availability

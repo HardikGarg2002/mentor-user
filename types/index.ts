@@ -69,6 +69,7 @@ export interface TimeSlot {
   rawEndTime: string; // Original HH:MM format
   isBooked: boolean; // Whether this slot is already booked
   duration: number; // Duration in minutes
+  availabilityId?: string; // Reference to the availability slot this was generated from
 }
 
 // =========================================

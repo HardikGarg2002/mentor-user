@@ -177,6 +177,9 @@ export async function deleteTimeSlot(timeSlotId: string) {
   }
 }
 
+/**
+ * Get available time slots for a specific mentor
+ */
 export async function getMentorWeeklyAvailabilityById({
   mentorId,
 }: {
@@ -233,30 +236,6 @@ export async function getMentorWeeklyAvailability() {
     }));
   } catch (error) {
     console.error("Error getting mentor weekly availability:", error);
-    return [];
-  }
-}
-
-/**
- * Get available time slots for a specific mentor
- */
-export async function getMentorAvailabilityById(mentorId: string) {
-  try {
-    await connectDB();
-    console.log("Mentor ID:", mentorId);
-    const timeSlots = await MentorWeeklyAvailability.find({
-      mentorId: mentorId,
-    }).sort({ dayOfWeek: 1, startTime: 1 });
-
-    return timeSlots.map((slot) => ({
-      id: slot._id.toString(),
-      dayOfWeek: slot.dayOfWeek,
-      startTime: slot.startTime,
-      endTime: slot.endTime,
-      timezone: slot.timezone,
-    }));
-  } catch (error) {
-    console.error("Error getting mentor availability by ID:", error);
     return [];
   }
 }

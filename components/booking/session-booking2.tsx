@@ -5,7 +5,6 @@ import React, { useTransition, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/calendar/date-picker";
-import { TimeSlotPicker } from "@/components/calendar/time-slot-picker";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +31,6 @@ import {
   WeeklyAvailabilitySlot,
   BookedSlot,
   TimeSlot,
-  DURATION_OPTIONS,
   timeToMinutes,
   SessionType,
   MentorPricing,
@@ -116,6 +114,7 @@ function generateTimeSlotsForDate(
         rawEndTime: endTimeStr,
         isBooked,
         duration: 30, // 30-minute intervals
+        availabilityId: availability.id,
       });
     }
   }
@@ -125,14 +124,40 @@ function generateTimeSlotsForDate(
   );
 }
 
-export default function SessionBooking({ mentor }: SessionBookingProps) {
+// Helper function to check if two slots are adjacent
+function areSlotsAdjacent(slot1: TimeSlot, slot2: TimeSlot): boolean {
+  return (
+    slot1.rawEndTime === slot2.rawStartTime &&
+    slot1.availabilityId === slot2.availabilityId
+  );
+}
+
+// Helper function to check if slots are consecutive
+function areConsecutiveSlots(slots: TimeSlot[]): boolean {
+  if (slots.length <= 1) return true;
+
+  // Sort slots by start time
+  const sortedSlots = [...slots].sort(
+    (a, b) => timeToMinutes(a.rawStartTime) - timeToMinutes(b.rawStartTime)
+  );
+
+  // Check if each pair of slots is adjacent
+  for (let i = 0; i < sortedSlots.length - 1; i++) {
+    if (!areSlotsAdjacent(sortedSlots[i], sortedSlots[i + 1])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export default function SessionBooking2({ mentor }: SessionBookingProps) {
   const router = useRouter();
   const { data: session } = useSession();
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<SessionType>("chat");
   const [selectedDate, setDate] = useState<Date | undefined>(new Date());
-  const [selectedDuration, setSelectedDuration] = useState<string>("60"); // Default 1 hour
   const [timezone, setTimezone] = useState<string>(
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
@@ -144,13 +169,29 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
   const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
 
-  // Calculate session price based on duration and type
+  // Allow multiple slot selection
+  const [selectedSlotIds, setSelectedSlotIds] = useState<string[]>([]);
+
+  // Calculate session price based on number of selected slots
   const calculatePrice = () => {
-    if (!selectedType || !selectedDuration) return 0;
+    if (!selectedType || selectedSlotIds.length === 0) return 0;
     const hourlyRate = mentor.pricing[selectedType] || 0;
-    return (Number(selectedDuration) / 60) * hourlyRate;
+    // Each slot is 30 minutes, so multiply the number of slots by 30 to get total minutes
+    const totalMinutes = selectedSlotIds.length * 30;
+    return (totalMinutes / 60) * hourlyRate;
+  };
+
+  // Get the total duration of selected slots
+  const getTotalDuration = () => {
+    return selectedSlotIds.length * 30;
+  };
+
+  // Find selected slots from their IDs
+  const getSelectedSlots = (): TimeSlot[] => {
+    return selectedSlotIds
+      .map((id) => availableSlots.find((slot) => slot.id === id))
+      .filter((slot) => slot !== undefined) as TimeSlot[];
   };
 
   // Fetch mentor's weekly availability and booked slots
@@ -198,10 +239,48 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
         bookedSlots
       );
       setAvailableSlots(slots);
+      // Clear selected slots when date changes
+      setSelectedSlotIds([]);
     } else {
       setAvailableSlots([]);
+      setSelectedSlotIds([]);
     }
   }, [selectedDate, weeklyAvailability, bookedSlots]);
+
+  // Handle slot selection
+  const handleSlotSelection = (slot: TimeSlot) => {
+    // Skip if slot is already booked
+    if (slot.isBooked) return;
+
+    // Toggle selection
+    setSelectedSlotIds((prev) => {
+      const isSelected = prev.includes(slot.id);
+
+      if (isSelected) {
+        // If already selected, remove it
+        return prev.filter((id) => id !== slot.id);
+      } else {
+        // If not selected, add it
+        const newSelection = [...prev, slot.id];
+
+        // Get the slots objects from their IDs
+        const selectedSlots = newSelection
+          .map((id) => availableSlots.find((s) => s.id === id))
+          .filter((s) => s !== undefined) as TimeSlot[];
+
+        // Check if the new selection forms consecutive slots
+        if (!areConsecutiveSlots(selectedSlots)) {
+          toast({
+            title: "Invalid Selection",
+            description: "Please select consecutive time slots",
+          });
+          return prev;
+        }
+
+        return newSelection;
+      }
+    });
+  };
 
   // Handle booking session
   const handleBookSession = async () => {
@@ -210,17 +289,43 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
       return;
     }
 
-    if (!selectedDate || !selectedSlotId) {
+    if (!selectedDate || selectedSlotIds.length === 0) {
       toast({
         title: "Error",
-        description: "Please select a date and time slot",
+        description: "Please select at least one time slot",
       });
       return;
     }
 
-    // Parse slot ID to get information
-    const [dateStr, startTime, endTime, availabilityId] =
-      selectedSlotId.split("_");
+    // Get the selected slots
+    const selectedSlots = getSelectedSlots();
+
+    // Make sure they are consecutive
+    if (!areConsecutiveSlots(selectedSlots)) {
+      toast({
+        title: "Invalid Selection",
+        description: "Please select consecutive time slots",
+      });
+      return;
+    }
+
+    // Sort slots by start time
+    const sortedSlots = [...selectedSlots].sort(
+      (a, b) => timeToMinutes(a.rawStartTime) - timeToMinutes(b.rawStartTime)
+    );
+
+    // Get the first and last slot to determine start and end times
+    const firstSlot = sortedSlots[0];
+    const lastSlot = sortedSlots[sortedSlots.length - 1];
+
+    if (!firstSlot || !lastSlot) return;
+
+    // Extract date and times from slots
+    const [dateStr] = firstSlot.id.split("_");
+    const startTime = firstSlot.rawStartTime;
+    const endTime = lastSlot.rawEndTime;
+    const availabilityId = firstSlot.availabilityId;
+    const duration = getTotalDuration();
 
     startTransition(async () => {
       try {
@@ -231,7 +336,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
           endTime,
           availabilityId,
           meeting_type: selectedType,
-          duration: parseInt(selectedDuration),
+          duration,
           timezone,
         });
 
@@ -295,37 +400,74 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
             {/* Time Slot Selection */}
             {selectedDate && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Select Time Slot</label>
-                <TimeSlotPicker
-                  selectedSlotId={selectedSlotId}
-                  availableSlots={availableSlots}
-                  onSelectSlot={(slot) => setSelectedSlotId(slot.id)}
-                />
+                <label className="text-sm font-medium">
+                  Select Time Slots ({selectedSlotIds.length} selected)
+                </label>
+                <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-3">
+                  <p className="text-sm text-amber-800 font-medium">
+                    Selection Guide:
+                  </p>
+                  <ul className="text-xs text-amber-700 mt-1 list-disc pl-4 space-y-1">
+                    <li>
+                      Select consecutive 30-minute slots to build your session
+                    </li>
+                    <li>
+                      You can select multiple slots, but they must be in
+                      sequence
+                    </li>
+                  </ul>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {availableSlots.map((slot) => {
+                    // Check if this slot is adjacent to any selected slot
+                    const isAdjacentToSelected = () => {
+                      if (selectedSlotIds.length === 0) return true;
+
+                      const selectedSlots = getSelectedSlots();
+                      return selectedSlots.some(
+                        (selectedSlot) =>
+                          areSlotsAdjacent(selectedSlot, slot) ||
+                          areSlotsAdjacent(slot, selectedSlot)
+                      );
+                    };
+
+                    const isSelected = selectedSlotIds.includes(slot.id);
+                    const isAdjacent = isAdjacentToSelected();
+
+                    return (
+                      <div
+                        key={slot.id}
+                        onClick={() =>
+                          !slot.isBooked && handleSlotSelection(slot)
+                        }
+                        className={`
+                          p-2 border rounded-md text-center cursor-pointer text-sm relative
+                          ${
+                            slot.isBooked
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : isSelected
+                              ? "ring-2 ring-primary bg-primary/10 font-medium"
+                              : isAdjacent && !isSelected
+                              ? "border-primary/50 border-dashed"
+                              : "hover:bg-gray-50"
+                          }
+                        `}
+                      >
+                        {slot.startTime} - {slot.endTime}
+                        {isSelected && (
+                          <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                            {selectedSlotIds.indexOf(slot.id) + 1}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
-            {/* Duration Selection */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Session Duration</label>
-              <Select
-                value={selectedDuration}
-                onValueChange={setSelectedDuration}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  {DURATION_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Price Display */}
-            {selectedType && selectedDuration && (
+            {selectedType && selectedSlotIds.length > 0 && (
               <div className="rounded-md bg-muted p-3">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Total Price:</span>
@@ -334,7 +476,8 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {selectedDuration} minutes at ${mentor.pricing[selectedType]}
+                  {getTotalDuration()} minutes at $
+                  {mentor.pricing[selectedType]}
                   /hour
                 </p>
               </div>
@@ -362,7 +505,10 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
             <Button
               onClick={handleBookSession}
               disabled={
-                !selectedDate || !selectedSlotId || isPending || isLoading
+                !selectedDate ||
+                selectedSlotIds.length === 0 ||
+                isPending ||
+                isLoading
               }
             >
               {isPending ? "Booking..." : "Confirm Booking"}
