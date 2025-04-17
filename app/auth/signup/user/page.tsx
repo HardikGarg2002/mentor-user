@@ -18,78 +18,126 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
+import { CheckCircle2, ExternalLink } from "lucide-react";
 
 export default function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showResendVerification, setShowResendVerification] = useState(false);
-  const [resendMessage, setResendMessage] = useState("");
-  const [isResending, setIsResending] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [emailPreviewUrl, setEmailPreviewUrl] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-    setShowResendVerification(false);
-    // Login existing user
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
 
-    if (result?.error) {
-      setError(result.error);
-      setIsLoading(false);
-
-      // Check if the error is about email verification
-      if (result.error.includes("verify your email")) {
-        setShowResendVerification(true);
-      }
-    } else {
-      router.push("/");
-    }
-  };
-
-  const handleResendVerification = async () => {
-    setIsResending(true);
-    setResendMessage("");
-
+    // Register new user
     try {
-      const res = await fetch("/api/auth/resend-verification", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await res.json();
 
-      if (res.ok) {
-        setResendMessage(data.message);
-      } else {
-        setResendMessage(
-          data.message || "Failed to resend verification email."
-        );
+      if (!res.ok) {
+        throw new Error(data.message || "Something went wrong");
       }
-    } catch (error) {
-      setResendMessage("An error occurred. Please try again.");
-    } finally {
-      setIsResending(false);
+
+      // Show success message
+      setRegistrationSuccess(true);
+      setSuccessMessage(
+        data.message ||
+          "Registration successful! Please check your email to verify your account."
+      );
+
+      // Save email preview URL if available (for test emails)
+      if (data.previewUrl) {
+        setEmailPreviewUrl(data.previewUrl);
+      }
+
+      // Do not auto sign-in since email verification is required
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setError(error.message);
+      setIsLoading(false);
     }
   };
+
+  if (registrationSuccess) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              Registration Successful
+            </CardTitle>
+            <CardDescription className="text-center">
+              Please verify your email to complete the registration
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-6">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <CheckCircle2 className="h-16 w-16 text-green-500" />
+              <p className="text-center">{successMessage}</p>
+              <p className="text-sm text-gray-500 text-center">
+                We've sent a verification link to <strong>{email}</strong>.
+                Please check both your inbox and spam folder.
+              </p>
+
+              {emailPreviewUrl && (
+                <div className="mt-4 w-full p-4 bg-blue-50 rounded-md">
+                  <p className="text-sm font-semibold text-center mb-2">
+                    Testing Mode: View Your Verification Email
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="w-full flex items-center justify-center"
+                    onClick={() => window.open(emailPreviewUrl, "_blank")}
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    View Verification Email
+                  </Button>
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    This is a test email preview (Ethereal Email). In
+                    production, the email would be sent to your actual inbox.
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <Button
+              onClick={() => router.push("/auth/signin")}
+              className="w-full"
+            >
+              Go to Sign In
+            </Button>
+            <p className="text-xs text-gray-500 text-center">
+              Didn't receive the email? You can request a new verification link
+              from the sign-in page.
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Sign In
+            Create an account
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access your account
+            Enter your information to create an account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -97,28 +145,6 @@ export default function SignIn() {
             <Alert variant="destructive" className="mb-4">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
-          )}
-
-          {resendMessage && (
-            <Alert className="mb-4">
-              <AlertDescription>{resendMessage}</AlertDescription>
-            </Alert>
-          )}
-
-          {showResendVerification && (
-            <div className="mb-4 text-center">
-              <p className="text-sm text-gray-600 mb-2">
-                Need to verify your email?
-              </p>
-              <Button
-                variant="outline"
-                onClick={handleResendVerification}
-                disabled={isResending}
-                className="w-full"
-              >
-                {isResending ? "Sending..." : "Resend Verification Email"}
-              </Button>
-            </div>
           )}
 
           <div className="flex justify-center mb-6">
@@ -165,6 +191,17 @@ export default function SignIn() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -195,23 +232,17 @@ export default function SignIn() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Loading..." : "Sign In"}
+              {isLoading ? "Loading..." : "Register"}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col">
-          <div className="text-center text-sm">
-            <p>
-              Dont have an account?{" "}
-              <button
-                type="button"
-                onClick={() => router.push("/auth/signup")}
-                className="text-primary hover:underline"
-              >
-                Register
-              </button>
-            </p>
-          </div>
+        <CardFooter className="flex justify-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{" "}
+            <Link href="/auth/signin" className="text-primary hover:underline">
+              Sign in
+            </Link>
+          </p>
         </CardFooter>
       </Card>
     </div>
