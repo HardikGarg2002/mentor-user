@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 
-export default function VerifyEmail() {
+function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -69,6 +69,7 @@ export default function VerifyEmail() {
           isSuccess: false,
           error: "An unexpected error occurred. Please try again.",
         });
+        console.error(error, "error in verify email");
       }
     }
 
@@ -124,5 +125,37 @@ export default function VerifyEmail() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+// Loading fallback for the Suspense boundary
+function VerifyEmailFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            Email Verification
+          </CardTitle>
+          <CardDescription className="text-center">
+            Loading verification page...
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center pt-6">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-lg text-center">Loading...</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export default function VerifyEmail() {
+  return (
+    <Suspense fallback={<VerifyEmailFallback />}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }

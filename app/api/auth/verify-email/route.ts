@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
 
     // Check if already verified
     if (user.emailVerified) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await deleteToken(tokenDoc._id as any);
       return NextResponse.json(
         { message: "Email already verified" },
@@ -47,6 +48,7 @@ export async function GET(req: NextRequest) {
     await user.save();
 
     // Delete the token as it's been used
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await deleteToken(tokenDoc._id as any);
 
     return NextResponse.json(

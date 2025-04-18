@@ -49,7 +49,6 @@ export async function searchMentors(query: string) {
         experience: mentor.experience,
         education: mentor.education,
         pricing: mentor.pricing,
-        availability: mentor.availability,
         rating: mentor.rating,
         reviewCount: mentor.reviewCount,
       };

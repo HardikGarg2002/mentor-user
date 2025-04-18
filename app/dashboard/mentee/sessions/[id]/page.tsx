@@ -94,7 +94,9 @@ export default async function SessionDetailsPage({
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Type</h3>
-                  <p className="text-lg capitalize">{sessionRecord.type}</p>
+                  <p className="text-lg capitalize">
+                    {sessionRecord.meeting_type}
+                  </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Price</h3>
@@ -109,7 +111,7 @@ export default async function SessionDetailsPage({
               </div>
 
               {sessionRecord.status === "confirmed" &&
-                sessionRecord.type === "video" && (
+                sessionRecord.meeting_type === "video" && (
                   <div className="flex gap-4 mt-6">
                     {/* <VideoCallButton sessionId={params.id} /> */}
                     <StartChatButton otherUserId={mentor._id.toString()} />

@@ -27,8 +27,8 @@ export default function NewsletterUnsubscribed() {
         </CardHeader>
         <CardContent className="text-center space-y-4">
           <p>
-            We're sorry to see you go. You have been successfully unsubscribed
-            from the MentorMatch newsletter.
+            We&apos;re sorry to see you go. You have been successfully
+            unsubscribed from the MentorMatch newsletter.
           </p>
           <p className="text-sm text-gray-500">
             If you changed your mind, you can subscribe again anytime.
