@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type React from "react";
@@ -37,7 +36,7 @@ function convertTimeToMinutes(time: string): number {
 }
 
 // Days of the week
-export const DAYS_OF_WEEK = [
+const DAYS_OF_WEEK = [
   { value: 0, label: "Sunday" },
   { value: 1, label: "Monday" },
   { value: 2, label: "Tuesday" },
@@ -48,7 +47,7 @@ export const DAYS_OF_WEEK = [
 ];
 
 // Timezones (sample set - adjust as needed)
-export const TIMEZONES = [
+const TIMEZONES = [
   { value: "Asia/Calcutta", label: "India (GMT+5:30)" },
   { value: "America/New_York", label: "Eastern Time (GMT-5)" },
   { value: "America/Los_Angeles", label: "Pacific Time (GMT-8)" },
@@ -59,7 +58,7 @@ export const TIMEZONES = [
 ];
 
 // Time slots options (30 min increments for dropdown selection)
-export const TIME_OPTIONS = [
+const TIME_OPTIONS = [
   { value: "08:00", label: "8:00 AM" },
   { value: "08:30", label: "8:30 AM" },
   { value: "09:00", label: "9:00 AM" },
@@ -154,7 +153,8 @@ export default function MentorAvailability() {
   }, [startTime, endTime]);
 
   // Group time slots by day
-  const timeSlotsByDay = DAYS_OF_WEEK.map((day) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const timeSlotsByDay: any = DAYS_OF_WEEK.map((day) => {
     const daySlots = timeSlots.filter((slot) => slot.dayOfWeek === day.value);
     return {
       ...day,

@@ -87,7 +87,7 @@ export default function SignIn() {
               <CheckCircle2 className="h-16 w-16 text-green-500" />
               <p className="text-center">{successMessage}</p>
               <p className="text-sm text-gray-500 text-center">
-                We've sent a verification link to <strong>{email}</strong>.
+                We&apos;ve sent a verification link to <strong>{email}</strong>.
                 Please check both your inbox and spam folder.
               </p>
 
@@ -120,8 +120,8 @@ export default function SignIn() {
               Go to Sign In
             </Button>
             <p className="text-xs text-gray-500 text-center">
-              Didn't receive the email? You can request a new verification link
-              from the sign-in page.
+              Didn&apos;t receive the email? You can request a new verification
+              link from the sign-in page.
             </p>
           </CardFooter>
         </Card>

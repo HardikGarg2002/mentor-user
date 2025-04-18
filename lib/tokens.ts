@@ -49,6 +49,7 @@ export async function saveToken(
   const hashedToken = hashToken(token);
 
   // Delete any existing tokens of the same type for this user
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await Token.deleteMany({ userId, type } as any);
 
   // Create new token
@@ -72,6 +73,7 @@ export async function verifyToken(
   const hashedToken = hashToken(token);
 
   // Find the token in the database
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tokenDoc = await Token.findOne({ token: hashedToken, type } as any);
 
   if (!tokenDoc) {
@@ -84,5 +86,6 @@ export async function verifyToken(
 // Delete token after use
 export async function deleteToken(tokenId: mongoose.Types.ObjectId) {
   await connectDB();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return Token.findByIdAndDelete(tokenId as any);
 }

@@ -52,6 +52,7 @@ export function NewsletterForm({
         setMessage(data.message || "Failed to subscribe. Please try again.");
       }
     } catch (error) {
+      console.error(error, "error in newsletter form");
       setStatus("error");
       setMessage("An error occurred. Please try again later.");
     }

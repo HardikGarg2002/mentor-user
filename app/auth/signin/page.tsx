@@ -76,6 +76,7 @@ export default function SignIn() {
       }
     } catch (error) {
       setResendMessage("An error occurred. Please try again.");
+      console.error(error);
     } finally {
       setIsResending(false);
     }

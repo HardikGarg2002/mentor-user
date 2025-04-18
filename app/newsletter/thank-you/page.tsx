@@ -28,7 +28,8 @@ export default function NewsletterThankYou() {
         <CardContent className="text-center space-y-4">
           <p>
             You have successfully subscribed to the MentorMatch newsletter.
-            We'll keep you updated with the latest news, tips, and resources.
+            We&apos;ll keep you updated with the latest news, tips, and
+            resources.
           </p>
           <p className="text-sm text-gray-500">
             You can unsubscribe at any time by clicking the unsubscribe link in
