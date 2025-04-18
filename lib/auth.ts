@@ -42,6 +42,11 @@ export const authOptions = {
           throw new Error("Invalid password");
         }
 
+        // Check if email is verified
+        if (!user.emailVerified) {
+          throw new Error("Please verify your email before signing in");
+        }
+
         return {
           id: user._id.toString(),
           name: user.name,
@@ -91,3 +96,10 @@ export { handler as GET, handler as POST };
 
 // Export the auth function using getServerSession
 export const auth = () => getServerSession(authOptions);
+
+export async function getServerAuthSession() {
+  const session = await getServerSession(authOptions);
+  return session;
+}
+
+export default NextAuth(authOptions);

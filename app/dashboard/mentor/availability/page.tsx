@@ -2,27 +2,22 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
-// import { useRouter } from "next/navigation"
-import { format, parseISO } from "date-fns";
-import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DatePicker } from "@/components/calendar/date-picker";
+  addTimeSlot,
+  deleteTimeSlot,
+  getMentorWeeklyAvailability,
+} from "@/actions/availability-actions";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
@@ -32,18 +27,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Calendar, Trash2 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-import {
-  addAvailabilitySlot,
-  deleteAvailabilitySlot,
-  getMentorAvailability,
-} from "@/actions/availability-actions";
+import { Trash2, PlusCircle } from "lucide-react";
 
-// Days of the week for recurring options
-const DAYS_OF_WEEK = [
+// Helper function to convert time string to minutes for comparison
+function convertTimeToMinutes(time: string): number {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+// Days of the week
+export const DAYS_OF_WEEK = [
   { value: 0, label: "Sunday" },
   { value: 1, label: "Monday" },
   { value: 2, label: "Tuesday" },
@@ -53,104 +47,132 @@ const DAYS_OF_WEEK = [
   { value: 6, label: "Saturday" },
 ];
 
-// Time slots options (30 min increments)
-const TIME_SLOTS = [
-  "8:00 AM",
-  "8:30 AM",
-  "9:00 AM",
-  "9:30 AM",
-  "10:00 AM",
-  "10:30 AM",
-  "11:00 AM",
-  "11:30 AM",
-  "12:00 PM",
-  "12:30 PM",
-  "1:00 PM",
-  "1:30 PM",
-  "2:00 PM",
-  "2:30 PM",
-  "3:00 PM",
-  "3:30 PM",
-  "4:00 PM",
-  "4:30 PM",
-  "5:00 PM",
-  "5:30 PM",
-  "6:00 PM",
-  "6:30 PM",
-  "7:00 PM",
-  "7:30 PM",
+// Timezones (sample set - adjust as needed)
+export const TIMEZONES = [
+  { value: "Asia/Calcutta", label: "India (GMT+5:30)" },
+  { value: "America/New_York", label: "Eastern Time (GMT-5)" },
+  { value: "America/Los_Angeles", label: "Pacific Time (GMT-8)" },
+  { value: "Europe/London", label: "London (GMT)" },
+  { value: "Europe/Paris", label: "Central European (GMT+1)" },
+  { value: "Asia/Tokyo", label: "Tokyo (GMT+9)" },
+  { value: "Australia/Sydney", label: "Sydney (GMT+11)" },
 ];
 
-export default function MentorAvailability() {
-  // const router = useRouter()
-  const [availabilitySlots, setAvailabilitySlots] = useState<any[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    new Date()
-  );
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [recurringDays, setRecurringDays] = useState<number[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("upcoming");
+// Time slots options (30 min increments for dropdown selection)
+export const TIME_OPTIONS = [
+  { value: "08:00", label: "8:00 AM" },
+  { value: "08:30", label: "8:30 AM" },
+  { value: "09:00", label: "9:00 AM" },
+  { value: "09:30", label: "9:30 AM" },
+  { value: "10:00", label: "10:00 AM" },
+  { value: "10:30", label: "10:30 AM" },
+  { value: "11:00", label: "11:00 AM" },
+  { value: "11:30", label: "11:30 AM" },
+  { value: "12:00", label: "12:00 PM" },
+  { value: "12:30", label: "12:30 PM" },
+  { value: "13:00", label: "1:00 PM" },
+  { value: "13:30", label: "1:30 PM" },
+  { value: "14:00", label: "2:00 PM" },
+  { value: "14:30", label: "2:30 PM" },
+  { value: "15:00", label: "3:00 PM" },
+  { value: "15:30", label: "3:30 PM" },
+  { value: "16:00", label: "4:00 PM" },
+  { value: "16:30", label: "4:30 PM" },
+  { value: "17:00", label: "5:00 PM" },
+  { value: "17:30", label: "5:30 PM" },
+  { value: "18:00", label: "6:00 PM" },
+  { value: "18:30", label: "6:30 PM" },
+  { value: "19:00", label: "7:00 PM" },
+  { value: "19:30", label: "7:30 PM" },
+  { value: "20:00", label: "8:00 PM" },
+  { value: "20:30", label: "8:30 PM" },
+  { value: "21:00", label: "9:00 PM" },
+  { value: "21:30", label: "9:30 PM" },
+];
 
-  // Fetch availability data
-  async function fetchAvailability() {
-    const data = await getMentorAvailability(activeTab === "all");
-    setAvailabilitySlots(data);
-  }
+// Time display helper
+function formatTimeDisplay(time: string): string {
+  const timeOption = TIME_OPTIONS.find((option) => option.value === time);
+  return timeOption ? timeOption.label : time;
+}
+
+interface TimeSlot {
+  id: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  timezone: string;
+}
+
+export default function MentorAvailability() {
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Form state
+  const [selectedDay, setSelectedDay] = useState<string>("");
+  const [startTime, setStartTime] = useState<string>("");
+  const [endTime, setEndTime] = useState<string>("");
+  const [timezone, setTimezone] = useState<string>("Asia/Calcutta");
+
+  // Filter end time options based on start time
+  const endTimeOptions = startTime
+    ? TIME_OPTIONS.filter(
+        (option) =>
+          convertTimeToMinutes(option.value) > convertTimeToMinutes(startTime)
+      )
+    : [];
+
+  // Fetch time slots
+  const fetchTimeSlots = async () => {
+    try {
+      const slots = await getMentorWeeklyAvailability();
+      console.log("Slots:", slots);
+      setTimeSlots(slots);
+    } catch (error) {
+      console.error("Error fetching time slots:", error);
+      toast({
+        title: "Error",
+        description: "Could not load your availability settings",
+      });
+    }
+  };
 
   useEffect(() => {
-    fetchAvailability();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+    fetchTimeSlots();
+  }, []);
 
-  // Handle recurring day toggle
-  const toggleRecurringDay = (day: number) => {
-    setRecurringDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    );
-  };
+  // Reset end time if it's before start time
+  useEffect(() => {
+    if (
+      startTime &&
+      endTime &&
+      convertTimeToMinutes(startTime) >= convertTimeToMinutes(endTime)
+    ) {
+      setEndTime("");
+    }
+  }, [startTime, endTime]);
+
+  // Group time slots by day
+  const timeSlotsByDay = DAYS_OF_WEEK.map((day) => {
+    const daySlots = timeSlots.filter((slot) => slot.dayOfWeek === day.value);
+    return {
+      ...day,
+      slots: daySlots.sort(
+        (a, b) =>
+          convertTimeToMinutes(a.startTime) - convertTimeToMinutes(b.startTime)
+      ),
+    };
+  });
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedDate) {
+    if (!selectedDay || !startTime || !endTime) {
       toast({
         title: "Error",
-        description: "Please select a date",
-      });
-      return;
-    }
-
-    if (!startTime || !endTime) {
-      toast({
-        title: "Error",
-        description: "Please select start and end times",
-      });
-      return;
-    }
-
-    // Check if start time is before end time
-    const startIndex = TIME_SLOTS.indexOf(startTime);
-    const endIndex = TIME_SLOTS.indexOf(endTime);
-
-    if (startIndex >= endIndex) {
-      toast({
-        title: "Error",
-        description: "End time must be after start time",
-      });
-      return;
-    }
-
-    // Check if recurring has days selected
-    if (isRecurring && recurringDays.length === 0) {
-      toast({
-        title: "Error",
-        description:
-          "Please select at least one day for recurring availability",
+        description: "Please select day, start time and end time",
       });
       return;
     }
@@ -158,114 +180,103 @@ export default function MentorAvailability() {
     setIsLoading(true);
 
     try {
-      const result = await addAvailabilitySlot({
-        date: selectedDate.toISOString(),
+      const result = await addTimeSlot({
+        dayOfWeek: parseInt(selectedDay, 10),
         startTime,
         endTime,
-        isRecurring,
-        recurringDays: isRecurring ? recurringDays : undefined,
+        timezone,
       });
 
-      if (result.error) {
-        toast({
-          title: "Error",
-          description: result.error,
-        });
-      } else {
+      if (result.success) {
         toast({
           title: "Success",
-          description: "Availability added successfully",
+          description: "Time slot added successfully",
         });
-
-        // Reset form and close dialog
+        setIsDialogOpen(false);
+        setSelectedDay("");
         setStartTime("");
         setEndTime("");
-        setIsRecurring(false);
-        setRecurringDays([]);
-        setIsDialogOpen(false);
-
-        // Refresh data
-        fetchAvailability();
+        fetchTimeSlots();
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to add time slot",
+        });
       }
     } catch (error) {
+      console.error("Error adding time slot:", error);
       toast({
         title: "Error",
-        description: "Failed to add availability",
+        description: "An unexpected error occurred",
       });
-      console.log("error", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle slot deletion
-  const handleDeleteSlot = async (slotId: string, isRecurring: boolean) => {
-    if (confirm("Are you sure you want to delete this availability slot?")) {
+  // Handle time slot deletion
+  const handleDeleteTimeSlot = async (id: string) => {
+    if (confirm("Are you sure you want to delete this time slot?")) {
       try {
-        const deleteAll =
-          isRecurring &&
-          confirm("Do you want to delete all future recurring instances?");
+        const result = await deleteTimeSlot(id);
 
-        const result = await deleteAvailabilitySlot(slotId, deleteAll);
-
-        if (result.error) {
-          toast({
-            title: "Error",
-            description: result.error,
-          });
-        } else {
+        if (result.success) {
           toast({
             title: "Success",
-            description: "Availability slot deleted",
+            description: "Time slot deleted successfully",
           });
-
-          // Refresh data
-          fetchAvailability();
+          fetchTimeSlots();
+        } else {
+          toast({
+            title: "Error",
+            description: result.error || "Failed to delete time slot",
+          });
         }
       } catch (error) {
+        console.error("Error deleting time slot:", error);
         toast({
           title: "Error",
-          description: "Failed to delete availability slot",
+          description: "An unexpected error occurred",
         });
-        console.log("error", error);
       }
     }
   };
 
-  // Group slots by date for display
-  const groupedSlots: any = availabilitySlots.reduce((acc, slot) => {
-    const date = format(parseISO(slot.date), "yyyy-MM-dd");
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(slot);
-    return acc;
-  }, {} as Record<string, typeof availabilitySlots>);
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-        <h1 className="text-3xl font-bold">Manage Availability</h1>
+        <h1 className="text-3xl font-bold">Manage Weekly Availability</h1>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="mt-2 sm:mt-0">
-              <Calendar className="mr-2 h-4 w-4" />
-              Add Availability
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Time Slot
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Availability</DialogTitle>
+              <DialogTitle>Add Weekly Time Slot</DialogTitle>
               <DialogDescription>
-                Set when youre available for mentoring sessions.
+                Set when you&apos;re available for mentoring sessions each week.
               </DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
-                <DatePicker date={selectedDate} onSelect={setSelectedDate} />
+                <Label htmlFor="day">Day of Week</Label>
+                <Select value={selectedDay} onValueChange={setSelectedDay}>
+                  <SelectTrigger id="day">
+                    <SelectValue placeholder="Select day" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DAYS_OF_WEEK.map((day) => (
+                      <SelectItem key={day.value} value={day.value.toString()}>
+                        {day.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -275,10 +286,10 @@ export default function MentorAvailability() {
                     <SelectTrigger id="startTime">
                       <SelectValue placeholder="Select start time" />
                     </SelectTrigger>
-                    <SelectContent>
-                      {TIME_SLOTS.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {time}
+                    <SelectContent className="max-h-[300px]">
+                      {TIME_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -287,14 +298,24 @@ export default function MentorAvailability() {
 
                 <div className="space-y-2">
                   <Label htmlFor="endTime">End Time</Label>
-                  <Select value={endTime} onValueChange={setEndTime}>
+                  <Select
+                    value={endTime}
+                    onValueChange={setEndTime}
+                    disabled={!startTime}
+                  >
                     <SelectTrigger id="endTime">
-                      <SelectValue placeholder="Select end time" />
+                      <SelectValue
+                        placeholder={
+                          !startTime
+                            ? "Select start time first"
+                            : "Select end time"
+                        }
+                      />
                     </SelectTrigger>
-                    <SelectContent>
-                      {TIME_SLOTS.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {time}
+                    <SelectContent className="max-h-[300px]">
+                      {endTimeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -302,41 +323,25 @@ export default function MentorAvailability() {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="isRecurring"
-                  checked={isRecurring}
-                  onCheckedChange={(checked) =>
-                    setIsRecurring(checked === true)
-                  }
-                />
-                <Label htmlFor="isRecurring">Recurring availability</Label>
-              </div>
-
-              {isRecurring && (
-                <div className="space-y-2">
-                  <Label>Repeat on</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {DAYS_OF_WEEK.map((day) => (
-                      <div
-                        key={day.value}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={`day-${day.value}`}
-                          checked={recurringDays.includes(day.value)}
-                          onCheckedChange={() => toggleRecurringDay(day.value)}
-                        />
-                        <Label htmlFor={`day-${day.value}`}>{day.label}</Label>
-                      </div>
+              <div className="space-y-2">
+                <Label htmlFor="timezone">Timezone</Label>
+                <Select value={timezone} onValueChange={setTimezone}>
+                  <SelectTrigger id="timezone">
+                    <SelectValue placeholder="Select timezone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIMEZONES.map((tz) => (
+                      <SelectItem key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </SelectItem>
                     ))}
-                  </div>
-                </div>
-              )}
+                  </SelectContent>
+                </Select>
+              </div>
 
               <DialogFooter>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Adding..." : "Add Availability"}
+                  {isLoading ? "Adding..." : "Add Time Slot"}
                 </Button>
               </DialogFooter>
             </form>
@@ -344,146 +349,51 @@ export default function MentorAvailability() {
         </Dialog>
       </div>
 
-      <Tabs
-        defaultValue="upcoming"
-        value={activeTab}
-        onValueChange={setActiveTab}
-      >
-        <TabsList className="mb-4">
-          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-          <TabsTrigger value="all">All Slots</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="upcoming" className="space-y-6">
-          {Object.keys(groupedSlots).length === 0 ? (
-            <Card>
-              <CardContent className="pt-6 text-center">
+      <div className="space-y-6">
+        {timeSlotsByDay.map((day) => (
+          <Card
+            key={day.value}
+            className={day.slots.length === 0 ? "opacity-70" : ""}
+          >
+            <CardHeader>
+              <CardTitle>{day.label}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {day.slots.length === 0 ? (
                 <p className="text-muted-foreground">
-                  No upcoming availability slots. Add some to get started!
+                  No time slots set for this day
                 </p>
-              </CardContent>
-            </Card>
-          ) : (
-            Object.entries(groupedSlots)
-              .sort(
-                ([dateA], [dateB]) =>
-                  new Date(dateA).getTime() - new Date(dateB).getTime()
-              )
-              .map(([date, slots]: any) => (
-                <Card key={date}>
-                  <CardHeader>
-                    <CardTitle>
-                      {format(new Date(date), "EEEE, MMMM d, yyyy")}
-                    </CardTitle>
-                    <CardDescription>
-                      {slots.length} time slot(s)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {slots.map((slot) => (
-                        <div
-                          key={slot.id}
-                          className={`flex justify-between items-center p-3 rounded-md ${
-                            slot.isBooked
-                              ? "bg-yellow-50 border border-yellow-200"
-                              : "bg-gray-50 border border-gray-200"
-                          }`}
-                        >
-                          <div>
-                            <p className="font-medium">
-                              {slot.startTime} - {slot.endTime}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {slot.isBooked ? "Booked" : "Available"}
-                              {slot.isRecurring && " • Recurring"}
-                            </p>
-                          </div>
-                          {!slot.isBooked && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() =>
-                                handleDeleteSlot(slot.id, slot.isRecurring)
-                              }
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
+              ) : (
+                <div className="space-y-2">
+                  {day.slots.map((slot) => (
+                    <div
+                      key={slot.id}
+                      className="flex justify-between items-center p-3 rounded-md bg-gray-50 border border-gray-200"
+                    >
+                      <div>
+                        <p className="font-medium">
+                          {formatTimeDisplay(slot.startTime)} -{" "}
+                          {formatTimeDisplay(slot.endTime)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Timezone: {slot.timezone || "Asia/Calcutta"}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteTimeSlot(slot.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              ))
-          )}
-        </TabsContent>
-
-        <TabsContent value="all" className="space-y-6">
-          {Object.keys(groupedSlots).length === 0 ? (
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <p className="text-muted-foreground">
-                  No availability slots found.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            Object.entries(groupedSlots)
-              .sort(
-                ([dateA], [dateB]) =>
-                  new Date(dateA).getTime() - new Date(dateB).getTime()
-              )
-              .map(([date, slots]: any) => (
-                <Card key={date}>
-                  <CardHeader>
-                    <CardTitle>
-                      {format(new Date(date), "EEEE, MMMM d, yyyy")}
-                    </CardTitle>
-                    <CardDescription>
-                      {slots.length} time slot(s)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {slots.map((slot) => (
-                        <div
-                          key={slot.id}
-                          className={`flex justify-between items-center p-3 rounded-md ${
-                            slot.isBooked
-                              ? "bg-yellow-50 border border-yellow-200"
-                              : "bg-gray-50 border border-gray-200"
-                          }`}
-                        >
-                          <div>
-                            <p className="font-medium">
-                              {slot.startTime} - {slot.endTime}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {slot.isBooked ? "Booked" : "Available"}
-                              {slot.isRecurring && " • Recurring"}
-                            </p>
-                          </div>
-                          {!slot.isBooked && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() =>
-                                handleDeleteSlot(slot.id, slot.isRecurring)
-                              }
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-          )}
-        </TabsContent>
-      </Tabs>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

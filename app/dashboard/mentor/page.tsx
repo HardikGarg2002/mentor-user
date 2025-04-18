@@ -11,6 +11,7 @@ import {
   Users,
   Clock,
 } from "lucide-react";
+import Link from "next/link";
 
 // import Mentor from "@/models/Mentor";
 // import { getMentorById } from "@/lib/mentors";
@@ -311,7 +312,11 @@ export default async function MentorDashboard() {
                 Update your availability to let mentees know when youre free for
                 sessions.
               </p>
-              <Button>Manage Calendar</Button>
+              <Button>
+                <Link href="/dashboard/mentor/availability">
+                  Manage Calendar
+                </Link>
+              </Button>
             </div>
           </CardContent>
         </Card>

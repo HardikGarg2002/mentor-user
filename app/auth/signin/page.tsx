@@ -1,87 +1,95 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import Link from "next/link"
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Link from "next/link";
 
 export default function SignIn() {
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [name, setName] = useState("")
-  const [isRegister, setIsRegister] = useState(false)
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showResendVerification, setShowResendVerification] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+  const [isResending, setIsResending] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    setShowResendVerification(false);
+    // Login existing user
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
 
-    if (isRegister) {
-      // Register new user
-      try {
-        const res = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
-        })
+    if (result?.error) {
+      setError(result.error);
+      setIsLoading(false);
 
-        const data = await res.json()
-
-        if (!res.ok) {
-          throw new Error(data.message || "Something went wrong")
-        }
-
-        // After successful registration, sign in
-        await signIn("credentials", {
-          email,
-          password,
-          redirect: false,
-        })
-
-        router.push("/dashboard/mentee")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        setError(error.message)
-        setIsLoading(false)
+      // Check if the error is about email verification
+      if (result.error.includes("verify your email")) {
+        setShowResendVerification(true);
       }
     } else {
-      // Login existing user
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      })
-
-      if (result?.error) {
-        setError(result.error)
-        setIsLoading(false)
-      } else {
-        router.push("/dashboard/mentee")
-      }
+      router.push("/");
     }
-  }
+  };
+
+  const handleResendVerification = async () => {
+    setIsResending(true);
+    setResendMessage("");
+
+    try {
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setResendMessage(data.message);
+      } else {
+        setResendMessage(
+          data.message || "Failed to resend verification email."
+        );
+      }
+    } catch (error) {
+      setResendMessage("An error occurred. Please try again.");
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            {isRegister ? "Create an account" : "Sign in to your account"}
+            Sign In
           </CardTitle>
           <CardDescription className="text-center">
-            {isRegister
-              ? "Enter your information to create an account"
-              : "Enter your credentials to access your account"}
+            Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -91,11 +99,35 @@ export default function SignIn() {
             </Alert>
           )}
 
+          {resendMessage && (
+            <Alert className="mb-4">
+              <AlertDescription>{resendMessage}</AlertDescription>
+            </Alert>
+          )}
+
+          {showResendVerification && (
+            <div className="mb-4 text-center">
+              <p className="text-sm text-gray-600 mb-2">
+                Need to verify your email?
+              </p>
+              <Button
+                variant="outline"
+                onClick={handleResendVerification}
+                disabled={isResending}
+                className="w-full"
+              >
+                {isResending ? "Sending..." : "Resend Verification Email"}
+              </Button>
+            </div>
+          )}
+
           <div className="flex justify-center mb-6">
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => signIn("google", { callbackUrl: "/dashboard/mentee" })}
+              onClick={() =>
+                signIn("google", { callbackUrl: "/dashboard/mentee" })
+              }
             >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
@@ -125,31 +157,33 @@ export default function SignIn() {
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500">Or continue with</span>
+              <span className="bg-white px-2 text-gray-500">
+                Or continue with
+              </span>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {isRegister && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required />
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                {!isRegister && (
-                  <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
-                    Forgot password?
-                  </Link>
-                )}
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
               </div>
               <Input
                 id="password"
@@ -161,31 +195,25 @@ export default function SignIn() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Loading..." : isRegister ? "Register" : "Sign In"}
+              {isLoading ? "Loading..." : "Sign In"}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col">
           <div className="text-center text-sm">
-            {isRegister ? (
-              <p>
-                Already have an account?{" "}
-                <button type="button" onClick={() => setIsRegister(false)} className="text-primary hover:underline">
-                  Sign in
-                </button>
-              </p>
-            ) : (
-              <p>
-               Dont have an account?{" "}
-                <button type="button" onClick={() => setIsRegister(true)} className="text-primary hover:underline">
-                  Register
-                </button>
-              </p>
-            )}
+            <p>
+              Dont have an account?{" "}
+              <button
+                type="button"
+                onClick={() => router.push("/auth/signup")}
+                className="text-primary hover:underline"
+              >
+                Register
+              </button>
+            </p>
           </div>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
-

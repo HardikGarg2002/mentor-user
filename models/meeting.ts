@@ -1,5 +1,5 @@
 import { IVideoMeet, IVideoMeetStatus } from "@/types/videomeet";
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const MeetingSchema = new Schema<IVideoMeet>(
   {

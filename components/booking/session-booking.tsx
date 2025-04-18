@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useTransition, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -22,74 +22,188 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { bookSession } from "@/actions/booking-actions";
-import type { MentorProfile } from "@/types/mentor";
-import { getAvailableSlotsForDate } from "@/actions/availability-actions";
+import { bookSession, getMentorBookedSlots } from "@/actions/booking-actions";
+import { getMentorWeeklyAvailabilityById } from "@/actions/availability-actions";
 import SessionTypeSelector from "./SessionTypeSelector";
+import { format, getDay, parseISO } from "date-fns";
+
+// Import types from the central types system
+import {
+  WeeklyAvailabilitySlot,
+  BookedSlot,
+  TimeSlot,
+  DURATION_OPTIONS,
+  timeToMinutes,
+  SessionType,
+  MentorPricing,
+} from "@/types";
+
+// Use a more specific type with only the required properties
+type BookingMentorData = {
+  userId: string;
+  name: string;
+  pricing: MentorPricing;
+};
 
 type SessionBookingProps = {
-  mentor: MentorProfile;
+  mentor: BookingMentorData;
 };
+
+// Generate time slots from weekly availability for a specific date
+function generateTimeSlotsForDate(
+  weeklyAvailability: WeeklyAvailabilitySlot[],
+  date: Date,
+  bookedSlots: BookedSlot[] = []
+): TimeSlot[] {
+  const dayOfWeek = getDay(date); // 0 = Sunday, 6 = Saturday
+  const dateStr = format(date, "yyyy-MM-dd");
+
+  // Filter availability for the day of week
+  const dayAvailability = weeklyAvailability.filter(
+    (slot) => slot.dayOfWeek === dayOfWeek
+  );
+
+  if (dayAvailability.length === 0) return [];
+
+  // Generate 30-minute slots for each availability block
+  const slots = [];
+
+  for (const availability of dayAvailability) {
+    const startMinutes = timeToMinutes(availability.startTime);
+    const endMinutes = timeToMinutes(availability.endTime);
+
+    // Generate slots at 30-minute intervals
+    for (
+      let slotStart = startMinutes;
+      slotStart < endMinutes;
+      slotStart += 30
+    ) {
+      // If less than 30 minutes remain, don't create a partial slot
+      if (slotStart + 30 > endMinutes) break;
+
+      const slotEnd = slotStart + 30;
+
+      const startTimeStr = `${Math.floor(slotStart / 60)
+        .toString()
+        .padStart(2, "0")}:${(slotStart % 60).toString().padStart(2, "0")}`;
+      const endTimeStr = `${Math.floor(slotEnd / 60)
+        .toString()
+        .padStart(2, "0")}:${(slotEnd % 60).toString().padStart(2, "0")}`;
+
+      // Format for display
+      const startTimeDisplay = format(
+        parseISO(`${dateStr}T${startTimeStr}:00`),
+        "h:mm a"
+      );
+      const endTimeDisplay = format(
+        parseISO(`${dateStr}T${endTimeStr}:00`),
+        "h:mm a"
+      );
+
+      // Check if slot is booked
+      const isBooked = bookedSlots.some(
+        (bookedSlot) =>
+          bookedSlot.date === dateStr &&
+          timeToMinutes(bookedSlot.startTime) <= slotStart &&
+          timeToMinutes(bookedSlot.endTime) > slotStart
+      );
+
+      slots.push({
+        id: `${dateStr}_${startTimeStr}_${endTimeStr}_${availability.id}`,
+        startTime: startTimeDisplay,
+        endTime: endTimeDisplay,
+        rawStartTime: startTimeStr,
+        rawEndTime: endTimeStr,
+        isBooked,
+        duration: 30, // 30-minute intervals
+      });
+    }
+  }
+
+  return slots.sort(
+    (a, b) => timeToMinutes(a.rawStartTime) - timeToMinutes(b.rawStartTime)
+  );
+}
 
 export default function SessionBooking({ mentor }: SessionBookingProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedDate, setDate] = React.useState<Date>();
+  const [selectedType, setSelectedType] = useState<SessionType>("chat");
+  const [selectedDate, setDate] = useState<Date | undefined>(new Date());
+  const [selectedDuration, setSelectedDuration] = useState<string>("60"); // Default 1 hour
+  const [timezone, setTimezone] = useState<string>(
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
 
-  // Extract params from URL
-
-  const selectedSlotId = searchParams.get("slot");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const selectedType = searchParams.get("type") || ("chat" as any);
-  const timezone =
-    searchParams.get("timezone") ||
-    Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-  const [availableSlots, setAvailableSlots] = useState<
-    { id: string; startTime: string; endTime: string; date: string }[]
+  // Session info
+  const [weeklyAvailability, setWeeklyAvailability] = useState<
+    WeeklyAvailabilitySlot[]
   >([]);
+  const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
 
+  // Calculate session price based on duration and type
+  const calculatePrice = () => {
+    if (!selectedType || !selectedDuration) return 0;
+    const hourlyRate = mentor.pricing[selectedType] || 0;
+    return (Number(selectedDuration) / 60) * hourlyRate;
+  };
+
+  // Fetch mentor's weekly availability and booked slots
   useEffect(() => {
-    const fetchSlots = async () => {
-      if (!selectedDate) return;
-      const slots = await fetchAvailableSlots();
-      setAvailableSlots(slots);
+    const fetchMentorData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch both availability and booked slots in parallel
+        const [availabilityData, bookedSlotsData] = await Promise.all([
+          getMentorWeeklyAvailabilityById({ mentorId: mentor.userId }),
+          getMentorBookedSlots(mentor.userId),
+        ]);
+
+        setWeeklyAvailability(availabilityData);
+        // Convert Date objects to strings in bookedSlotsData if needed
+        const formattedBookedSlots = bookedSlotsData.map((slot) => ({
+          date:
+            typeof slot.date === "string"
+              ? slot.date
+              : format(new Date(slot.date), "yyyy-MM-dd"),
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+        }));
+        setBookedSlots(formattedBookedSlots);
+      } catch (error) {
+        console.error("Error fetching mentor data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load mentor's availability",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    fetchSlots();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate]);
+    fetchMentorData();
+  }, [mentor.userId]);
 
-  // Fetch available slots via Server Actions
-  const fetchAvailableSlots = async (): Promise<
-    {
-      id: string;
-      startTime: string;
-      endTime: string;
-      date: string;
-    }[]
-  > => {
-    if (!selectedDate) return [];
-    return await getAvailableSlotsForDate(
-      mentor.userId,
-      selectedDate.toISOString()
-    );
-  };
-
-  // Update URL params
-  const updateQueryParams = (key: string, value: string | undefined) => {
-    const params = new URLSearchParams(searchParams);
-    if (value) {
-      params.set(key, value);
+  // Generate time slots when date or availability changes
+  useEffect(() => {
+    if (selectedDate && weeklyAvailability.length > 0) {
+      const slots = generateTimeSlotsForDate(
+        weeklyAvailability,
+        selectedDate,
+        bookedSlots
+      );
+      setAvailableSlots(slots);
     } else {
-      params.delete(key);
+      setAvailableSlots([]);
     }
-    router.replace(`?${params.toString()}`);
-  };
+  }, [selectedDate, weeklyAvailability, bookedSlots]);
 
+  // Handle booking session
   const handleBookSession = async () => {
     if (!session) {
       router.push("/auth/signin");
@@ -104,12 +218,20 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
       return;
     }
 
+    // Parse slot ID to get information
+    const [dateStr, startTime, endTime, availabilityId] =
+      selectedSlotId.split("_");
+
     startTransition(async () => {
       try {
         const result = await bookSession({
           mentorId: mentor.userId,
-          slotId: selectedSlotId,
-          type: selectedType,
+          date: dateStr,
+          startTime,
+          endTime,
+          availabilityId,
+          meeting_type: selectedType,
+          duration: parseInt(selectedDuration),
           timezone,
         });
 
@@ -124,7 +246,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
           setIsDialogOpen(false);
         }
       } catch (error) {
-        console.log("error", error);
+        console.error("Booking error:", error);
         toast({
           title: "Booking Failed",
           description: "There was an error booking your session",
@@ -136,10 +258,10 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
   return (
     <div className="space-y-4">
       {/* Session Type Selection */}
-
       <SessionTypeSelector
         selectedType={selectedType}
         pricing={mentor.pricing}
+        setSelectedType={setSelectedType}
       />
 
       {/* Booking Dialog */}
@@ -177,18 +299,51 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
                 <TimeSlotPicker
                   selectedSlotId={selectedSlotId}
                   availableSlots={availableSlots}
-                  onSelectSlot={(slot) => updateQueryParams("slot", slot.id)}
+                  onSelectSlot={(slot) => setSelectedSlotId(slot.id)}
                 />
+              </div>
+            )}
+
+            {/* Duration Selection */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Session Duration</label>
+              <Select
+                value={selectedDuration}
+                onValueChange={setSelectedDuration}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DURATION_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Price Display */}
+            {selectedType && selectedDuration && (
+              <div className="rounded-md bg-muted p-3">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Total Price:</span>
+                  <span className="text-lg font-bold">
+                    ${calculatePrice().toFixed(2)}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {selectedDuration} minutes at ${mentor.pricing[selectedType]}
+                  /hour
+                </p>
               </div>
             )}
 
             {/* Timezone Selection */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Timezone</label>
-              <Select
-                value={timezone}
-                onValueChange={(tz) => updateQueryParams("timezone", tz)}
-              >
+              <Select value={timezone} onValueChange={(tz) => setTimezone(tz)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select timezone" />
                 </SelectTrigger>
@@ -206,7 +361,9 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
           <DialogFooter>
             <Button
               onClick={handleBookSession}
-              disabled={!selectedDate || !selectedSlotId || isPending}
+              disabled={
+                !selectedDate || !selectedSlotId || isPending || isLoading
+              }
             >
               {isPending ? "Booking..." : "Confirm Booking"}
             </Button>

@@ -4,9 +4,28 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SessionBooking from "@/components/booking/session-booking";
+import SessionBooking2 from "@/components/booking/session-booking2";
 import { StartChatButton } from "@/components/chat/start-chat-button";
-import { getMentorById } from "@/lib/mentors";
+import { getMentorByUserId } from "@/lib/mentors";
 import { notFound } from "next/navigation";
+import { getMentorWeeklyAvailabilityById } from "@/actions/availability-actions";
+
+const DAYS_OF_WEEK = [
+  { value: 1, label: "Monday" },
+  { value: 2, label: "Tuesday" },
+  { value: 3, label: "Wednesday" },
+  { value: 4, label: "Thursday" },
+  { value: 5, label: "Friday" },
+  { value: 6, label: "Saturday" },
+  { value: 7, label: "Sunday" },
+];
+
+function formatTimeDisplay(time: string) {
+  const [hours, minutes] = time.split(":");
+  const formattedHours = parseInt(hours, 10) % 12 || 12;
+  const amPm = parseInt(hours, 10) < 12 ? "AM" : "PM";
+  return `${formattedHours}:${minutes} ${amPm}`;
+}
 
 export default async function MentorProfile({
   params,
@@ -14,12 +33,12 @@ export default async function MentorProfile({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  console.log("id from params", id);
-  const mentor = await getMentorById(id);
+  const mentor = await getMentorByUserId(id);
   if (!mentor) {
     notFound();
   }
   const mentorData = JSON.parse(JSON.stringify(mentor));
+  const slots = await getMentorWeeklyAvailabilityById({ mentorId: id });
 
   // Mock reviews data - in a real app, this would come from a database
   const reviews = [
@@ -48,6 +67,13 @@ export default async function MentorProfile({
         "They provided excellent career advice and helped me prepare for my interviews. Their feedback on my resume was particularly helpful.",
     },
   ];
+
+  // Extract only the mentor properties needed by SessionBooking
+  const bookingMentorData = {
+    userId: mentorData.userId,
+    name: mentorData.name,
+    pricing: mentorData.pricing,
+  };
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -193,16 +219,28 @@ export default async function MentorProfile({
               <CardTitle>Book a Session</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <SessionBooking mentor={mentorData} />
+              <div className="flex flex-col gap-4">
+                <SessionBooking mentor={bookingMentorData} />
+                <SessionBooking2 mentor={bookingMentorData} />
+              </div>
               <div>
                 <h3 className="font-medium mb-3 flex items-center">
                   <Calendar className="h-5 w-5 mr-2" /> Availability
                 </h3>
                 <ul className="space-y-3">
-                  {mentor.availability.map((avail, index) => (
+                  {slots.map((slot, index) => (
                     <li key={index} className="text-sm">
-                      <span className="font-medium">{avail.day}:</span>{" "}
-                      {avail.slots.join(", ")}
+                      <span className="font-medium">
+                        {DAYS_OF_WEEK.find(
+                          (day) => day.value === slot.dayOfWeek
+                        )?.label || "Unknown Day"}
+                        :
+                      </span>{" "}
+                      {formatTimeDisplay(slot.startTime)} -{" "}
+                      {formatTimeDisplay(slot.endTime)}
+                      <span className="text-gray-500 ml-2">
+                        ({slot.timezone})
+                      </span>
                     </li>
                   ))}
                 </ul>

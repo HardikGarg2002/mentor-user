@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Facebook, Twitter, Instagram, Linkedin, Mail } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { NewsletterForm } from "@/components/newsletter/newsletter-form";
 
 export function Footer() {
   return (
@@ -74,7 +73,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/become-mentor"
+                  href="/auth/signup/become-mentor"
                   className="text-gray-600 hover:text-primary transition-colors"
                 >
                   Become a Mentor
@@ -131,27 +130,12 @@ export function Footer() {
           </div>
 
           {/* Newsletter */}
-          <div>
+          <div id="newsletter">
             <h3 className="font-semibold text-lg mb-4">Stay Updated</h3>
             <p className="text-gray-600 mb-4">
               Subscribe to our newsletter for the latest updates.
             </p>
-            <form className="space-y-2">
-              <div className="flex">
-                <Input
-                  type="email"
-                  placeholder="Your email"
-                  className="rounded-r-none"
-                  aria-label="Email for newsletter"
-                />
-                <Button type="submit" className="rounded-l-none">
-                  <Mail className="h-4 w-4" />
-                </Button>
-              </div>
-              <p className="text-xs text-gray-500">
-                We respect your privacy. Unsubscribe at any time.
-              </p>
-            </form>
+            <NewsletterForm />
           </div>
         </div>
 
