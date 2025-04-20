@@ -3,8 +3,6 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-console.log("RAZORPAY_KEY_ID", process.env.RAZORPAY_KEY_ID);
-console.log("RAZORPAY_KEY_SECRET", process.env.RAZORPAY_KEY_SECRET);
 // Initialize Razorpay instance
 const razorpayInstance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || "",
@@ -54,5 +52,3 @@ export async function verifyPayment(
     return { success: false, error };
   }
 }
-
-// export const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || "";
