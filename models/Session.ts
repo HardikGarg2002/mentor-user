@@ -1,4 +1,5 @@
 import { ISession } from "@/types";
+import { SessionStatus } from "@/types/session";
 import mongoose, { Schema, type Model } from "mongoose";
 
 const SessionSchema = new Schema<ISession>(
@@ -18,12 +19,13 @@ const SessionSchema = new Schema<ISession>(
     timezone: { type: String, required: true, default: "UTC" },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled"],
-      default: "pending",
+      enum: Object.values(SessionStatus),
+      default: SessionStatus.RESERVED,
     },
     price: { type: Number, required: true },
     rating: { type: Number, min: 1, max: 5 },
     review: { type: String },
+    reservationExpires: { type: Date },
   },
   {
     timestamps: true,
