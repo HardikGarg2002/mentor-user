@@ -4,10 +4,18 @@ import connectDB from "@/lib/db";
 import Payment from "@/models/Payment";
 import Session from "@/models/Session";
 import { revalidatePath } from "next/cache";
+import { SessionStatus } from "@/types/session";
+import { PaymentStatus } from "@/types/payment";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+
+    // First run cleanup to ensure clean state
+    const { cleanupExpiredReservations } = await import(
+      "@/lib/utils/session-utils"
+    );
+    await cleanupExpiredReservations();
 
     // Verify webhook signature
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -22,6 +30,7 @@ export async function POST(req: NextRequest) {
     // Get the Razorpay signature from headers
     const razorpaySignature = req.headers.get("x-razorpay-signature");
     if (!razorpaySignature) {
+      console.error("Missing Razorpay signature in webhook request");
       return NextResponse.json({ error: "Missing signature" }, { status: 400 });
     }
 
@@ -32,11 +41,13 @@ export async function POST(req: NextRequest) {
       .digest("hex");
 
     if (expectedSignature !== razorpaySignature) {
+      console.error("Invalid Razorpay signature in webhook request");
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     // Process the webhook based on event type
     const { event, payload } = body;
+    console.log(`Processing Razorpay webhook event: ${event}`);
 
     await connectDB();
 
@@ -45,7 +56,6 @@ export async function POST(req: NextRequest) {
       const { entity } = payment;
 
       const razorpayPaymentId = entity.id;
-      const razorpayOrderId = entity.order_id;
 
       // Find the payment by transaction ID
       const paymentRecord = await Payment.findOne({
@@ -54,6 +64,7 @@ export async function POST(req: NextRequest) {
 
       if (paymentRecord) {
         // Payment already processed
+        console.log(`Payment ${razorpayPaymentId} already processed, skipping`);
         return NextResponse.json({ success: true });
       }
 
@@ -78,7 +89,10 @@ export async function POST(req: NextRequest) {
       }
 
       // Update or create payment record
-      const status = event === "payment.captured" ? "completed" : "pending";
+      const status =
+        event === "payment.captured"
+          ? PaymentStatus.COMPLETED
+          : PaymentStatus.PENDING;
 
       if (!paymentRecord) {
         // Create new payment record
@@ -95,10 +109,15 @@ export async function POST(req: NextRequest) {
         });
 
         await newPayment.save();
+        console.log(`Created new payment record for session ${receipt}`);
 
-        // Update session status
-        sessionRecord.status = "confirmed";
-        await sessionRecord.save();
+        // Only update session status to confirmed when payment is captured
+        if (event === "payment.captured") {
+          sessionRecord.status = SessionStatus.CONFIRMED;
+          sessionRecord.reservationExpires = undefined; // Clear reservation expiry
+          await sessionRecord.save();
+          console.log(`Updated session ${receipt} status to CONFIRMED`);
+        }
 
         // Revalidate relevant pages
         revalidatePath(`/dashboard/mentee/sessions/${receipt}`);
@@ -108,6 +127,23 @@ export async function POST(req: NextRequest) {
         // Update existing payment
         paymentRecord.status = status;
         await paymentRecord.save();
+        console.log(`Updated payment ${razorpayPaymentId} status to ${status}`);
+
+        // Update session status if payment is now captured
+        if (
+          event === "payment.captured" &&
+          sessionRecord.status === SessionStatus.RESERVED
+        ) {
+          sessionRecord.status = SessionStatus.CONFIRMED;
+          sessionRecord.reservationExpires = undefined; // Clear reservation expiry
+          await sessionRecord.save();
+          console.log(`Updated session ${receipt} status to CONFIRMED`);
+
+          // Revalidate relevant pages
+          revalidatePath(`/dashboard/mentee/sessions/${receipt}`);
+          revalidatePath(`/payment/success/${receipt}`);
+          revalidatePath(`/profile`);
+        }
       }
     } else if (event === "payment.failed") {
       const { payment } = payload;
@@ -119,8 +155,9 @@ export async function POST(req: NextRequest) {
       // Find the payment by transaction ID and update status
       const paymentRecord = await Payment.findOne({ transactionId: entity.id });
       if (paymentRecord) {
-        paymentRecord.status = "failed";
+        paymentRecord.status = PaymentStatus.FAILED;
         await paymentRecord.save();
+        console.log(`Updated payment ${entity.id} status to FAILED`);
       }
     }
 

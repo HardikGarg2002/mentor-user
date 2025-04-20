@@ -12,6 +12,7 @@ import User from "@/models/User";
 import Session from "@/models/Session";
 import Payment from "@/models/Payment";
 import { auth } from "@/lib/auth";
+import { SessionStatus } from "@/types/session";
 
 export default async function SessionDetailsPage({
   params,
@@ -122,7 +123,7 @@ export default async function SessionDetailsPage({
         </div>
 
         <div>
-          {sessionRecord.status === "pending" && !isPaid ? (
+          {sessionRecord.status === SessionStatus.RESERVED && !isPaid ? (
             <PaymentForm
               sessionId={id}
               amount={sessionRecord.price}

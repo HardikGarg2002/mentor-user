@@ -8,7 +8,8 @@ import Session from "@/models/Session";
 import Payment from "@/models/Payment";
 import { createOrder, verifyPayment } from "@/lib/razorpay";
 import mongoose from "mongoose";
-import { SessionStatus, PaymentStatus } from "@/types/session";
+import { SessionStatus } from "@/types/session";
+import { PaymentStatus } from "@/types/payment";
 
 export async function createPayment(sessionId: string, paymentMethod: string) {
   const session = await auth();
@@ -151,6 +152,12 @@ export async function createRazorpayOrder(sessionId: string) {
   try {
     await connectDB();
 
+    // Run cleanup before processing to ensure clean state
+    const { cleanupExpiredReservations } = await import(
+      "@/lib/utils/session-utils"
+    );
+    await cleanupExpiredReservations();
+
     // Get the current user
     const currentUser = await User.findOne({ email: session.user.email });
     if (!currentUser) {
@@ -170,10 +177,18 @@ export async function createRazorpayOrder(sessionId: string) {
     }
 
     // Check if session is already confirmed
-    if (sessionRecord.status === "confirmed") {
+    if (sessionRecord.status === SessionStatus.CONFIRMED) {
       return {
         success: false,
         error: "This session has already been confirmed",
+      };
+    }
+
+    // Check if session is in RESERVED status
+    if (sessionRecord.status !== SessionStatus.RESERVED) {
+      return {
+        success: false,
+        error: "This session is not reserved",
       };
     }
 
@@ -196,9 +211,6 @@ export async function createRazorpayOrder(sessionId: string) {
       };
     }
 
-    // Note: Session reservation is now handled separately by the reserveSession function
-    // in actions/reservation-actions.ts and is called before this function
-
     // Create a Razorpay order
     const orderResponse = await createOrder(
       sessionRecord.price,
@@ -220,6 +232,7 @@ export async function createRazorpayOrder(sessionId: string) {
       currency: "INR",
       mentorName:
         (await User.findById(sessionRecord.mentorId))?.name || "Mentor",
+      reservationExpires: sessionRecord.reservationExpires?.toISOString(),
     };
   } catch (error) {
     console.error("Error creating Razorpay order:", error);
@@ -281,6 +294,15 @@ export async function verifyRazorpayPayment(
       return {
         success: false,
         error: "Session not found",
+      };
+    }
+
+    // Check if session is in reserved status before proceeding
+    if (sessionRecord.status !== SessionStatus.RESERVED) {
+      // Session may be already confirmed or in another state
+      return {
+        success: false,
+        error: "Session is not in a valid state for payment",
       };
     }
 

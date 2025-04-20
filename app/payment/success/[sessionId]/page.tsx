@@ -1,4 +1,3 @@
-import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -14,11 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
-
-const metadata: Metadata = {
-  title: "Payment Success",
-  description: "Your payment has been successfully processed",
-};
 
 async function getSessionData(sessionId: string) {
   try {
