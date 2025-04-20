@@ -1,4 +1,5 @@
 import { IPayment } from "@/types/payment";
+import { PaymentStatus } from "@/types/session";
 import mongoose, { Schema, type Model } from "mongoose";
 
 const PaymentSchema = new Schema<IPayment>(
@@ -11,8 +12,8 @@ const PaymentSchema = new Schema<IPayment>(
     paymentMethod: { type: String, required: true },
     status: {
       type: String,
-      enum: ["pending", "completed", "failed", "refunded"],
-      default: "pending",
+      enum: Object.values(PaymentStatus),
+      default: PaymentStatus.PENDING,
     },
     transactionId: { type: String },
     paymentDate: { type: Date, default: Date.now },

@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SessionBooking from "@/components/booking/session-booking";
-import SessionBooking2 from "@/components/booking/session-booking2";
 import { StartChatButton } from "@/components/chat/start-chat-button";
 import { getMentorByUserId } from "@/lib/mentors";
 import { notFound } from "next/navigation";
@@ -221,7 +220,6 @@ export default async function MentorProfile({
             <CardContent className="space-y-6">
               <div className="flex flex-col gap-4">
                 <SessionBooking mentor={bookingMentorData} />
-                <SessionBooking2 mentor={bookingMentorData} />
               </div>
               <div>
                 <h3 className="font-medium mb-3 flex items-center">

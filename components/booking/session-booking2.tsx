@@ -31,6 +31,7 @@ import {
   WeeklyAvailabilitySlot,
   BookedSlot,
   TimeSlot,
+  DURATION_OPTIONS,
   timeToMinutes,
   SessionType,
   MentorPricing,
@@ -284,6 +285,7 @@ export default function SessionBooking2({ mentor }: SessionBookingProps) {
 
   // Handle booking session
   const handleBookSession = async () => {
+    console.log("handleBookSession");
     if (!session) {
       router.push("/auth/signin");
       return;
@@ -299,6 +301,7 @@ export default function SessionBooking2({ mentor }: SessionBookingProps) {
 
     // Get the selected slots
     const selectedSlots = getSelectedSlots();
+    console.log("selectedSlots", selectedSlots);
 
     // Make sure they are consecutive
     if (!areConsecutiveSlots(selectedSlots)) {
@@ -306,6 +309,7 @@ export default function SessionBooking2({ mentor }: SessionBookingProps) {
         title: "Invalid Selection",
         description: "Please select consecutive time slots",
       });
+      console.log("not consecutive");
       return;
     }
 
@@ -342,12 +346,13 @@ export default function SessionBooking2({ mentor }: SessionBookingProps) {
 
         if (result.error) {
           toast({ title: "Booking Failed", description: result.error });
+          console.log("Booking failed", result.error);
         } else {
           toast({
             title: "Booking Successful",
             description: "Your session has been booked",
           });
-          router.push("/dashboard/mentee");
+          router.push(`/dashboard/mentee/sessions/${result.sessionId}`);
           setIsDialogOpen(false);
         }
       } catch (error) {

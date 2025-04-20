@@ -191,7 +191,6 @@ export async function getMentorWeeklyAvailabilityById({
     const timeSlots = await MentorWeeklyAvailability.find({
       mentorId: mentorId,
     }).sort({ dayOfWeek: 1, startTime: 1 });
-    console.log("Time slots:", timeSlots);
 
     return timeSlots.map((slot) => ({
       id: slot._id.toString(),
