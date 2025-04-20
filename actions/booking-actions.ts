@@ -8,6 +8,7 @@ import User from "@/models/User";
 import Mentor from "@/models/Mentor";
 import MentorWeeklyAvailability from "@/models/Availability";
 import { z } from "zod";
+import { SessionStatus } from "@/types/session";
 
 // Validation schema for bookings
 const bookingSchema = z.object({
@@ -17,6 +18,7 @@ const bookingSchema = z.object({
   endTime: z.string(), // HH:MM
   availabilityId: z.string(), // ID of the weekly availability slot
   meeting_type: z.enum(["chat", "video", "call"]),
+
   duration: z.number().min(30).max(240), // in minutes
   timezone: z.string(),
 });
@@ -68,36 +70,17 @@ export async function bookSession(formData: BookingFormData) {
       };
     }
 
-    // Check if the requested slot is already booked
-    const existingBooking = await Session.findOne({
-      mentorId: mentor._id,
-      date: validatedData.date,
-      $or: [
-        // Check if any existing booking overlaps with the new one
-        {
-          $and: [
-            { startTime: { $lte: validatedData.startTime } },
-            { endTime: { $gt: validatedData.startTime } },
-          ],
-        },
-        {
-          $and: [
-            { startTime: { $lt: validatedData.endTime } },
-            { endTime: { $gte: validatedData.endTime } },
-          ],
-        },
-        {
-          $and: [
-            { startTime: { $gte: validatedData.startTime } },
-            { endTime: { $lte: validatedData.endTime } },
-          ],
-        },
-      ],
-    });
+    // Check if the slot is actually available (including reservations)
+    const { isSessionAvailable } = await import("@/lib/utils/session-utils");
+    const slotInfo = `${validatedData.mentorId}_${validatedData.date}_${validatedData.startTime}_${validatedData.endTime}`;
+    const availabilityCheck = await isSessionAvailable(slotInfo);
 
-    if (existingBooking) {
+    if (!availabilityCheck.available) {
       return {
-        error: "This time slot is already booked",
+        error:
+          availabilityCheck.reason === "Session reserved"
+            ? "This slot is temporarily reserved by another user. Please try again in a few minutes or select a different time."
+            : "This slot is no longer available.",
       };
     }
 
@@ -113,7 +96,10 @@ export async function bookSession(formData: BookingFormData) {
     const hourlyRate = mentorProfile.pricing[validatedData.meeting_type];
     const price = (validatedData.duration / 60) * hourlyRate;
 
-    // Create the booking record
+    // Create the booking record with an expiration time
+    const reservationExpires = new Date();
+    reservationExpires.setMinutes(reservationExpires.getMinutes() + 30); // 30-minute initial reservation
+
     const newSession = new Session({
       mentorId: mentor._id,
       menteeId: mentee._id,
@@ -124,7 +110,8 @@ export async function bookSession(formData: BookingFormData) {
       duration: validatedData.duration,
       timezone: validatedData.timezone,
       price: price,
-      status: "pending",
+      status: SessionStatus.RESERVED,
+      reservationExpires: reservationExpires,
     });
 
     await newSession.save();
@@ -262,12 +249,29 @@ export async function getMentorBookedSlots(mentorId: string) {
   try {
     await connectDB();
 
-    const sessions = await Session.find({
+    // First cleanup any expired reservations
+    const { cleanupExpiredReservations } = await import(
+      "@/lib/utils/session-utils"
+    );
+    await cleanupExpiredReservations();
+
+    // Find both confirmed sessions and reserved sessions
+    const confirmedSessions = await Session.find({
       mentorId: mentorId,
       status: { $in: ["scheduled", "confirmed"] },
     }).select("date startTime endTime");
 
-    return sessions.map((s) => ({
+    const now = new Date();
+    const reservedSessions = await Session.find({
+      mentorId: mentorId,
+      status: "reserved",
+      reservationExpires: { $gt: now },
+    }).select("date startTime endTime");
+
+    // Combine both types of sessions
+    const allBookedSessions = [...confirmedSessions, ...reservedSessions];
+
+    return allBookedSessions.map((s) => ({
       date: s.date,
       startTime: s.startTime,
       endTime: s.endTime,

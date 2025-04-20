@@ -38,8 +38,7 @@ export async function POST(req: NextRequest) {
       email,
       password: hashedPassword,
       role: "user",
-      // User is not verified by default
-      emailVerified: null,
+      emailVerified: false,
     });
 
     await newUser.save();

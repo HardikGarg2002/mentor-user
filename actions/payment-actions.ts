@@ -6,6 +6,9 @@ import connectDB from "@/lib/db";
 import User from "@/models/User";
 import Session from "@/models/Session";
 import Payment from "@/models/Payment";
+import { createOrder, verifyPayment } from "@/lib/razorpay";
+import mongoose from "mongoose";
+import { SessionStatus, PaymentStatus } from "@/types/session";
 
 export async function createPayment(sessionId: string, paymentMethod: string) {
   const session = await auth();
@@ -63,7 +66,7 @@ export async function createPayment(sessionId: string, paymentMethod: string) {
       recipientId: sessionRecord.mentorId,
       amount: sessionRecord.price,
       paymentMethod,
-      status: "completed", // In a real app, this would be set after payment processing
+      status: PaymentStatus.COMPLETED, // In a real app, this would be set after payment processing
       transactionId: `txn_${Math.random().toString(36).substring(2, 15)}`, // Mock transaction ID
       paymentDate: new Date(),
     });
@@ -71,7 +74,7 @@ export async function createPayment(sessionId: string, paymentMethod: string) {
     await payment.save();
 
     // Update session status to confirmed
-    sessionRecord.status = "confirmed";
+    sessionRecord.status = SessionStatus.CONFIRMED;
     await sessionRecord.save();
 
     revalidatePath(`/dashboard/mentee/sessions/${sessionId}`);
@@ -133,5 +136,186 @@ export async function getPaymentsByUser() {
   } catch (error) {
     console.error("Error fetching payments:", error);
     return [];
+  }
+}
+
+export async function createRazorpayOrder(sessionId: string) {
+  const session = await auth();
+  if (!session || !session.user) {
+    return {
+      success: false,
+      error: "Unauthorized",
+    };
+  }
+
+  try {
+    await connectDB();
+
+    // Get the current user
+    const currentUser = await User.findOne({ email: session.user.email });
+    if (!currentUser) {
+      return {
+        success: false,
+        error: "User not found",
+      };
+    }
+
+    // Find the session
+    const sessionRecord = await Session.findById(sessionId);
+    if (!sessionRecord) {
+      return {
+        success: false,
+        error: "Session not found",
+      };
+    }
+
+    // Check if session is already confirmed
+    if (sessionRecord.status === "confirmed") {
+      return {
+        success: false,
+        error: "This session has already been confirmed",
+      };
+    }
+
+    // Check if user is the mentee for this session
+    if (!sessionRecord.menteeId.equals(currentUser._id)) {
+      return {
+        success: false,
+        error: "You are not authorized to make a payment for this session",
+      };
+    }
+
+    // Check if payment already exists
+    const existingPayment = await Payment.findOne({
+      sessionId: sessionRecord._id,
+    });
+    if (existingPayment) {
+      return {
+        success: false,
+        error: "Payment already exists for this session",
+      };
+    }
+
+    // Note: Session reservation is now handled separately by the reserveSession function
+    // in actions/reservation-actions.ts and is called before this function
+
+    // Create a Razorpay order
+    const orderResponse = await createOrder(
+      sessionRecord.price,
+      "INR",
+      sessionId
+    );
+
+    if (!orderResponse.success) {
+      return {
+        success: false,
+        error: "Failed to create payment order",
+      };
+    }
+
+    return {
+      success: true,
+      order: orderResponse.order,
+      amount: sessionRecord.price,
+      currency: "INR",
+      mentorName:
+        (await User.findById(sessionRecord.mentorId))?.name || "Mentor",
+    };
+  } catch (error) {
+    console.error("Error creating Razorpay order:", error);
+    return {
+      success: false,
+      error: "Failed to create payment order",
+    };
+  }
+}
+
+export async function verifyRazorpayPayment(
+  sessionId: string,
+  paymentId: string,
+  orderId: string,
+  signature: string
+) {
+  const session = await auth();
+  if (!session || !session.user) {
+    return {
+      success: false,
+      error: "Unauthorized",
+    };
+  }
+
+  try {
+    await connectDB();
+
+    // Run cleanup before processing to ensure clean state
+    const { cleanupExpiredReservations } = await import(
+      "@/lib/utils/session-utils"
+    );
+    await cleanupExpiredReservations();
+
+    // Verify the payment signature
+    const verificationResult = await verifyPayment(
+      orderId,
+      paymentId,
+      signature
+    );
+    if (!verificationResult.success) {
+      return {
+        success: false,
+        error: "Payment verification failed",
+      };
+    }
+
+    // Get the current user
+    const currentUser = await User.findOne({ email: session.user.email });
+    if (!currentUser) {
+      return {
+        success: false,
+        error: "User not found",
+      };
+    }
+
+    // Find the session
+    const sessionRecord = await Session.findById(sessionId);
+    if (!sessionRecord) {
+      return {
+        success: false,
+        error: "Session not found",
+      };
+    }
+
+    // Create a new payment
+    const payment = new Payment({
+      sessionId: sessionRecord._id,
+      userId: currentUser._id,
+      recipientId: sessionRecord.mentorId,
+      amount: sessionRecord.price,
+      currency: "INR",
+      paymentMethod: "razorpay",
+      status: PaymentStatus.COMPLETED,
+      transactionId: paymentId,
+      paymentDate: new Date(),
+    });
+
+    await payment.save();
+
+    // Update session status to confirmed and clear reservation
+    sessionRecord.status = SessionStatus.CONFIRMED;
+    sessionRecord.reservationExpires = undefined; // Clear reservation expiry
+    await sessionRecord.save();
+
+    revalidatePath(`/dashboard/mentee/sessions/${sessionId}`);
+    revalidatePath(`/profile`);
+
+    return {
+      success: true,
+      paymentId: payment._id.toString(),
+    };
+  } catch (error) {
+    console.error("Error verifying Razorpay payment:", error);
+    return {
+      success: false,
+      error: "Failed to verify payment",
+    };
   }
 }
