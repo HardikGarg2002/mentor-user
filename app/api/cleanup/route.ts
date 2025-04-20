@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Cleanup completed: ${result.deletedCount} sessions deleted, ${result.extendedCount} sessions extended`,
+      message: `Cleanup completed: ${result.deletedCount} sessions deleted`,
       ...result,
     });
   } catch (error) {

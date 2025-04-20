@@ -23,9 +23,7 @@ async function runCleanup() {
     const result = await cleanupExpiredReservations();
 
     if (result.success) {
-      console.log(
-        `Cleanup complete: ${result.deletedCount} sessions deleted, ${result.resetCount} sessions reset`
-      );
+      console.log(`Cleanup complete: ${result.deletedCount} sessions deleted`);
     } else {
       console.error("Cleanup failed:", result.error);
     }
