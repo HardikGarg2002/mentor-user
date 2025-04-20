@@ -39,6 +39,12 @@ export async function bookSession(formData: BookingFormData) {
   try {
     await connectDB();
 
+    // Run cleanup before booking to ensure clean state
+    const { cleanupExpiredReservations } = await import(
+      "@/lib/utils/session-utils"
+    );
+    await cleanupExpiredReservations();
+
     // Validate booking data
     const validatedData = bookingSchema.parse(formData);
 
@@ -78,7 +84,7 @@ export async function bookSession(formData: BookingFormData) {
     if (!availabilityCheck.available) {
       return {
         error:
-          availabilityCheck.reason === "Session reserved"
+          availabilityCheck.reason === "This time slot is temporarily reserved"
             ? "This slot is temporarily reserved by another user. Please try again in a few minutes or select a different time."
             : "This slot is no longer available.",
       };
@@ -96,9 +102,9 @@ export async function bookSession(formData: BookingFormData) {
     const hourlyRate = mentorProfile.pricing[validatedData.meeting_type];
     const price = (validatedData.duration / 60) * hourlyRate;
 
-    // Create the booking record with an expiration time
+    // Create the booking record with an expiration time (30 minutes)
     const reservationExpires = new Date();
-    reservationExpires.setMinutes(reservationExpires.getMinutes() + 30); // 30-minute initial reservation
+    reservationExpires.setMinutes(reservationExpires.getMinutes() + 20);
 
     const newSession = new Session({
       mentorId: mentor._id,
@@ -258,13 +264,13 @@ export async function getMentorBookedSlots(mentorId: string) {
     // Find both confirmed sessions and reserved sessions
     const confirmedSessions = await Session.find({
       mentorId: mentorId,
-      status: { $in: ["scheduled", "confirmed"] },
+      status: SessionStatus.CONFIRMED,
     }).select("date startTime endTime");
 
     const now = new Date();
     const reservedSessions = await Session.find({
       mentorId: mentorId,
-      status: "reserved",
+      status: SessionStatus.RESERVED,
       reservationExpires: { $gt: now },
     }).select("date startTime endTime");
 
