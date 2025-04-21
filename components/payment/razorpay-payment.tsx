@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   createRazorpayOrder,
   verifyRazorpayPayment,
@@ -64,8 +64,7 @@ export function RazorpayPayment({ sessionId }: RazorpayPaymentProps) {
           if (timerIntervalRef.current) {
             clearInterval(timerIntervalRef.current);
           }
-          toast({
-            title: "Reservation Expired",
+          toast.error("Reservation Expired", {
             description:
               "Your session reservation has expired. Please try booking again.",
           });
@@ -95,8 +94,7 @@ export function RazorpayPayment({ sessionId }: RazorpayPaymentProps) {
             reservationExpires: response.reservationExpires,
           });
         } else {
-          toast({
-            title: "Error",
+          toast.error("Error", {
             description: response.error || "Failed to create payment order",
           });
           if (
@@ -108,8 +106,7 @@ export function RazorpayPayment({ sessionId }: RazorpayPaymentProps) {
         }
       } catch (error) {
         console.error("Error fetching order details:", error);
-        toast({
-          title: "Error",
+        toast.error("Error", {
           description: "An unexpected error occurred. Please try again.",
         });
       } finally {
@@ -151,15 +148,13 @@ export function RazorpayPayment({ sessionId }: RazorpayPaymentProps) {
           );
 
           if (verificationResponse.success) {
-            toast({
-              title: "Payment Successful",
+            toast.success("Payment Successful", {
               description: `Your payment of ${orderDetails.currency} ${orderDetails.amount} has been processed.`,
             });
             router.push(`/payment/success/${sessionId}`);
             router.refresh();
           } else {
-            toast({
-              title: "Payment Verification Failed",
+            toast.error("Payment Verification Failed", {
               description:
                 verificationResponse.error ||
                 "There was an error verifying your payment.",
@@ -167,8 +162,7 @@ export function RazorpayPayment({ sessionId }: RazorpayPaymentProps) {
           }
         } catch (error) {
           console.error("Payment verification error:", error);
-          toast({
-            title: "Payment Error",
+          toast.error("Payment Error", {
             description:
               "An unexpected error occurred during payment verification.",
           });

@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Trash2, PlusCircle } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 // Days of the week
 const DAYS_OF_WEEK = [
@@ -72,8 +72,7 @@ export function WeeklySchedule({
     );
 
     if (availableDays.length === 0) {
-      toast({
-        title: "All days added",
+      toast.error("All days added", {
         description: "You've already added all days of the week.",
       });
       return;
@@ -153,8 +152,7 @@ export function WeeklySchedule({
     // Validate the schedule
     for (const day of schedule) {
       if (day.timeSlots.length === 0) {
-        toast({
-          title: "Validation Error",
+        toast.error("Validation Error", {
           description: `${
             DAYS_OF_WEEK.find((d) => d.value === day.dayOfWeek)?.label
           } has no time slots.`,
@@ -164,8 +162,7 @@ export function WeeklySchedule({
 
       for (const slot of day.timeSlots) {
         if (!slot.startTime || !slot.endTime) {
-          toast({
-            title: "Validation Error",
+          toast.error("Validation Error", {
             description: "All time slots must have start and end times.",
           });
           return;
@@ -173,8 +170,7 @@ export function WeeklySchedule({
 
         // Check if start time is before end time
         if (slot.startTime >= slot.endTime) {
-          toast({
-            title: "Validation Error",
+          toast.error("Validation Error", {
             description: "End time must be after start time.",
           });
           return;
@@ -185,14 +181,12 @@ export function WeeklySchedule({
     setIsSaving(true);
     try {
       await onSave(schedule);
-      toast({
-        title: "Success",
+      toast.success("Success", {
         description: "Your availability schedule has been saved.",
       });
     } catch (error) {
       console.error("Error saving schedule:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Failed to save your availability schedule.",
       });
     } finally {

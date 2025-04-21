@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { bookSession, getMentorBookedSlots } from "@/actions/booking-actions";
 import { getMentorWeeklyAvailabilityById } from "@/actions/availability-actions";
 import SessionTypeSelector from "./SessionTypeSelector";
@@ -219,8 +219,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
         setBookedSlots(formattedBookedSlots);
       } catch (error) {
         console.error("Error fetching mentor data:", error);
-        toast({
-          title: "Error",
+        toast.error("Error", {
           description: "Failed to load mentor's availability",
         });
       } finally {
@@ -271,8 +270,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
 
         // Check if the new selection forms consecutive slots
         if (!areConsecutiveSlots(selectedSlots)) {
-          toast({
-            title: "Invalid Selection",
+          toast.warning("Invalid Selection", {
             description: "Please select consecutive time slots",
           });
           return prev;
@@ -285,15 +283,13 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
 
   // Handle booking session
   const handleBookSession = async () => {
-    console.log("handleBookSession");
     if (!session) {
       router.push("/auth/signin");
       return;
     }
 
     if (!selectedDate || selectedSlotIds.length === 0) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Please select at least one time slot",
       });
       return;
@@ -301,15 +297,12 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
 
     // Get the selected slots
     const selectedSlots = getSelectedSlots();
-    console.log("selectedSlots", selectedSlots);
 
     // Make sure they are consecutive
     if (!areConsecutiveSlots(selectedSlots)) {
-      toast({
-        title: "Invalid Selection",
+      toast.warning("Invalid Selection", {
         description: "Please select consecutive time slots",
       });
-      console.log("not consecutive");
       return;
     }
 
@@ -337,8 +330,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
 
     if (!checkSession.available) {
       // Show an error message
-      toast({
-        title: "Session Unavailable",
+      toast.error("Session Unavailable", {
         description:
           checkSession.reason === "Session reserved"
             ? "This slot is currently reserved by another user. Please try again later or select a different time."
@@ -374,11 +366,12 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
         });
 
         if (result.error) {
-          toast({ title: "Booking Failed", description: result.error });
+          toast.error("Booking Failed", {
+            description: result.error,
+          });
           console.log("Booking failed", result.error);
         } else {
-          toast({
-            title: "Booking Successful",
+          toast.success("Booking Successful", {
             description: "Your session has been booked",
           });
           router.push(`/dashboard/mentee/sessions/${result.sessionId}`);
@@ -386,8 +379,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
         }
       } catch (error) {
         console.error("Booking error:", error);
-        toast({
-          title: "Booking Failed",
+        toast.error("Booking Failed", {
           description: "There was an error booking your session",
         });
       }

@@ -6,6 +6,7 @@ import { Inter } from "next/font/google";
 import { SessionProvider } from "@/providers/session-provider";
 import { MainNav } from "@/components/main-nav";
 import { Footer } from "@/components/home-page/footer";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,6 +30,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          <Toaster position="top-right" richColors />
           {/* </ThemeProvider> */}
         </SessionProvider>
       </body>
