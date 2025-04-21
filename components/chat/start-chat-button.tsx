@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getOrCreateChat } from "@/actions/chat-actions";
 import { useSession } from "next-auth/react";
 
@@ -39,16 +39,14 @@ export function StartChatButton({
 
         router.push(`${basePath}/${result.chatId}`);
       } else {
-        toast({
-          title: "Error",
+        toast.error("Error", {
           description: result.error || "Failed to start chat",
         });
       }
     } catch (error) {
       console.error("Error starting chat:", error);
-      toast({
-        title: "Error",
-        description: "Failed to start chat",
+      toast.error("Error", {
+        description: "An unexpected error occurred",
       });
     } finally {
       setLoading(false);
