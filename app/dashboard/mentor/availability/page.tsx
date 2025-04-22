@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState, useEffect } from "react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   addTimeSlot,
   deleteTimeSlot,
@@ -130,10 +130,7 @@ export default function MentorAvailability() {
       setTimeSlots(slots);
     } catch (error) {
       console.error("Error fetching time slots:", error);
-      toast({
-        title: "Error",
-        description: "Could not load your availability settings",
-      });
+      toast.error("Error fetching time slots");
     }
   };
 
@@ -170,10 +167,7 @@ export default function MentorAvailability() {
     e.preventDefault();
 
     if (!selectedDay || !startTime || !endTime) {
-      toast({
-        title: "Error",
-        description: "Please select day, start time and end time",
-      });
+      toast.error("Please select day, start time and end time");
       return;
     }
 
@@ -188,27 +182,20 @@ export default function MentorAvailability() {
       });
 
       if (result.success) {
-        toast({
-          title: "Success",
-          description: "Time slot added successfully",
-        });
+        toast.success("Time slot added successfully");
+
         setIsDialogOpen(false);
         setSelectedDay("");
         setStartTime("");
         setEndTime("");
         fetchTimeSlots();
       } else {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to add time slot",
-        });
+        toast.error("Failed to add time slot");
+        console.log("error occured", result.error);
       }
     } catch (error) {
       console.error("Error adding time slot:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-      });
+      toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -221,23 +208,16 @@ export default function MentorAvailability() {
         const result = await deleteTimeSlot(id);
 
         if (result.success) {
-          toast({
-            title: "Success",
-            description: "Time slot deleted successfully",
-          });
+          toast.error("Time slot deleted successfully");
+
           fetchTimeSlots();
         } else {
-          toast({
-            title: "Error",
-            description: result.error || "Failed to delete time slot",
-          });
+          toast.error("Failed to delete time slot");
+          console.log("failed to delete slot, Error: ", result.error);
         }
       } catch (error) {
         console.error("Error deleting time slot:", error);
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred",
-        });
+        toast.error("An unexpected error occurred");
       }
     }
   };
