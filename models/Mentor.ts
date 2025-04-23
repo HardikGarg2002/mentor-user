@@ -22,9 +22,9 @@ const MentorSchema = new Schema<IMentor>(
       },
     ],
     pricing: {
-      chat: { type: Number, required: true },
-      video: { type: Number, required: true },
-      call: { type: Number, required: true },
+      chat: { type: Number, required: true, min: 0 },
+      video: { type: Number, required: true, min: 0 },
+      call: { type: Number, required: true, min: 0 },
     },
     rating: { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 },
