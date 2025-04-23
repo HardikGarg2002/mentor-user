@@ -64,27 +64,29 @@ export interface MentorFilters {
 }
 
 export interface IMentor extends Document {
-  userId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId | string;
   title: string;
   about: string;
   specialties: string[];
-  experience: {
-    company: string;
-    role: string;
-    period: string;
-  }[];
-  education: {
-    institution: string;
-    degree: string;
-    year: string;
-  }[];
-  pricing: {
-    chat: number;
-    video: number;
-    call: number;
-  };
+  experience: MentorExperience[];
+  education: MentorEducation[];
+  pricing: MentorPricing;
   rating: number;
   reviewCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  image?: string;
+  emailVerified: boolean;
+  role: string;
+}
+
+export interface MentorProfilePageProps {
+  user: User;
+  mentorProfile: IMentor;
 }
