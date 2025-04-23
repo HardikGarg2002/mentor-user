@@ -53,9 +53,9 @@ export function MentorApplicationForm() {
       setFormData({
         ...formData,
         [parent]: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ...((formData[parent as keyof MentorFormData] as Record<
             string,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             any
           >) || {}),
           [child]: value,
