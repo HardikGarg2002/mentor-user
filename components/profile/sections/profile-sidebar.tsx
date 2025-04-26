@@ -5,7 +5,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, MessageSquare, Phone, Star, Video } from "lucide-react";
 import { type MentorProfile } from "@/types/mentor";
 import { AvatarUpload } from "../avatar-upload";
-import { updateMentorProfileImage } from "@/actions/mentor-actions";
+// import { updateMentorProfileImage } from "@/actions/mentor-actions";
 
 interface ProfileSidebarProps {
   mentorProfile: MentorProfile;
