@@ -21,7 +21,7 @@ export function MentorProfilePage({ mentorProfile }: MentorProfilePageProps) {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center mb-6">
         <Button variant="ghost" size="sm" asChild className="mr-4">
-          <Link href="/dashboard">
+          <Link href="/dashboard/mentor">
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back to Dashboard
           </Link>

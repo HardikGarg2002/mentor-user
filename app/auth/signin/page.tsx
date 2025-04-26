@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export default function SignIn() {
   const router = useRouter();
@@ -186,9 +187,8 @@ export default function SignIn() {
                   Forgot password?
                 </Link>
               </div>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
