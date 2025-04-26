@@ -20,11 +20,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { bookSession, getMentorBookedSlots } from "@/actions/booking-actions";
 import { getMentorWeeklyAvailabilityById } from "@/actions/availability-actions";
 import SessionTypeSelector from "./SessionTypeSelector";
 import { format, getDay, parseISO } from "date-fns";
+import { CalendarIcon, Clock, Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 // Import types from the central types system
 import {
@@ -36,6 +40,26 @@ import {
   MentorPricing,
 } from "@/types";
 import { isSessionAvailable } from "@/lib/utils/session-utils";
+
+// Custom CSS for scrollbars
+const scrollbarStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(var(--primary), 0.2);
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(var(--primary), 0.3);
+  }
+`;
 
 // Use a more specific type with only the required properties
 type BookingMentorData = {
@@ -152,6 +176,38 @@ function areConsecutiveSlots(slots: TimeSlot[]): boolean {
   return true;
 }
 
+// Group time slots by time period
+const groupSlotsByTimePeriod = (slots: TimeSlot[]) => {
+  // Sort by start time
+  const sortedSlots = [...slots].sort(
+    (a, b) => timeToMinutes(a.rawStartTime) - timeToMinutes(b.rawStartTime)
+  );
+
+  const groups: { [key: string]: TimeSlot[] } = {
+    morning: [],
+    afternoon: [],
+    evening: [],
+    night: [],
+  };
+
+  sortedSlots.forEach((slot) => {
+    const minutes = timeToMinutes(slot.rawStartTime);
+
+    if (minutes >= 6 * 60 && minutes < 12 * 60) {
+      groups["morning"].push(slot);
+    } else if (minutes >= 12 * 60 && minutes < 17 * 60) {
+      groups["afternoon"].push(slot);
+    } else if (minutes >= 17 * 60 && minutes < 22 * 60) {
+      groups["evening"].push(slot);
+    } else {
+      groups["night"].push(slot);
+    }
+  });
+
+  // Filter out empty groups
+  return Object.entries(groups).filter(([_, slots]) => slots.length > 0);
+};
+
 export default function SessionBooking({ mentor }: SessionBookingProps) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -170,6 +226,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
   const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTimeTab, setActiveTimeTab] = useState<string>("morning");
 
   // Allow multiple slot selection
   const [selectedSlotIds, setSelectedSlotIds] = useState<string[]>([]);
@@ -241,6 +298,14 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
       setAvailableSlots(slots);
       // Clear selected slots when date changes
       setSelectedSlotIds([]);
+
+      // Set initial active tab based on available slots
+      const groups = groupSlotsByTimePeriod(slots);
+      if (groups.length > 0) {
+        setActiveTimeTab(groups[0][0]);
+      } else {
+        setActiveTimeTab("morning");
+      }
     } else {
       setAvailableSlots([]);
       setSelectedSlotIds([]);
@@ -386,8 +451,21 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
     });
   };
 
+  // Create time period display names
+  const timePeriodNames = {
+    morning: "Morning (6AM-12PM)",
+    afternoon: "Afternoon (12PM-5PM)",
+    evening: "Evening (5PM-10PM)",
+    night: "Night (10PM-6AM)",
+  };
+
   return (
     <div className="space-y-4">
+      {/* Custom scrollbar styles */}
+      <style jsx global>
+        {scrollbarStyles}
+      </style>
+
       {/* Session Type Selection */}
       <SessionTypeSelector
         selectedType={selectedType}
@@ -400,120 +478,196 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
         <DialogTrigger asChild>
           <Button className="w-full">Schedule Session</Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Book a Session with {mentor.name}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <span>Book a Session with {mentor.name}</span>
+            </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
+          <div className="space-y-6 py-4">
             {/* Selected Type */}
-            <div className="flex items-center gap-2">
-              <span className="font-medium">
-                {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}{" "}
-                Session
-              </span>
-              <span className="font-semibold ml-auto">
-                ${mentor.pricing[selectedType]}/hr
-              </span>
-            </div>
+            <Card className="bg-muted/50">
+              <CardContent className="p-4 flex items-center justify-between">
+                <span className="font-medium flex items-center gap-2">
+                  {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}{" "}
+                  Session
+                </span>
+                <Badge className="px-2 py-1">
+                  ${mentor.pricing[selectedType]}/hr
+                </Badge>
+              </CardContent>
+            </Card>
 
             {/* Date Selection */}
-            <div className="space-y-2 flex items-center justify-between px-1">
-              <label className="text-sm font-medium">Select Date</label>
-              <DatePicker date={selectedDate} setDate={setDate} />
+            <div className="space-y-3 flex items-baseline justify-between">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+                <h3 className="text-base font-medium">Select Date</h3>
+              </div>
+              <DatePicker
+                date={selectedDate}
+                setDate={setDate}
+                className="w-full"
+              />
             </div>
 
             {/* Time Slot Selection */}
             {selectedDate && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Select Time Slots ({selectedSlotIds.length} selected)
-                </label>
-                <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-3">
-                  <p className="text-sm text-amber-800 font-medium">
-                    Selection Guide:
-                  </p>
-                  <ul className="text-xs text-amber-700 mt-1 list-disc pl-4 space-y-1">
-                    <li>
-                      Select consecutive 30-minute slots to build your session
-                    </li>
-                    <li>
-                      You can select multiple slots, but they must be in
-                      sequence
-                    </li>
-                  </ul>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-muted-foreground" />
+                  <h3 className="text-base font-medium">
+                    Select Time Slots
+                    {selectedSlotIds.length > 0 && (
+                      <span className="ml-2 text-sm font-normal text-muted-foreground">
+                        ({selectedSlotIds.length} selected)
+                      </span>
+                    )}
+                  </h3>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {availableSlots.map((slot) => {
-                    // Check if this slot is adjacent to any selected slot
-                    const isAdjacentToSelected = () => {
-                      if (selectedSlotIds.length === 0) return true;
 
-                      const selectedSlots = getSelectedSlots();
-                      return selectedSlots.some(
-                        (selectedSlot) =>
-                          areSlotsAdjacent(selectedSlot, slot) ||
-                          areSlotsAdjacent(slot, selectedSlot)
-                      );
-                    };
+                <Card className="border border-amber-200 bg-amber-50">
+                  <CardContent className="p-3 flex gap-2">
+                    <Info className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-amber-800 font-medium">
+                        Selection Guide:
+                      </p>
+                      <ul className="text-xs text-amber-700 mt-1 list-disc pl-4 space-y-1">
+                        <li>Select consecutive 30-minute slots</li>
+                        <li>Slots must be in sequence</li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                    const isSelected = selectedSlotIds.includes(slot.id);
-                    const isAdjacent = isAdjacentToSelected();
-
-                    return (
-                      <div
-                        key={slot.id}
-                        onClick={() =>
-                          !slot.isBooked && handleSlotSelection(slot)
-                        }
-                        className={`
-                          p-2 border rounded-md text-center cursor-pointer text-sm relative
-                          ${
-                            slot.isBooked
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : isSelected
-                              ? "ring-2 ring-primary bg-primary/10 font-medium"
-                              : isAdjacent && !isSelected
-                              ? "border-primary/50 border-dashed"
-                              : "hover:bg-gray-50"
-                          }
-                        `}
+                {availableSlots.length > 0 ? (
+                  <div className="border rounded-lg overflow-hidden">
+                    <div>
+                      <Tabs
+                        value={activeTimeTab}
+                        onValueChange={setActiveTimeTab}
+                        className="w-full"
                       >
-                        {slot.startTime} - {slot.endTime}
-                        {isSelected && (
-                          <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                            {selectedSlotIds.indexOf(slot.id) + 1}
-                          </span>
+                        <TabsList className="w-full grid-cols-4 grid border-b rounded-none bg-muted/30">
+                          {groupSlotsByTimePeriod(availableSlots).map(
+                            ([period]) => (
+                              <TabsTrigger
+                                key={period}
+                                value={period}
+                                className="text-xs font-medium"
+                              >
+                                {period.charAt(0).toUpperCase() +
+                                  period.slice(1)}
+                              </TabsTrigger>
+                            )
+                          )}
+                        </TabsList>
+
+                        {groupSlotsByTimePeriod(availableSlots).map(
+                          ([period, slots]) => (
+                            <TabsContent
+                              key={period}
+                              value={period}
+                              className="pt-2 px-0 mt-0"
+                            >
+                              <div className="px-3 py-1 text-xs font-medium text-muted-foreground sticky top-0 bg-background z-10 border-b">
+                                {
+                                  timePeriodNames[
+                                    period as keyof typeof timePeriodNames
+                                  ]
+                                }
+                              </div>
+                              <div
+                                className="grid grid-cols-2 gap-2 p-3 max-h-[225px] overflow-y-auto custom-scrollbar"
+                                style={{ scrollbarWidth: "thin" }}
+                              >
+                                {slots.map((slot) => {
+                                  const isSelected = selectedSlotIds.includes(
+                                    slot.id
+                                  );
+                                  const isAdjacent = getSelectedSlots().some(
+                                    (selectedSlot) =>
+                                      areSlotsAdjacent(selectedSlot, slot) ||
+                                      areSlotsAdjacent(slot, selectedSlot)
+                                  );
+
+                                  return (
+                                    <div
+                                      key={slot.id}
+                                      onClick={() =>
+                                        !slot.isBooked &&
+                                        handleSlotSelection(slot)
+                                      }
+                                      className={`
+                                        p-3 border rounded-md text-center cursor-pointer text-sm relative
+                                        transition-all duration-150 ease-in-out
+                                        ${
+                                          slot.isBooked
+                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                            : isSelected
+                                            ? "ring-2 ring-primary bg-primary/10 font-medium"
+                                            : selectedSlotIds.length > 0 &&
+                                              isAdjacent &&
+                                              !isSelected
+                                            ? "border-primary/50 border-dashed border-2"
+                                            : "hover:bg-muted/50 hover:border-primary/30"
+                                        }
+                                      `}
+                                    >
+                                      {slot.startTime} - {slot.endTime}
+                                      {isSelected && (
+                                        <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                          {selectedSlotIds.indexOf(slot.id) + 1}
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </TabsContent>
+                          )
                         )}
-                      </div>
-                    );
-                  })}
-                </div>
+                      </Tabs>
+                    </div>
+                  </div>
+                ) : (
+                  <Card className="bg-muted/30 border-dashed">
+                    <CardContent className="p-6 text-center">
+                      <p className="text-muted-foreground">
+                        No time slots available for this date
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             )}
 
             {/* Price Display */}
             {selectedType && selectedSlotIds.length > 0 && (
-              <div className="rounded-md bg-muted p-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Total Price:</span>
-                  <span className="text-lg font-bold">
-                    ${calculatePrice().toFixed(2)}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {getTotalDuration()} minutes at $
-                  {mentor.pricing[selectedType]}
-                  /hour
-                </p>
-              </div>
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Total Price:</span>
+                    <span className="text-lg font-bold text-primary">
+                      ${calculatePrice().toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {getTotalDuration()} minutes at $
+                    {mentor.pricing[selectedType]}
+                    /hour
+                  </p>
+                </CardContent>
+              </Card>
             )}
 
             {/* Timezone Selection */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Timezone</label>
               <Select value={timezone} onValueChange={(tz) => setTimezone(tz)}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select timezone" />
                 </SelectTrigger>
                 <SelectContent>
@@ -536,6 +690,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
                 isPending ||
                 isLoading
               }
+              className={selectedSlotIds.length > 0 ? "w-full" : ""}
             >
               {isPending ? "Booking..." : "Confirm Booking"}
             </Button>

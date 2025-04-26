@@ -1,7 +1,13 @@
 import Image from "next/image";
 import { Star, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SessionBooking from "@/components/booking/session-booking";
 import { StartChatButton } from "@/components/chat/start-chat-button";
@@ -213,9 +219,12 @@ export default async function MentorProfile({
 
         {/* Right Column - Booking */}
         <div>
-          <Card className="sticky top-8">
+          <Card className="sticky md:top-16 lg:top-24">
             <CardHeader>
               <CardTitle>Book a Session</CardTitle>
+              <CardDescription>
+                Choose your preferred session type and schedule a time
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex flex-col gap-4">

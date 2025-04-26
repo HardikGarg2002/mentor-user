@@ -25,7 +25,7 @@ export default async function MentorProfilePageContainer() {
 
   // Check if user is a mentor
   if (session.user.role !== "mentor") {
-    redirect("/dashboard");
+    redirect("/dashboard/mentee");
   }
 
   // Get mentor profile

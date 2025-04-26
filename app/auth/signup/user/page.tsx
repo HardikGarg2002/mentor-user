@@ -19,6 +19,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { CheckCircle2, ExternalLink } from "lucide-react";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export default function SignUp() {
   const router = useRouter();
@@ -222,9 +223,8 @@ export default function SignUp() {
                   Forgot password?
                 </Link>
               </div>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

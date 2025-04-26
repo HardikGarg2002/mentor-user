@@ -98,7 +98,15 @@ export function MainNav() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/profile">Profile</Link>
+                    <Link
+                      href={
+                        session.user?.role === "mentor"
+                          ? "/profile/mentor"
+                          : "/profile/mentee"
+                      }
+                    >
+                      Profile
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -170,7 +178,11 @@ export function MainNav() {
                   Dashboard
                 </Link>
                 <Link
-                  href="/profile"
+                  href={
+                    session.user?.role === "mentor"
+                      ? "/profile/mentor"
+                      : "/profile/mentee"
+                  }
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
                   onClick={() => setIsMenuOpen(false)}
                 >

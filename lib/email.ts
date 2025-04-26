@@ -45,7 +45,8 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
     const transporter = await createTransporter();
 
     // Get the from address from environment variable or use a default
-    const fromAddress = process.env.EMAIL_FROM || "noreply@mentormatch.com";
+    const fromAddress =
+      process.env.AWS_SES_FROM_EMAIL || "noreply@mentormatch.com";
 
     const info = await transporter.sendMail({
       from: `"MentorMatch" <${fromAddress}>`,

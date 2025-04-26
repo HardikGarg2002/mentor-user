@@ -20,6 +20,7 @@ import { PlusCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { createMentor, type MentorFormData } from "@/actions/mentor-actions";
 import { Separator } from "@radix-ui/react-select";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export function MentorApplicationForm() {
   const router = useRouter();
@@ -226,10 +227,9 @@ export function MentorApplicationForm() {
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
+              <PasswordInput
                 id="password"
                 name="password"
-                type="password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
