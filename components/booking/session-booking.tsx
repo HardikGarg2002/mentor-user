@@ -439,7 +439,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
           toast.success("Booking Successful", {
             description: "Your session has been booked",
           });
-          router.push(`/dashboard/mentee/sessions/${result.sessionId}`);
+          router.push(`/sessions/${result.sessionId}`);
           setIsDialogOpen(false);
         }
       } catch (error) {
