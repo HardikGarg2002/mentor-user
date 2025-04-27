@@ -78,7 +78,7 @@ export async function createPayment(sessionId: string, paymentMethod: string) {
     sessionRecord.status = SessionStatus.CONFIRMED;
     await sessionRecord.save();
 
-    revalidatePath(`/dashboard/mentee/sessions/${sessionId}`);
+    revalidatePath(`/sessions/${sessionId}`);
     revalidatePath(`/profile`);
 
     return {
@@ -326,7 +326,7 @@ export async function verifyRazorpayPayment(
     sessionRecord.reservationExpires = undefined; // Clear reservation expiry
     await sessionRecord.save();
 
-    revalidatePath(`/dashboard/mentee/sessions/${sessionId}`);
+    revalidatePath(`/sessions/${sessionId}`);
     revalidatePath(`/profile`);
 
     return {

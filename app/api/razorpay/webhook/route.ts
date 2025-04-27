@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Revalidate relevant pages
-        revalidatePath(`/dashboard/mentee/sessions/${receipt}`);
+        revalidatePath(`/sessions/${receipt}`);
         revalidatePath(`/payment/success/${receipt}`);
         revalidatePath(`/profile`);
       } else {
@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
           console.log(`Updated session ${receipt} status to CONFIRMED`);
 
           // Revalidate relevant pages
-          revalidatePath(`/dashboard/mentee/sessions/${receipt}`);
+          revalidatePath(`/sessions/${receipt}`);
           revalidatePath(`/payment/success/${receipt}`);
           revalidatePath(`/profile`);
         }

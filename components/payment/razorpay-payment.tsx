@@ -68,7 +68,7 @@ export function RazorpayPayment({ sessionId }: RazorpayPaymentProps) {
             description:
               "Your session reservation has expired. Please try booking again.",
           });
-          router.push(`/dashboard/mentee/sessions`);
+          router.push(`/sessions`);
         }
       }, 1000);
 
@@ -101,7 +101,7 @@ export function RazorpayPayment({ sessionId }: RazorpayPaymentProps) {
             response.error === "This session is not reserved" ||
             response.error === "This session has already been confirmed"
           ) {
-            router.push("/dashboard/mentee/sessions");
+            router.push("/sessions");
           }
         }
       } catch (error) {

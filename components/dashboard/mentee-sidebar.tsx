@@ -1,14 +1,21 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Calendar, Settings, MessageSquare, Search } from "lucide-react"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  LayoutDashboard,
+  Calendar,
+  Settings,
+  MessageSquare,
+  Search,
+} from "lucide-react";
 
 export function MenteeSidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
-  const isActive = (path: string) => pathname === path || pathname.startsWith(path)
+  const isActive = (path: string) =>
+    pathname === path || pathname.startsWith(path);
 
   const navItems = [
     {
@@ -28,7 +35,7 @@ export function MenteeSidebar() {
     },
     {
       name: "Sessions",
-      href: "/dashboard/mentee/sessions",
+      href: "/sessions",
       icon: Calendar,
     },
     {
@@ -36,7 +43,7 @@ export function MenteeSidebar() {
       href: "/dashboard/mentee/settings",
       icon: Settings,
     },
-  ]
+  ];
 
   return (
     <div className="w-64 border-r h-screen sticky top-0 hidden md:block">
@@ -45,7 +52,10 @@ export function MenteeSidebar() {
         <nav className="space-y-2">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href}>
-              <Button variant={isActive(item.href) ? "default" : "ghost"} className="w-full justify-start">
+              <Button
+                variant={isActive(item.href) ? "default" : "ghost"}
+                className="w-full justify-start"
+              >
                 <item.icon className="mr-2 h-5 w-5" />
                 {item.name}
               </Button>
@@ -54,6 +64,5 @@ export function MenteeSidebar() {
         </nav>
       </div>
     </div>
-  )
+  );
 }
-
