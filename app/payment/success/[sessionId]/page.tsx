@@ -72,7 +72,7 @@ export default async function PaymentSuccessPage({
 
   const sessionData = await getSessionData(sessionId);
   if (!sessionData) {
-    redirect("/dashboard/mentee/sessions");
+    redirect("/sessions");
   }
 
   const { session, mentor, payment } = sessionData;
@@ -175,12 +175,10 @@ export default async function PaymentSuccessPage({
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row gap-3 justify-center pt-2 pb-6">
           <Button asChild variant="default">
-            <Link href={`/dashboard/mentee/sessions/${session.id}`}>
-              View Session Details
-            </Link>
+            <Link href={`/sessions/${session.id}`}>View Session Details</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href="/dashboard/mentee/sessions">Go to My Sessions</Link>
+            <Link href="/sessions">Go to My Sessions</Link>
           </Button>
         </CardFooter>
       </Card>

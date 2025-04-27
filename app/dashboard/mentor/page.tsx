@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Calendar,
   DollarSign,
@@ -10,83 +12,56 @@ import {
   Video,
   Users,
   Clock,
+  FileText,
+  Bell,
+  Star,
+  ChevronRight,
+  Download,
+  Eye,
+  MessageSquare,
+  CheckCircle,
+  PlusCircle,
 } from "lucide-react";
 import Link from "next/link";
-
-// import Mentor from "@/models/Mentor";
-// import { getMentorById } from "@/lib/mentors";
-// import BookVideoCallDialog from "@/components/booking/VideomeetBooking";
+import { format, formatDistanceToNow, isFuture, parseISO } from "date-fns";
+import { auth } from "@/lib/auth";
+import { getMentorByUserId } from "@/lib/mentors";
+import {
+  getUpcomingSessions,
+  getPreviousSessions,
+  getChatHistory,
+  getEarningsData,
+  getPaymentHistory,
+  getNotifications,
+  getReviews,
+  getMentorStats,
+} from "@/lib/utils/mentor-dashboard";
+import { redirect } from "next/navigation";
 
 export default async function MentorDashboard() {
-  // Mock data - in a real app, this would come from a database
-  const earnings = {
-    total: 2450,
-    thisMonth: 850,
-    pending: 200,
-  };
+  // Get the current authenticated user
+  const session = await auth();
 
-  const sessions = {
-    completed: 27,
-    upcoming: 3,
-    cancelled: 2,
-  };
+  if (!session || !session.user) {
+    redirect("/auth/signin");
+  }
 
-  const upcomingSessions = [
-    {
-      id: 1,
-      mentee: "John Smith",
-      type: "video",
-      date: "Mar 15, 2025",
-      time: "10:00 AM - 11:00 AM",
-      status: "confirmed",
-    },
-    {
-      id: 2,
-      mentee: "Emily Johnson",
-      type: "chat",
-      date: "Mar 16, 2025",
-      time: "2:00 PM - 3:00 PM",
-      status: "confirmed",
-    },
-    {
-      id: 3,
-      mentee: "Michael Brown",
-      type: "call",
-      date: "Mar 18, 2025",
-      time: "4:00 PM - 5:00 PM",
-      status: "pending",
-    },
-  ];
+  // Get the mentor information from the user ID
+  const mentor = await getMentorByUserId(session.user.id);
 
-  const recentSessions = [
-    {
-      id: 4,
-      mentee: "Sarah Williams",
-      type: "video",
-      date: "Mar 10, 2025",
-      time: "11:00 AM - 12:00 PM",
-      status: "completed",
-      rating: 5,
-    },
-    {
-      id: 5,
-      mentee: "David Lee",
-      type: "call",
-      date: "Mar 8, 2025",
-      time: "3:00 PM - 4:00 PM",
-      status: "completed",
-      rating: 4,
-    },
-    {
-      id: 6,
-      mentee: "Jessica Chen",
-      type: "chat",
-      date: "Mar 5, 2025",
-      time: "1:00 PM - 2:00 PM",
-      status: "completed",
-      rating: 5,
-    },
-  ];
+  if (!mentor) {
+    redirect("/dashboard");
+  }
+  console.log(mentor, "mentor");
+  // Get dashboard data
+  const upcomingSessions = await getUpcomingSessions(mentor.userId);
+  const previousSessions = await getPreviousSessions(mentor.userId);
+  const chatHistory = await getChatHistory(mentor.userId);
+  const earnings = await getEarningsData(mentor.userId);
+  const paymentHistory = await getPaymentHistory(mentor.userId);
+  const notifications = await getNotifications(mentor.userId);
+  const reviews = await getReviews(mentor.userId);
+  const stats = await getMentorStats(mentor.userId);
 
   const getSessionIcon = (type: string) => {
     switch (type) {
@@ -131,7 +106,56 @@ export default async function MentorDashboard() {
         return <Badge>{status}</Badge>;
     }
   };
-  // const mentor = await getMentorById("67d4709d9d1e7c742b328ade");
+
+  const canJoinSession = (date: string, startTime: string) => {
+    const sessionDateTime = new Date(`${date}T${startTime}`);
+    const now = new Date();
+    const fifteenMinutesBefore = new Date(sessionDateTime);
+    fifteenMinutesBefore.setMinutes(fifteenMinutesBefore.getMinutes() - 15);
+
+    return now >= fifteenMinutesBefore && now <= sessionDateTime;
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "booking":
+        return <Calendar className="h-4 w-4" />;
+      case "review":
+        return <Star className="h-4 w-4" />;
+      case "system":
+        return <Bell className="h-4 w-4" />;
+      default:
+        return <Bell className="h-4 w-4" />;
+    }
+  };
+
+  const formatDateTime = (date: string, time: string) => {
+    try {
+      return format(new Date(`${date}T${time}`), "MMM d, yyyy h:mm a");
+    } catch (error) {
+      return `${date} ${time}`;
+    }
+  };
+
+  const formatDate = (dateString: string | Date) => {
+    try {
+      const date =
+        typeof dateString === "string" ? new Date(dateString) : dateString;
+      return format(date, "MMM d, yyyy");
+    } catch (error) {
+      return String(dateString);
+    }
+  };
+
+  const formatTimeAgo = (dateString: string | Date) => {
+    try {
+      const date =
+        typeof dateString === "string" ? parseISO(dateString) : dateString;
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      return String(dateString);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -159,9 +183,9 @@ export default async function MentorDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{sessions.completed}</div>
+            <div className="text-2xl font-bold">{stats.completed}</div>
             <p className="text-xs text-muted-foreground">
-              {sessions.upcoming} upcoming
+              {stats.upcoming} upcoming
             </p>
           </CardContent>
         </Card>
@@ -176,7 +200,7 @@ export default async function MentorDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">${earnings.pending}</div>
             <p className="text-xs text-muted-foreground">
-              From {sessions.upcoming} upcoming sessions
+              From {earnings.upcomingSessionsCount} upcoming sessions
             </p>
           </CardContent>
         </Card>
@@ -185,7 +209,11 @@ export default async function MentorDashboard() {
       <Tabs defaultValue="upcoming" className="mb-8">
         <TabsList>
           <TabsTrigger value="upcoming">Upcoming Sessions</TabsTrigger>
-          <TabsTrigger value="recent">Recent Sessions</TabsTrigger>
+          <TabsTrigger value="previous">Previous Sessions</TabsTrigger>
+          <TabsTrigger value="chats">Chat History</TabsTrigger>
+          <TabsTrigger value="earnings">Earnings</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews & Ratings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="upcoming">
@@ -206,24 +234,68 @@ export default async function MentorDashboard() {
                           {getSessionIcon(session.type)}
                         </div>
                         <div>
-                          <h3 className="font-medium">{session.mentee}</h3>
+                          <div className="flex items-center space-x-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage
+                                src={session.menteeImage}
+                                alt={session.menteeName}
+                              />
+                              <AvatarFallback>
+                                {session.menteeName.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <h3 className="font-medium">
+                              {session.menteeName}
+                            </h3>
+                          </div>
                           <div className="flex items-center text-sm text-gray-500">
                             <Calendar className="h-3 w-3 mr-1" />
                             <span>
-                              {session.date}, {session.time}
+                              {formatDateTime(
+                                String(session.date),
+                                session.startTime
+                              )}
                             </span>
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            <Clock className="h-3 w-3 mr-1 inline" />
+                            <span>{session.duration} minutes</span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
                         {getStatusBadge(session.status)}
-                        <Button variant="outline" size="sm" className="mr-2">
-                          View Details
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mr-2"
+                          asChild
+                        >
+                          <Link
+                            href={`/dashboard/mentor/sessions/${session.id}`}
+                          >
+                            View Details
+                          </Link>
                         </Button>
-                        <Button variant="outline" size="sm" asChild>
-                          <a href="/dashboard/mentor/availability">
-                            Manage Availability
-                          </a>
+                        <Button
+                          variant={
+                            canJoinSession(
+                              String(session.date),
+                              session.startTime
+                            )
+                              ? "default"
+                              : "outline"
+                          }
+                          size="sm"
+                          disabled={
+                            !canJoinSession(
+                              String(session.date),
+                              session.startTime
+                            )
+                          }
+                          asChild
+                        >
+                          <Link href={`/meeting/${session.id}`}>Join</Link>
                         </Button>
                       </div>
                     </div>
@@ -238,15 +310,15 @@ export default async function MentorDashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="recent">
+        <TabsContent value="previous">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Sessions</CardTitle>
+              <CardTitle>Previous Sessions</CardTitle>
             </CardHeader>
             <CardContent>
-              {recentSessions.length > 0 ? (
+              {previousSessions.length > 0 ? (
                 <div className="space-y-4">
-                  {recentSessions.map((session) => (
+                  {previousSessions.map((session) => (
                     <div
                       key={session.id}
                       className="flex items-center justify-between p-4 border rounded-lg"
@@ -256,34 +328,74 @@ export default async function MentorDashboard() {
                           {getSessionIcon(session.type)}
                         </div>
                         <div>
-                          <h3 className="font-medium">{session.mentee}</h3>
+                          <div className="flex items-center space-x-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage
+                                src={session.menteeImage}
+                                alt={session.menteeName}
+                              />
+                              <AvatarFallback>
+                                {session.menteeName.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <h3 className="font-medium">
+                              {session.menteeName}
+                            </h3>
+                          </div>
                           <div className="flex items-center text-sm text-gray-500">
                             <Calendar className="h-3 w-3 mr-1" />
                             <span>
-                              {session.date}, {session.time}
+                              {formatDateTime(
+                                String(session.date),
+                                session.startTime
+                              )}
                             </span>
+                          </div>
+                          <div className="flex mt-1">
+                            {session.rating &&
+                              [...Array(5)].map((_, i) => (
+                                <svg
+                                  key={i}
+                                  className={`h-4 w-4 ${
+                                    i < session.rating
+                                      ? "text-yellow-500 fill-yellow-500"
+                                      : "text-gray-300"
+                                  }`}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                </svg>
+                              ))}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <svg
-                              key={i}
-                              className={`h-4 w-4 ${
-                                i < session.rating
-                                  ? "text-yellow-500 fill-yellow-500"
-                                  : "text-gray-300"
-                              }`}
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                            >
-                              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                            </svg>
-                          ))}
-                        </div>
-                        <Button variant="outline" size="sm">
-                          View Details
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center space-x-1"
+                          asChild
+                        >
+                          <Link
+                            href={`/dashboard/mentor/sessions/${session.id}`}
+                          >
+                            <Eye className="h-3 w-3" />
+                            <span>View Feedback</span>
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center space-x-1"
+                          asChild
+                        >
+                          <Link
+                            href={`/dashboard/mentor/sessions/${session.id}/notes`}
+                          >
+                            <PlusCircle className="h-3 w-3" />
+                            <span>Add Notes</span>
+                          </Link>
                         </Button>
                       </div>
                     </div>
@@ -291,8 +403,294 @@ export default async function MentorDashboard() {
                 </div>
               ) : (
                 <p className="text-center py-4 text-gray-500">
-                  No recent sessions
+                  No previous sessions
                 </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="chats">
+          <Card>
+            <CardHeader>
+              <CardTitle>Chat History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {chatHistory.length > 0 ? (
+                <div className="space-y-4">
+                  {chatHistory.map((chat) => (
+                    <div
+                      key={chat.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                          <MessageSquare className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage
+                                src={chat.menteeImage}
+                                alt={chat.menteeName}
+                              />
+                              <AvatarFallback>
+                                {chat.menteeName.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <h3 className="font-medium flex items-center">
+                              {chat.menteeName}
+                              {chat.unread && (
+                                <Badge className="ml-2 bg-blue-100 text-blue-800">
+                                  New
+                                </Badge>
+                              )}
+                            </h3>
+                          </div>
+                          <p className="text-sm text-gray-500 truncate max-w-[250px]">
+                            {chat.lastMessage}
+                          </p>
+                          <div className="text-xs text-gray-400 mt-1">
+                            {formatTimeAgo(chat.timestamp)}
+                          </div>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/dashboard/mentor/chats/${chat.id}`}>
+                          View Chat
+                        </Link>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center py-4 text-gray-500">
+                  No chat history
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="earnings">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Earnings Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-4 border-b">
+                    <div>
+                      <p className="text-gray-500">Total Earnings</p>
+                      <p className="text-2xl font-bold">${earnings.total}</p>
+                    </div>
+                    <DollarSign className="h-8 w-8 text-green-500" />
+                  </div>
+                  <div className="flex justify-between items-center p-4 border-b">
+                    <div>
+                      <p className="text-gray-500">This Month</p>
+                      <p className="text-xl font-semibold">
+                        ${earnings.thisMonth}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center p-4 border-b">
+                    <div>
+                      <p className="text-gray-500">Pending</p>
+                      <p className="text-xl font-semibold">
+                        ${earnings.pending}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center p-4">
+                    <div>
+                      <p className="text-gray-500">Next Payout</p>
+                      <p className="text-xl font-semibold">
+                        ${earnings.nextPayout}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Expected on{" "}
+                        {earnings.payoutDate
+                          ? formatDate(earnings.payoutDate)
+                          : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <Button className="w-full mt-4" asChild>
+                    <Link href="/dashboard/mentor/earnings">
+                      View Breakdown
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {paymentHistory.length > 0 ? (
+                  <div className="space-y-4">
+                    {paymentHistory.map((payment) => (
+                      <div
+                        key={payment.id}
+                        className="flex items-center justify-between p-4 border rounded-lg"
+                      >
+                        <div>
+                          <h3 className="font-medium">${payment.amount}</h3>
+                          <div className="text-sm text-gray-500">
+                            {payment.date} · {payment.sessions} sessions
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center space-x-1"
+                          asChild
+                        >
+                          <Link
+                            href={`/dashboard/mentor/payments/${payment.id}/invoice`}
+                          >
+                            <Download className="h-3 w-3" />
+                            <span>Download Invoice</span>
+                          </Link>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center py-4 text-gray-500">
+                    No payment history
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Notifications</CardTitle>
+              <Button variant="outline" size="sm">
+                Mark All as Read
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {notifications.length > 0 ? (
+                <div className="space-y-4">
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`flex items-center justify-between p-4 border rounded-lg ${
+                        !notification.read ? "bg-blue-50" : ""
+                      }`}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div
+                          className={`p-2 rounded-full ${
+                            notification.type === "booking"
+                              ? "bg-green-100"
+                              : notification.type === "review"
+                              ? "bg-yellow-100"
+                              : "bg-blue-100"
+                          }`}
+                        >
+                          {getNotificationIcon(notification.type)}
+                        </div>
+                        <div>
+                          <p className="font-medium">{notification.message}</p>
+                          <p className="text-sm text-gray-500">
+                            {formatTimeAgo(notification.timestamp)}
+                          </p>
+                        </div>
+                      </div>
+                      {!notification.read && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex items-center space-x-1"
+                        >
+                          <CheckCircle className="h-3 w-3" />
+                          <span>Mark as Read</span>
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center py-4 text-gray-500">
+                  No notifications
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reviews">
+          <Card>
+            <CardHeader>
+              <CardTitle>Reviews & Ratings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {reviews.length > 0 ? (
+                <div className="space-y-6">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center space-x-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage
+                              src={review.menteeImage}
+                              alt={review.menteeName}
+                            />
+                            <AvatarFallback>
+                              {review.menteeName.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <h3 className="font-medium">{review.menteeName}</h3>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          {formatDate(review.date)}
+                        </p>
+                      </div>
+                      <div className="flex mb-2">
+                        {[...Array(5)].map((_, i) => (
+                          <svg
+                            key={i}
+                            className={`h-4 w-4 ${
+                              i < review.rating
+                                ? "text-yellow-500 fill-yellow-500"
+                                : "text-gray-300"
+                            }`}
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <p className="text-sm text-gray-700 mb-4">
+                        {review.review}
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center space-x-1"
+                        asChild
+                      >
+                        <Link href={`/dashboard/mentor/sessions/${review.id}`}>
+                          <Eye className="h-3 w-3" />
+                          <span>View Session</span>
+                        </Link>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center py-4 text-gray-500">No reviews yet</p>
               )}
             </CardContent>
           </Card>
@@ -309,10 +707,10 @@ export default async function MentorDashboard() {
               <Calendar className="h-12 w-12 mx-auto mb-4 text-primary" />
               <h3 className="font-medium mb-2">Set Your Schedule</h3>
               <p className="text-gray-500 mb-4">
-                Update your availability to let mentees know when youre free for
-                sessions.
+                Update your availability to let mentees know when you're free
+                for sessions.
               </p>
-              <Button>
+              <Button asChild>
                 <Link href="/dashboard/mentor/availability">
                   Manage Calendar
                 </Link>
@@ -333,9 +731,11 @@ export default async function MentorDashboard() {
                   <span>Chat Session</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="font-semibold mr-2">$50/hr</span>
-                  <Button variant="outline" size="sm">
-                    Edit
+                  <span className="font-semibold mr-2">
+                    ${mentor.pricing.chat}/hr
+                  </span>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/dashboard/mentor/pricing">Edit</Link>
                   </Button>
                 </div>
               </div>
@@ -346,9 +746,11 @@ export default async function MentorDashboard() {
                   <span>Video Call</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="font-semibold mr-2">$100/hr</span>
-                  <Button variant="outline" size="sm">
-                    Edit
+                  <span className="font-semibold mr-2">
+                    ${mentor.pricing.video}/hr
+                  </span>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/dashboard/mentor/pricing">Edit</Link>
                   </Button>
                 </div>
               </div>
@@ -359,16 +761,17 @@ export default async function MentorDashboard() {
                   <span>Phone Call</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="font-semibold mr-2">$80/hr</span>
-                  <Button variant="outline" size="sm">
-                    Edit
+                  <span className="font-semibold mr-2">
+                    ${mentor.pricing.call}/hr
+                  </span>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/dashboard/mentor/pricing">Edit</Link>
                   </Button>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
-        {/* <BookVideoCallDialog mentor={mentor} /> */}
       </div>
     </div>
   );
