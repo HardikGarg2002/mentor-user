@@ -1,5 +1,5 @@
 "use client";
-import { createJitsiLink } from "@/actions/meeting-actions";
+import { createVideoLink } from "@/actions/meeting-actions";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -70,7 +70,7 @@ const BookVideoCallDialog = () => {
         (parseInt(endTime.split(":")[0]) - parseInt(startTime.split(":")[0])) *
         60;
 
-      const response = await createJitsiLink({
+      const response = await createVideoLink({
         mentorId: demoMentor.id,
         scheduledAt: scheduledAt,
         bookedBy: session?.user?.id || "guest",
