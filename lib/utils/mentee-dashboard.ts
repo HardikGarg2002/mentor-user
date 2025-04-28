@@ -64,6 +64,20 @@ export async function getUpcomingSessions(menteeId: string) {
         session.startTime <= currentTime &&
         session.endTime > currentTime;
 
+      // Check accessibility for different features
+      const chatAccessible = isSessionAccessible(
+        session.date,
+        session.startTime,
+        session.meeting_type,
+        "chat"
+      );
+      const videoAccessible = isSessionAccessible(
+        session.date,
+        session.startTime,
+        session.meeting_type,
+        "video"
+      );
+
       return {
         id: session._id.toString(),
         mentorId: session.mentorId.toString(),
@@ -78,6 +92,8 @@ export async function getUpcomingSessions(menteeId: string) {
         status: session.status,
         price: session.price,
         isOngoing: isOngoing,
+        chatAccessible: chatAccessible,
+        videoAccessible: videoAccessible,
       };
     });
   } catch (error) {
@@ -508,6 +524,20 @@ export async function getOngoingSessions(menteeId: string) {
         (mp) => mp.userId.toString() === session.mentorId.toString()
       );
 
+      // Check accessibility for different features
+      const chatAccessible = isSessionAccessible(
+        session.date,
+        session.startTime,
+        session.meeting_type,
+        "chat"
+      );
+      const videoAccessible = isSessionAccessible(
+        session.date,
+        session.startTime,
+        session.meeting_type,
+        "video"
+      );
+
       return {
         id: session._id.toString(),
         mentorId: session.mentorId.toString(),
@@ -521,12 +551,289 @@ export async function getOngoingSessions(menteeId: string) {
         duration: session.duration,
         status: session.status,
         price: session.price,
-        // All sessions returned by this function are ongoing
         isOngoing: true,
+        chatAccessible: chatAccessible,
+        videoAccessible: videoAccessible,
       };
     });
   } catch (error) {
     console.error("Error fetching ongoing sessions:", error);
     return [];
+  }
+}
+
+/**
+ * Check if a session is accessible for video/chat
+ * - For chat sessions: always accessible
+ * - For video/call sessions: accessible 10 minutes before start time until 10 minutes after
+ * @param sessionDate - Date of the session
+ * @param startTime - Start time of the session (HH:MM format)
+ * @param sessionType - Type of session (chat, video, call)
+ * @param feature - Feature trying to access (chat or video)
+ */
+function isSessionAccessible(
+  sessionDate: Date,
+  startTime: string,
+  sessionType: string,
+  feature: "chat" | "video" = "video"
+): boolean {
+  // Chat is always accessible for chat sessions
+  if (feature === "chat") {
+    return true;
+  }
+
+  // For video features, check time window
+  if (
+    feature === "video" &&
+    (sessionType === "video" || sessionType === "call")
+  ) {
+    const now = new Date();
+    const sessionDateTime = new Date(sessionDate);
+
+    // Set the session time on the session date
+    const [hours, minutes] = startTime.split(":").map(Number);
+    sessionDateTime.setHours(hours, minutes, 0, 0);
+
+    // Calculate time difference in minutes
+    const diffMs = sessionDateTime.getTime() - now.getTime();
+    const diffMinutes = Math.round(diffMs / (1000 * 60));
+
+    // Access is allowed from 10 minutes before to 10 minutes after session start
+    return diffMinutes >= -10 && diffMinutes <= 10;
+  }
+
+  return false;
+}
+
+/**
+ * Fetch upcoming sessions for a mentor
+ * @param mentorId - The ID of the mentor
+ */
+export async function getMentorUpcomingSessions(mentorId: string) {
+  try {
+    await connectDB();
+
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const currentTime = now.toTimeString().slice(0, 5);
+
+    // Find all upcoming and ongoing sessions for this mentor
+    const sessions = await Session.find({
+      mentorId,
+      $or: [
+        // Future dates (tomorrow onwards)
+        { date: { $gte: tomorrow } },
+        // Today's sessions that haven't ended yet
+        {
+          date: { $gte: today, $lt: tomorrow },
+          endTime: { $gt: currentTime },
+        },
+      ],
+      status: { $in: [SessionStatus.CONFIRMED, SessionStatus.RESERVED] },
+    }).sort({ date: 1, startTime: 1 });
+
+    // Get mentee information for each session
+    const menteeIds = sessions.map((session) => session.menteeId);
+    const users = await User.find({ _id: { $in: menteeIds } });
+
+    return sessions.map((session) => {
+      const user = users.find(
+        (u) => u._id.toString() === session.menteeId.toString()
+      );
+
+      // Check if the session is ongoing (happening right now)
+      const sessionDate = new Date(session.date);
+      const isToday =
+        sessionDate.getDate() === today.getDate() &&
+        sessionDate.getMonth() === today.getMonth() &&
+        sessionDate.getFullYear() === today.getFullYear();
+
+      const isOngoing =
+        isToday &&
+        session.startTime <= currentTime &&
+        session.endTime > currentTime;
+
+      // Check accessibility for different features
+      const chatAccessible = isSessionAccessible(
+        session.date,
+        session.startTime,
+        session.meeting_type,
+        "chat"
+      );
+      const videoAccessible = isSessionAccessible(
+        session.date,
+        session.startTime,
+        session.meeting_type,
+        "video"
+      );
+
+      return {
+        id: session._id.toString(),
+        menteeId: session.menteeId.toString(),
+        menteeName: user?.name || "Unknown",
+        menteeImage: user?.image || "",
+        type: session.meeting_type,
+        date: session.date,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        duration: session.duration,
+        status: session.status,
+        price: session.price,
+        isOngoing: isOngoing,
+        chatAccessible: chatAccessible,
+        videoAccessible: videoAccessible,
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching mentor upcoming sessions:", error);
+    return [];
+  }
+}
+
+/**
+ * Fetch only ongoing sessions for a mentor
+ * @param mentorId - The ID of the mentor
+ */
+export async function getMentorOngoingSessions(mentorId: string) {
+  try {
+    await connectDB();
+
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const currentTime = now.toTimeString().slice(0, 5);
+
+    // Find only sessions happening right now
+    const sessions = await Session.find({
+      mentorId,
+      date: { $gte: today, $lt: tomorrow },
+      startTime: { $lte: currentTime },
+      endTime: { $gt: currentTime },
+      status: { $in: [SessionStatus.CONFIRMED, SessionStatus.RESERVED] },
+    });
+
+    // Get mentee information for each session
+    const menteeIds = sessions.map((session) => session.menteeId);
+    const users = await User.find({ _id: { $in: menteeIds } });
+
+    return sessions.map((session) => {
+      const user = users.find(
+        (u) => u._id.toString() === session.menteeId.toString()
+      );
+
+      // Check accessibility for different features
+      const chatAccessible = isSessionAccessible(
+        session.date,
+        session.startTime,
+        session.meeting_type,
+        "chat"
+      );
+      const videoAccessible = isSessionAccessible(
+        session.date,
+        session.startTime,
+        session.meeting_type,
+        "video"
+      );
+
+      return {
+        id: session._id.toString(),
+        menteeId: session.menteeId.toString(),
+        menteeName: user?.name || "Unknown",
+        menteeImage: user?.image || "",
+        type: session.meeting_type,
+        date: session.date,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        duration: session.duration,
+        status: session.status,
+        price: session.price,
+        isOngoing: true,
+        chatAccessible: chatAccessible,
+        videoAccessible: videoAccessible,
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching mentor ongoing sessions:", error);
+    return [];
+  }
+}
+
+/**
+ * Get details for a specific session
+ * @param sessionId - The ID of the session
+ */
+export async function getSessionById(sessionId: string) {
+  try {
+    await connectDB();
+
+    const session = await Session.findById(sessionId);
+    if (!session) {
+      return null;
+    }
+
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    const currentTime = now.toTimeString().slice(0, 5);
+
+    // Get mentor and mentee information
+    const mentor = await User.findById(session.mentorId);
+    const mentee = await User.findById(session.menteeId);
+    const mentorProfile = await Mentor.findOne({ userId: session.mentorId });
+
+    // Check if the session is ongoing
+    const sessionDate = new Date(session.date);
+    const isToday =
+      sessionDate.getDate() === today.getDate() &&
+      sessionDate.getMonth() === today.getMonth() &&
+      sessionDate.getFullYear() === today.getFullYear();
+
+    const isOngoing =
+      isToday &&
+      session.startTime <= currentTime &&
+      session.endTime > currentTime;
+
+    // Check accessibility for different features
+    const chatAccessible = isSessionAccessible(
+      session.date,
+      session.startTime,
+      session.meeting_type,
+      "chat"
+    );
+    const videoAccessible = isSessionAccessible(
+      session.date,
+      session.startTime,
+      session.meeting_type,
+      "video"
+    );
+
+    return {
+      id: session._id.toString(),
+      mentorId: session.mentorId.toString(),
+      menteeId: session.menteeId.toString(),
+      mentorName: mentor?.name || "Unknown",
+      mentorImage: mentor?.image || "",
+      mentorTitle: mentorProfile?.title || "",
+      menteeName: mentee?.name || "Unknown",
+      menteeImage: mentee?.image || "",
+      type: session.meeting_type,
+      date: session.date,
+      startTime: session.startTime,
+      endTime: session.endTime,
+      duration: session.duration,
+      status: session.status,
+      price: session.price,
+      isOngoing: isOngoing,
+      chatAccessible: chatAccessible,
+      videoAccessible: videoAccessible,
+    };
+  } catch (error) {
+    console.error("Error fetching session details:", error);
+    return null;
   }
 }
