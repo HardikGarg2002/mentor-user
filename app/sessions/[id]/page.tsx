@@ -21,7 +21,10 @@ export default async function SessionDetailsPage({
 }) {
   const { id } = await params;
   const session = await auth();
-  if (!session || session.user.role !== "user") {
+  if (
+    !session ||
+    (session.user.role !== "user" && session.user.role !== "mentor")
+  ) {
     notFound();
   }
 
@@ -35,13 +38,24 @@ export default async function SessionDetailsPage({
 
   // Find the session
   const sessionRecord = await Session.findById(id);
-  if (!sessionRecord || !sessionRecord.menteeId.equals(currentUser._id)) {
+  if (!sessionRecord) {
     notFound();
   }
 
-  // Get the mentor
-  const mentor = await User.findById(sessionRecord.mentorId);
-  if (!mentor) {
+  // Check if the current user is the mentee or mentor for this session
+  const isMentee = sessionRecord.menteeId.equals(currentUser._id);
+  const isMentor = sessionRecord.mentorId.equals(currentUser._id);
+
+  if (!isMentee && !isMentor) {
+    notFound();
+  }
+
+  // Get the other user (mentor if current user is mentee, mentee if current user is mentor)
+  const otherUserId = isMentee
+    ? sessionRecord.mentorId
+    : sessionRecord.menteeId;
+  const otherUser = await User.findById(otherUserId);
+  if (!otherUser) {
     notFound();
   }
 
@@ -65,8 +79,10 @@ export default async function SessionDetailsPage({
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Mentor</h3>
-                  <p className="text-lg">{mentor.name}</p>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    {isMentee ? "Mentor" : "Mentee"}
+                  </h3>
+                  <p className="text-lg">{otherUser.name}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Status</h3>
@@ -115,7 +131,7 @@ export default async function SessionDetailsPage({
                 sessionRecord.meeting_type === "video" && (
                   <div className="flex gap-4 mt-6">
                     {/* <VideoCallButton sessionId={params.id} /> */}
-                    <StartChatButton otherUserId={mentor._id.toString()} />
+                    <StartChatButton otherUserId={otherUser._id.toString()} />
                   </div>
                 )}
             </CardContent>
@@ -123,30 +139,42 @@ export default async function SessionDetailsPage({
         </div>
 
         <div>
-          {sessionRecord.status === SessionStatus.RESERVED && !isPaid ? (
+          {isMentee &&
+          sessionRecord.status === SessionStatus.RESERVED &&
+          !isPaid ? (
             <PaymentForm
               sessionId={id}
               amount={sessionRecord.price}
-              mentorName={mentor.name}
+              mentorName={otherUser.name}
             />
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Payment Status</CardTitle>
+                <CardTitle>
+                  {isMentor ? "Session Status" : "Payment Status"}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isPaid ? (
                   <div className="bg-green-50 p-4 rounded-lg text-green-800 text-center">
-                    <p className="font-medium">Payment Complete</p>
+                    <p className="font-medium">
+                      {isMentor ? "Session Confirmed" : "Payment Complete"}
+                    </p>
                     <p className="text-sm mt-1">
-                      Your session has been paid for.
+                      {isMentor
+                        ? "This session has been paid for and confirmed."
+                        : "Your session has been paid for."}
                     </p>
                   </div>
                 ) : (
                   <div className="bg-yellow-50 p-4 rounded-lg text-yellow-800 text-center">
-                    <p className="font-medium">Payment Required</p>
+                    <p className="font-medium">
+                      {isMentor ? "Awaiting Payment" : "Payment Required"}
+                    </p>
                     <p className="text-sm mt-1">
-                      Please complete payment to confirm your session.
+                      {isMentor
+                        ? "Waiting for the mentee to complete payment."
+                        : "Please complete payment to confirm your session."}
                     </p>
                   </div>
                 )}
@@ -157,10 +185,10 @@ export default async function SessionDetailsPage({
                   </h3>
                   <div className="space-y-2">
                     <StartChatButton
-                      otherUserId={mentor._id.toString()}
+                      otherUserId={otherUser._id.toString()}
                       className="w-full"
                     />
-                    {sessionRecord.status === "cancelled" && (
+                    {sessionRecord.status === "cancelled" && isMentee && (
                       <Button variant="outline" className="w-full">
                         Reschedule
                       </Button>
