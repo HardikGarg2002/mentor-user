@@ -32,10 +32,11 @@ export function StartChatButton({
       console.log("get or create chat result", result);
       if (result.success) {
         // Determine the correct path based on user role
-        const basePath =
-          session.user.role === "mentor"
-            ? "/dashboard/mentor/chats"
-            : "/dashboard/mentee/chats";
+        // const basePath =
+        //   session.user.role === "mentor"
+        //     ? "/dashboard/mentor/chats"
+        //     : "/dashboard/mentee/chats";
+        const basePath = "/dashboard/chats";
 
         router.push(`${basePath}/${result.chatId}`);
       } else {

@@ -94,6 +94,9 @@ export async function sendMessage(formData: MessageFormData) {
     await chat.save();
 
     // Revalidate paths for both users
+    revalidatePath(`/dashboard/chats/${chat._id.toString()}`);
+    revalidatePath(`/dashboard/chats`);
+    // For backward compatibility
     revalidatePath(`/dashboard/mentor/chats/${menteeId}`);
     revalidatePath(`/dashboard/mentee/chats/${mentorId}`);
     revalidatePath(`/dashboard/mentor/chats`);
@@ -184,6 +187,9 @@ export async function markMessagesAsRead(chatId: string) {
       await chat.save();
 
       // Revalidate paths
+      revalidatePath(`/dashboard/chats/${chat._id.toString()}`);
+      revalidatePath(`/dashboard/chats`);
+      // For backward compatibility
       revalidatePath(`/dashboard/mentor/chats/${chat.menteeId}`);
       revalidatePath(`/dashboard/mentee/chats/${chat.mentorId}`);
       revalidatePath(`/dashboard/mentor/chats`);

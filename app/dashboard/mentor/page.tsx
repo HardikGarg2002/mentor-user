@@ -271,9 +271,7 @@ export default async function MentorDashboard() {
                           className="mr-2"
                           asChild
                         >
-                          <Link
-                            href={`/dashboard/mentor/sessions/${session.id}`}
-                          >
+                          <Link href={`/sessions/${session.id}`}>
                             View Details
                           </Link>
                         </Button>
@@ -377,9 +375,7 @@ export default async function MentorDashboard() {
                           className="flex items-center space-x-1"
                           asChild
                         >
-                          <Link
-                            href={`/dashboard/mentor/sessions/${session.id}`}
-                          >
+                          <Link href={`/sessions/${session.id}`}>
                             <Eye className="h-3 w-3" />
                             <span>View Feedback</span>
                           </Link>
@@ -390,9 +386,7 @@ export default async function MentorDashboard() {
                           className="flex items-center space-x-1"
                           asChild
                         >
-                          <Link
-                            href={`/dashboard/mentor/sessions/${session.id}/notes`}
-                          >
+                          <Link href={`/sessions/${session.id}/notes`}>
                             <PlusCircle className="h-3 w-3" />
                             <span>Add Notes</span>
                           </Link>
@@ -456,7 +450,7 @@ export default async function MentorDashboard() {
                         </div>
                       </div>
                       <Button variant="outline" size="sm" asChild>
-                        <Link href={`/dashboard/mentor/chats/${chat.id}`}>
+                        <Link href={`/dashboard/chats/${chat.id}`}>
                           View Chat
                         </Link>
                       </Button>
@@ -681,7 +675,7 @@ export default async function MentorDashboard() {
                         className="flex items-center space-x-1"
                         asChild
                       >
-                        <Link href={`/dashboard/mentor/sessions/${review.id}`}>
+                        <Link href={`/sessions/${review.id}`}>
                           <Eye className="h-3 w-3" />
                           <span>View Session</span>
                         </Link>

@@ -45,9 +45,11 @@ type ChatData = {
 export function ChatInterface({
   chatId,
   basePath,
+  userRole,
 }: {
   chatId: string;
   basePath: string;
+  userRole?: string;
 }) {
   const router = useRouter();
   const [chatData, setChatData] = useState<ChatData | null>(null);
@@ -150,7 +152,7 @@ export function ChatInterface({
         <CardContent className="flex flex-col items-center justify-center p-6 text-center">
           <h3 className="text-lg font-medium mb-2">Chat not found</h3>
           <p className="text-muted-foreground mb-4">
-            This conversation doesn’t exist or you don’t have access to it.
+            This conversation doesn't exist or you don't have access to it.
           </p>
           <Button onClick={() => router.push(basePath)}>
             Back to Messages
