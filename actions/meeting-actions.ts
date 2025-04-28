@@ -1,8 +1,5 @@
 "use server";
-
-import { createMeeting } from "@/lib/meeting";
-
-export async function createJitsiLink({
+export async function createVideoLink({
   bookedBy,
   mentorId,
   scheduledAt,
@@ -20,13 +17,6 @@ export async function createJitsiLink({
     //   menteeName
     // )}`;
     //
-    await createMeeting({
-      meetingId,
-      bookedBy,
-      mentorId,
-      scheduledAt,
-      duration,
-    });
 
     return meetingId;
   } catch (error) {
