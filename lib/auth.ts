@@ -102,4 +102,9 @@ export async function getServerAuthSession() {
   return session;
 }
 
+export async function getUserRole() {
+  const session = await getServerSession(authOptions);
+  return session?.user?.role || null;
+}
+
 export default NextAuth(authOptions);
