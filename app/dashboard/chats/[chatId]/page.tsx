@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 export default async function ChatPage({
   params,
 }: {
-  params: { chatId: string };
+  params: Promise<{ chatId: string }>;
 }) {
   const role = await getUserRole();
 
@@ -13,7 +13,7 @@ export default async function ChatPage({
     return redirect("/auth/signin");
   }
 
-  const { chatId } = params;
+  const { chatId } = await params;
   const basePath = "/dashboard/chats";
 
   return (
