@@ -25,7 +25,6 @@ export function MainNav() {
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Mentors", path: "/mentors" },
-    { name: "How It Works", path: "/#how-it-works" },
   ];
 
   return (
@@ -177,17 +176,15 @@ export function MainNav() {
                 >
                   Dashboard
                 </Link>
-                <Link
-                  href={
-                    session.user?.role === "mentor"
-                      ? "/profile/mentor"
-                      : "/profile/mentee"
-                  }
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Profile
-                </Link>
+                {session.user?.role === "mentor" && (
+                  <Link
+                    href="/profile/mentor"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                )}
                 <button
                   className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
                   onClick={() => {

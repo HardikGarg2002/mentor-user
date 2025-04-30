@@ -23,7 +23,7 @@ export default async function Home() {
             Share your expertise, help others grow, and earn money on your own
             schedule.
           </p>
-          <Link href="/become-mentor">
+          <Link href="/auth/signup/become-mentor">
             <Button variant="secondary" size="lg">
               Apply Now
             </Button>
