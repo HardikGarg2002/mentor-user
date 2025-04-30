@@ -27,7 +27,7 @@ export default function NewsletterThankYou() {
         </CardHeader>
         <CardContent className="text-center space-y-4">
           <p>
-            You have successfully subscribed to the MentorMatch newsletter.
+            You have successfully subscribed to the ARicious newsletter.
             We&apos;ll keep you updated with the latest news, tips, and
             resources.
           </p>

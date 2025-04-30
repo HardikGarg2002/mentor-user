@@ -8,8 +8,8 @@ export default function NewsletterPage() {
           <h1 className="text-4xl font-bold text-center mb-8">Newsletter</h1>
           <p className="text-lg text-center max-w-3xl mx-auto mb-12">
             Stay up to date with the latest news, resources, and insights from
-            MentorMatch. Our newsletter delivers valuable content straight to
-            your inbox.
+            ARicious. Our newsletter delivers valuable content straight to your
+            inbox.
           </p>
         </div>
       </div>

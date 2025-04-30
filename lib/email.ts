@@ -46,10 +46,10 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
 
     // Get the from address from environment variable or use a default
     const fromAddress =
-      process.env.AWS_SES_FROM_EMAIL || "noreply@mentormatch.com";
+      process.env.AWS_SES_FROM_EMAIL || "noreply@aricious.com";
 
     const info = await transporter.sendMail({
-      from: `"MentorMatch" <${fromAddress}>`,
+      from: `"ARicious" <${fromAddress}>`,
       to,
       subject,
       html,
@@ -84,9 +84,9 @@ export function createVerificationEmailHtml(
 ) {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Welcome to MentorMatch!</h2>
+      <h2>Welcome to ARicious!</h2>
       <p>Hello ${name},</p>
-      <p>Thank you for registering with MentorMatch. To complete your registration and verify your email address, please click the button below:</p>
+      <p>Thank you for registering with ARicious. To complete your registration and verify your email address, please click the button below:</p>
       <div style="text-align: center; margin: 30px 0;">
         <a href="${verificationUrl}" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a>
       </div>
@@ -94,7 +94,7 @@ export function createVerificationEmailHtml(
       <p style="word-break: break-all;">${verificationUrl}</p>
       <p>This verification link will expire in 24 hours.</p>
       <p>If you didn't create this account, you can safely ignore this email.</p>
-      <p>Best regards,<br>The MentorMatch Team</p>
+      <p>Best regards,<br>The ARicious Team</p>
     </div>
   `;
 }
