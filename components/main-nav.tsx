@@ -24,7 +24,11 @@ export function MainNav() {
 
   const navItems = [
     { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
     { name: "Mentors", path: "/mentors" },
+    { name: "Blog", path: "/blog" },
+    { name: "FAQ", path: "/faq" },
+    { name: "Contact", path: "/contact" },
   ];
 
   return (
@@ -33,7 +37,7 @@ export function MainNav() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="text-xl font-bold text-primary">
-              MentorMatch
+              ARicious
             </Link>
 
             <nav className="hidden md:ml-10 md:flex md:space-x-8">

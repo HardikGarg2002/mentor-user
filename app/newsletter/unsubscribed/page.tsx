@@ -28,7 +28,7 @@ export default function NewsletterUnsubscribed() {
         <CardContent className="text-center space-y-4">
           <p>
             We&apos;re sorry to see you go. You have been successfully
-            unsubscribed from the MentorMatch newsletter.
+            unsubscribed from the ARicious newsletter.
           </p>
           <p className="text-sm text-gray-500">
             If you changed your mind, you can subscribe again anytime.

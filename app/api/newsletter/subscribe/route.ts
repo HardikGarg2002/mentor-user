@@ -146,14 +146,14 @@ async function sendVerificationEmail(
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Verify Your Newsletter Subscription</h2>
       <p>Hello ${name || "there"},</p>
-      <p>Thank you for subscribing to the MentorMatch newsletter! To complete your subscription, please click the button below:</p>
+      <p>Thank you for subscribing to the ARicious newsletter! To complete your subscription, please click the button below:</p>
       <div style="text-align: center; margin: 30px 0;">
         <a href="${verificationUrl}" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Subscription</a>
       </div>
       <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
       <p style="word-break: break-all;">${verificationUrl}</p>
       <p>If you didn't subscribe to our newsletter, you can safely ignore this email.</p>
-      <p>Best regards,<br>The MentorMatch Team</p>
+      <p>Best regards,<br>The ARicious Team</p>
     </div>
   `;
 

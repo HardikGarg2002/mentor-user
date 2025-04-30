@@ -13,7 +13,7 @@ export function Footer() {
               href="/"
               className="text-xl font-bold text-primary mb-4 block"
             >
-              MentorMatch
+              ARicious
             </Link>
             <p className="text-gray-600 mb-4">
               Connect with industry experts who can help you grow your skills
@@ -65,6 +65,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/about"
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/mentors"
                   className="text-gray-600 hover:text-primary transition-colors"
                 >
@@ -81,10 +89,10 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/about"
+                  href="/contact"
                   className="text-gray-600 hover:text-primary transition-colors"
                 >
-                  About Us
+                  Contact Us
                 </Link>
               </li>
             </ul>
@@ -141,7 +149,7 @@ export function Footer() {
 
         <div className="border-t border-gray-200 mt-12 pt-8 text-center text-gray-500 text-sm">
           <p>
-            &copy; {new Date().getFullYear()} MentorMatch. All rights reserved.
+            &copy; {new Date().getFullYear()} ARicious. All rights reserved.
           </p>
         </div>
       </div>
