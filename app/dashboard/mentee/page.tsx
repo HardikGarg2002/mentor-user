@@ -11,14 +11,14 @@ import {
   DollarSign,
   Users,
   Bell,
-  MessageSquare,
+  // MessageSquare,
   Clock,
-  Download,
-  Star,
+  // Download,
+  // Star,
   CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 import { SearchBar } from "@/components/search/search-bar";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -29,7 +29,7 @@ import {
   getChatHistory,
   getPaymentHistory,
   getNotifications,
-  getRecommendedMentors,
+  // getRecommendedMentors,
   getMenteeStats,
 } from "@/lib/utils/mentee-dashboard";
 import { PaymentStatus } from "@/types/payment";
@@ -48,7 +48,7 @@ export default async function MenteeDashboard() {
   const chatHistory = await getChatHistory(menteeId);
   const payments = await getPaymentHistory(menteeId);
   const notifications = await getNotifications(menteeId);
-  const recommendedMentors = await getRecommendedMentors(menteeId);
+  // const recommendedMentors = await getRecommendedMentors(menteeId);
   const stats = await getMenteeStats(menteeId);
 
   const getSessionIcon = (type: string) => {
@@ -553,7 +553,7 @@ export default async function MenteeDashboard() {
         </TabsContent>
       </Tabs>
 
-      <div className="mb-8">
+      {/* <div className="mb-8">
         <h2 className="text-2xl font-bold mb-6">Recommended Mentors</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {recommendedMentors.map((mentor) => (
@@ -599,7 +599,7 @@ export default async function MenteeDashboard() {
             </Card>
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
