@@ -149,7 +149,7 @@ export function RazorpayPayment({ sessionId }: RazorpayPaymentProps) {
 
           if (verificationResponse.success) {
             toast.success("Payment Successful", {
-              description: `Your payment of ${orderDetails.currency} ${orderDetails.amount} has been processed.`,
+              description: `Your payment of ₹ ${orderDetails.amount} has been processed.`,
             });
             router.push(`/payment/success/${sessionId}`);
             router.refresh();

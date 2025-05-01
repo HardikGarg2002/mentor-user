@@ -316,7 +316,7 @@ export async function getNotifications(menteeId: string) {
       notifications.push({
         id: `payment_${payment._id.toString()}`,
         type: "payment",
-        message: `Payment of $${
+        message: `Payment of ₹${
           payment.amount
         } has been ${payment.status.toLowerCase()}`,
         timestamp: payment.createdAt,

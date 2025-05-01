@@ -510,7 +510,7 @@ export async function getNotifications(mentorId: string) {
       notifications.push({
         id: `payment_${payment._id.toString()}`,
         type: "system",
-        message: `Your payout of $${payment.amount} has been processed`,
+        message: `Your payout of ₹${payment.amount} has been processed`,
         timestamp: payment.updatedAt,
         read: false,
       });

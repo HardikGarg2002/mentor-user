@@ -54,15 +54,15 @@ export function MentorCard({ mentor }: MentorCardProps) {
           <div className="grid grid-cols-3 gap-2 mb-4">
             <div className="text-center p-2 bg-gray-50 rounded-md">
               <p className="text-xs text-gray-500">Chat</p>
-              <p className="font-semibold">${mentor.pricing.chat}/hr</p>
+              <p className="font-semibold">₹{mentor.pricing.chat}/hr</p>
             </div>
             <div className="text-center p-2 bg-gray-50 rounded-md">
               <p className="text-xs text-gray-500">Video</p>
-              <p className="font-semibold">${mentor.pricing.video}/hr</p>
+              <p className="font-semibold">₹{mentor.pricing.video}/hr</p>
             </div>
             <div className="text-center p-2 bg-gray-50 rounded-md">
               <p className="text-xs text-gray-500">Call</p>
-              <p className="font-semibold">${mentor.pricing.call}/hr</p>
+              <p className="font-semibold">₹{mentor.pricing.call}/hr</p>
             </div>
           </div>
         </div>
