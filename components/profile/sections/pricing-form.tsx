@@ -102,7 +102,7 @@ export function PricingForm({ mentorProfile }: PricingFormProps) {
                       <FormLabel>Chat Rate (per hour)</FormLabel>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2">
-                          $
+                          ₹
                         </span>
                         <FormControl>
                           <Input type="number" className="pl-7" {...field} />
@@ -124,7 +124,7 @@ export function PricingForm({ mentorProfile }: PricingFormProps) {
                       <FormLabel>Video Call Rate (per hour)</FormLabel>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2">
-                          $
+                          ₹
                         </span>
                         <FormControl>
                           <Input type="number" className="pl-7" {...field} />
@@ -146,7 +146,7 @@ export function PricingForm({ mentorProfile }: PricingFormProps) {
                       <FormLabel>Phone Call Rate (per hour)</FormLabel>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2">
-                          $
+                          ₹
                         </span>
                         <FormControl>
                           <Input type="number" className="pl-7" {...field} />
@@ -185,7 +185,7 @@ export function PricingForm({ mentorProfile }: PricingFormProps) {
                   <h3 className="font-medium">Chat Sessions</h3>
                 </div>
                 <p className="text-2xl font-bold">
-                  ${mentorProfile.pricing.chat}
+                  ₹{mentorProfile.pricing.chat}
                   <span className="text-sm font-normal text-muted-foreground">
                     /hr
                   </span>
@@ -201,7 +201,7 @@ export function PricingForm({ mentorProfile }: PricingFormProps) {
                   <h3 className="font-medium">Video Sessions</h3>
                 </div>
                 <p className="text-2xl font-bold">
-                  ${mentorProfile.pricing.video}
+                  ₹{mentorProfile.pricing.video}
                   <span className="text-sm font-normal text-muted-foreground">
                     /hr
                   </span>
@@ -217,7 +217,7 @@ export function PricingForm({ mentorProfile }: PricingFormProps) {
                   <h3 className="font-medium">Call Sessions</h3>
                 </div>
                 <p className="text-2xl font-bold">
-                  ${mentorProfile.pricing.call}
+                  ₹{mentorProfile.pricing.call}
                   <span className="text-sm font-normal text-muted-foreground">
                     /hr
                   </span>

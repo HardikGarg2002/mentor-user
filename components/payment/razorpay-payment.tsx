@@ -233,19 +233,15 @@ export function RazorpayPayment({ sessionId }: RazorpayPaymentProps) {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex justify-between mb-2">
                   <span>Session Fee</span>
-                  <span>
-                    {orderDetails.currency} {orderDetails.amount}
-                  </span>
+                  <span>₹ {orderDetails.amount}</span>
                 </div>
                 <div className="flex justify-between mb-2">
                   <span>Platform Fee</span>
-                  <span>{orderDetails.currency} 0</span>
+                  <span>₹ 0</span>
                 </div>
                 <div className="flex justify-between font-medium pt-2 border-t">
                   <span>Total</span>
-                  <span>
-                    {orderDetails.currency} {orderDetails.amount}
-                  </span>
+                  <span>₹ {orderDetails.amount}</span>
                 </div>
               </div>
             </div>
@@ -257,9 +253,7 @@ export function RazorpayPayment({ sessionId }: RazorpayPaymentProps) {
             className="w-full"
             disabled={isLoading}
           >
-            {isLoading
-              ? "Processing..."
-              : `Pay ${orderDetails.currency} ${orderDetails.amount}`}
+            {isLoading ? "Processing..." : `Pay ₹ ${orderDetails.amount}`}
           </Button>
         </CardFooter>
       </Card>

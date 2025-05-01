@@ -59,7 +59,7 @@ export function ProfileSidebar({
                   <span>Chat</span>
                 </div>
                 <span className="font-medium">
-                  ${mentorProfile.pricing.chat}/hr
+                  ₹{mentorProfile.pricing.chat}/hr
                 </span>
               </div>
               <div className="flex items-center justify-between p-2 bg-muted rounded-md">
@@ -68,7 +68,7 @@ export function ProfileSidebar({
                   <span>Video</span>
                 </div>
                 <span className="font-medium">
-                  ${mentorProfile.pricing.video}/hr
+                  ₹{mentorProfile.pricing.video}/hr
                 </span>
               </div>
               <div className="flex items-center justify-between p-2 bg-muted rounded-md">
@@ -77,7 +77,7 @@ export function ProfileSidebar({
                   <span>Call</span>
                 </div>
                 <span className="font-medium">
-                  ${mentorProfile.pricing.call}/hr
+                  ₹{mentorProfile.pricing.call}/hr
                 </span>
               </div>
             </div>
