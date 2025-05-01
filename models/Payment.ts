@@ -8,7 +8,7 @@ const PaymentSchema = new Schema<IPayment>(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     recipientId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     amount: { type: Number, required: true },
-    currency: { type: String, default: "USD" },
+    currency: { type: String, default: "INR" },
     paymentMethod: { type: String, required: true },
     status: {
       type: String,

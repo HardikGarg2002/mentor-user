@@ -128,8 +128,8 @@ export function MentorFilters() {
             className="mb-6"
           />
           <div className="flex items-center justify-between">
-            <p>${priceRange[0]}</p>
-            <p>${priceRange[1]}</p>
+            <p>₹{priceRange[0]}</p>
+            <p>₹{priceRange[1]}</p>
           </div>
         </CardContent>
       </Card>
