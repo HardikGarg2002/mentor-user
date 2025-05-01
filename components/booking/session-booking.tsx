@@ -494,7 +494,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
                   Session
                 </span>
                 <Badge className="px-2 py-1">
-                  ${mentor.pricing[selectedType]}/hr
+                  ₹{mentor.pricing[selectedType]}/hr
                 </Badge>
               </CardContent>
             </Card>
@@ -651,11 +651,11 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
                   <div className="flex justify-between items-center">
                     <span className="font-medium">Total Price:</span>
                     <span className="text-lg font-bold text-primary">
-                      ${calculatePrice().toFixed(2)}
+                      ₹{calculatePrice().toFixed(2)}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {getTotalDuration()} minutes at $
+                    {getTotalDuration()} minutes at ₹
                     {mentor.pricing[selectedType]}
                     /hour
                   </p>
