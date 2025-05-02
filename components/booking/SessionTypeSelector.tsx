@@ -54,7 +54,7 @@ export default function SessionTypeSelector({
           <div className="flex items-center">
             {icon} <span>{label} Session</span>
           </div>
-          <span className="font-semibold">${pricing}/hr</span>
+          <span className="font-semibold">₹{pricing}/hr</span>
         </div>
       ))}
     </div>

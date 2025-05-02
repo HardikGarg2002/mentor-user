@@ -455,7 +455,7 @@ export function MentorApplicationForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="pricing.chat">Chat Session ($/hr)</Label>
+                <Label htmlFor="pricing.chat">Chat Session (₹/hr)</Label>
                 <Input
                   id="pricing.chat"
                   name="pricing.chat"
@@ -468,7 +468,7 @@ export function MentorApplicationForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="pricing.video">Video Call ($/hr)</Label>
+                <Label htmlFor="pricing.video">Video Call (₹/hr)</Label>
                 <Input
                   id="pricing.video"
                   name="pricing.video"
@@ -481,7 +481,7 @@ export function MentorApplicationForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="pricing.call">Phone Call ($/hr)</Label>
+                <Label htmlFor="pricing.call">Phone Call (₹/hr)</Label>
                 <Input
                   id="pricing.call"
                   name="pricing.call"

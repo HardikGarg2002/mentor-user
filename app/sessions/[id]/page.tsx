@@ -117,7 +117,7 @@ export default async function SessionDetailsPage({
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Price</h3>
-                  <p className="text-lg">${sessionRecord.price}</p>
+                  <p className="text-lg">₹{sessionRecord.price}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">

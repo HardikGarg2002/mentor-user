@@ -8,7 +8,7 @@ import {
   MessageCircle,
   Phone,
   Video,
-  DollarSign,
+  IndianRupee,
   Users,
   Bell,
   // MessageSquare,
@@ -100,7 +100,7 @@ export default async function MenteeDashboard() {
       case "confirmation":
         return <Calendar className="h-4 w-4" />;
       case "payment":
-        return <DollarSign className="h-4 w-4" />;
+        return <IndianRupee className="h-4 w-4" />;
       case "reminder":
         return <Clock className="h-4 w-4" />;
       default:
@@ -159,10 +159,10 @@ export default async function MenteeDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <IndianRupee className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.totalSpent}</div>
+            <div className="text-2xl font-bold">₹{stats.totalSpent}</div>
             <p className="text-xs text-muted-foreground">
               Over {stats.completed} sessions
             </p>
@@ -448,11 +448,11 @@ export default async function MenteeDashboard() {
                               : "bg-red-100"
                           }`}
                         >
-                          <DollarSign className="h-4 w-4" />
+                          <IndianRupee className="h-4 w-4" />
                         </div>
                         <div>
                           <h3 className="font-medium">
-                            ${payment.amount} {payment.currency}
+                            ₹{payment.amount} {payment.currency}
                           </h3>
                           <p className="text-sm text-gray-500">
                             {payment.mentorName} - {formatDate(payment.date)}

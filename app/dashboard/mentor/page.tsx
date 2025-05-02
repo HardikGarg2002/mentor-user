@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Calendar,
-  DollarSign,
+  IndianRupee,
   MessageCircle,
   Phone,
   Video,
@@ -167,12 +167,12 @@ export default async function MentorDashboard() {
             <CardTitle className="text-sm font-medium">
               Total Earnings
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <IndianRupee className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${earnings.total}</div>
+            <div className="text-2xl font-bold">₹{earnings.total}</div>
             <p className="text-xs text-muted-foreground">
-              ${earnings.thisMonth} this month
+              ₹{earnings.thisMonth} this month
             </p>
           </CardContent>
         </Card>
@@ -198,7 +198,7 @@ export default async function MentorDashboard() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${earnings.pending}</div>
+            <div className="text-2xl font-bold">₹{earnings.pending}</div>
             <p className="text-xs text-muted-foreground">
               From {earnings.upcomingSessionsCount} upcoming sessions
             </p>
@@ -477,15 +477,15 @@ export default async function MentorDashboard() {
                   <div className="flex justify-between items-center p-4 border-b">
                     <div>
                       <p className="text-gray-500">Total Earnings</p>
-                      <p className="text-2xl font-bold">${earnings.total}</p>
+                      <p className="text-2xl font-bold">₹{earnings.total}</p>
                     </div>
-                    <DollarSign className="h-8 w-8 text-green-500" />
+                    <IndianRupee className="h-8 w-8 text-green-500" />
                   </div>
                   <div className="flex justify-between items-center p-4 border-b">
                     <div>
                       <p className="text-gray-500">This Month</p>
                       <p className="text-xl font-semibold">
-                        ${earnings.thisMonth}
+                        ₹{earnings.thisMonth}
                       </p>
                     </div>
                   </div>
@@ -493,7 +493,7 @@ export default async function MentorDashboard() {
                     <div>
                       <p className="text-gray-500">Pending</p>
                       <p className="text-xl font-semibold">
-                        ${earnings.pending}
+                        ₹{earnings.pending}
                       </p>
                     </div>
                   </div>
@@ -501,7 +501,7 @@ export default async function MentorDashboard() {
                     <div>
                       <p className="text-gray-500">Next Payout</p>
                       <p className="text-xl font-semibold">
-                        ${earnings.nextPayout}
+                        ₹ {earnings.nextPayout}
                       </p>
                       <p className="text-sm text-gray-400">
                         Expected on{" "}
@@ -533,7 +533,7 @@ export default async function MentorDashboard() {
                         className="flex items-center justify-between p-4 border rounded-lg"
                       >
                         <div>
-                          <h3 className="font-medium">${payment.amount}</h3>
+                          <h3 className="font-medium">₹{payment.amount}</h3>
                           <div className="text-sm text-gray-500">
                             {payment.date} · {payment.sessions} sessions
                           </div>
@@ -726,7 +726,7 @@ export default async function MentorDashboard() {
                 </div>
                 <div className="flex items-center">
                   <span className="font-semibold mr-2">
-                    ${mentor.pricing.chat}/hr
+                    ₹{mentor.pricing.chat}/hr
                   </span>
                   <Button variant="outline" size="sm" asChild>
                     <Link href="/dashboard/mentor/pricing">Edit</Link>
@@ -741,7 +741,7 @@ export default async function MentorDashboard() {
                 </div>
                 <div className="flex items-center">
                   <span className="font-semibold mr-2">
-                    ${mentor.pricing.video}/hr
+                    ₹{mentor.pricing.video}/hr
                   </span>
                   <Button variant="outline" size="sm" asChild>
                     <Link href="/dashboard/mentor/pricing">Edit</Link>
@@ -756,7 +756,7 @@ export default async function MentorDashboard() {
                 </div>
                 <div className="flex items-center">
                   <span className="font-semibold mr-2">
-                    ${mentor.pricing.call}/hr
+                    ₹{mentor.pricing.call}/hr
                   </span>
                   <Button variant="outline" size="sm" asChild>
                     <Link href="/dashboard/mentor/pricing">Edit</Link>
