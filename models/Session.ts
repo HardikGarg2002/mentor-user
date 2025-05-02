@@ -32,6 +32,12 @@ const SessionSchema = new Schema<ISession>(
   }
 );
 
+// Add compound indexes to improve booking query performance
+SessionSchema.index({ mentorId: 1, date: 1, startTime: 1, endTime: 1 });
+SessionSchema.index({ mentorId: 1, status: 1 });
+SessionSchema.index({ status: 1, reservationExpires: 1 }); // For cleanup expired reservations
+SessionSchema.index({ menteeId: 1, date: 1 }); // For mentee session listing
+
 // Prevent model overwrite error in development due to hot reloading
 const Session =
   (mongoose.models.Session as Model<ISession>) ||
