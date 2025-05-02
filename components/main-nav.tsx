@@ -101,15 +101,9 @@ export function MainNav() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link
-                      href={
-                        session.user?.role === "mentor"
-                          ? "/profile/mentor"
-                          : "/profile/mentee"
-                      }
-                    >
-                      Profile
-                    </Link>
+                    {session.user?.role === "mentor" && (
+                      <Link href="/profile/mentor">Profile</Link>
+                    )}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
