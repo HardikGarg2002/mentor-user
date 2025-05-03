@@ -12,7 +12,7 @@ import {
 } from "@/lib/utils/mentor-dashboard";
 import { redirect } from "next/navigation";
 import { MentorStats } from "@/components/dashboard/mentor-stats";
-import { MentorDashboardTabs } from "@/components/dashboard/mentor-dashboard-tabs";
+import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 import {
   AvailabilityCard,
   PricingCard,
@@ -55,9 +55,11 @@ export default async function MentorDashboard() {
 
       <MentorStats earnings={earnings} stats={stats} />
 
-      <MentorDashboardTabs
+      <DashboardTabs
+        isMentor={true}
         upcomingSessions={upcomingSessions}
         previousSessions={previousSessions}
+        pastSessions={previousSessions}
         chatHistory={chatHistory}
         earnings={earnings}
         paymentHistory={paymentHistory}

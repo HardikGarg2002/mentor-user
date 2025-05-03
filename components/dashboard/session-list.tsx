@@ -4,30 +4,54 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Clock, Video, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
+import { StarRating } from "./ui-helpers";
 
-interface Session {
+interface BaseSession {
   id: string;
   mentorName: string;
   mentorTitle: string;
   mentorImage: string;
   date: string | Date;
   startTime: string;
-  duration: number;
   type: string;
+}
+
+interface UpcomingSession extends BaseSession {
+  duration: number;
   status: string;
 }
 
-interface UpcomingSessionsProps {
-  sessions: Session[];
-  formatDateTime: (date: string, time: string) => string;
+interface PreviousSession extends BaseSession {
+  rating?: number;
+  rated?: boolean;
 }
 
-export function UpcomingSessions({
+type Session = UpcomingSession | PreviousSession;
+
+interface SessionListProps {
+  sessions: Session[];
+  formatDateTime: (date: string, time: string) => string;
+  title: string;
+  type: "upcoming" | "previous";
+  emptyStateMessage?: string;
+  emptyStateAction?: {
+    label: string;
+    href: string;
+  };
+}
+
+export function SessionList({
   sessions,
   formatDateTime,
-}: UpcomingSessionsProps) {
-  const getSessionIcon = (type: string) => {
-    switch (type) {
+  title,
+  type,
+  emptyStateMessage = "No sessions",
+  emptyStateAction,
+}: SessionListProps) {
+  const isUpcoming = type === "upcoming";
+
+  const getSessionIcon = (sessionType: string) => {
+    switch (sessionType) {
       case "video":
         return <Video className="h-4 w-4" />;
       case "chat":
@@ -70,10 +94,18 @@ export function UpcomingSessions({
     }
   };
 
+  const isPreviousSession = (session: Session): session is PreviousSession => {
+    return !isUpcoming;
+  };
+
+  const isUpcomingSession = (session: Session): session is UpcomingSession => {
+    return isUpcoming;
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Upcoming Sessions</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
         {sessions.length > 0 ? (
@@ -107,40 +139,61 @@ export function UpcomingSessions({
                         )}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      <Clock className="h-3 w-3 mr-1 inline" />
-                      <span>{session.duration} minutes</span>
-                    </div>
+                    {isUpcomingSession(session) && (
+                      <div className="text-sm text-gray-500">
+                        <Clock className="h-3 w-3 mr-1 inline" />
+                        <span>{session.duration} minutes</span>
+                      </div>
+                    )}
+                    {isPreviousSession(session) && session.rating && (
+                      <div className="flex mt-1">
+                        <StarRating rating={session.rating} />
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="bg-primary/10 p-2 rounded-full">
                     {getSessionIcon(session.type)}
                   </div>
-                  {getStatusBadge(session.status)}
+                  {isUpcomingSession(session) && getStatusBadge(session.status)}
+                  {isPreviousSession(session) && !session.rated && (
+                    <Button size="sm" asChild>
+                      <Link href={`/sessions/${session.id}/review`}>
+                        Leave Review
+                      </Link>
+                    </Button>
+                  )}
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/sessions/${session.id}`}>View Details</Link>
                   </Button>
-                  {session.status === "confirmed" && (
-                    <Button size="sm" asChild>
-                      <Link href={`/meeting/${session.id}`}>Join</Link>
-                    </Button>
-                  )}
+                  {isUpcomingSession(session) &&
+                    session.status === "confirmed" && (
+                      <Button size="sm" asChild>
+                        <Link href={`/meeting/${session.id}`}>Join</Link>
+                      </Button>
+                    )}
                 </div>
               </div>
             ))}
-            <div className="flex justify-center mt-4">
-              <Button asChild>
-                <Link href="/mentors">Book More Sessions</Link>
-              </Button>
-            </div>
+            {isUpcoming && (
+              <div className="flex justify-center mt-4">
+                <Button asChild>
+                  <Link href="/mentors">Book More Sessions</Link>
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-4">
-            <p className="text-gray-500 mb-4">No upcoming sessions</p>
-            <Button asChild>
-              <Link href="/mentors">Find a Mentor</Link>
-            </Button>
+            <p className="text-gray-500 mb-4">{emptyStateMessage}</p>
+            {emptyStateAction && (
+              <Button asChild>
+                <Link href={emptyStateAction.href}>
+                  {emptyStateAction.label}
+                </Link>
+              </Button>
+            )}
           </div>
         )}
       </CardContent>
