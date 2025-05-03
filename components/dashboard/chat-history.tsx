@@ -55,10 +55,10 @@ export function ChatHistory({ chats, formatTimeAgo }: ChatHistoryProps) {
                   <Avatar className={chat.showIcon ? "h-6 w-6" : "h-12 w-12"}>
                     <AvatarImage
                       src={chat.person.image}
-                      alt={chat.person.name}
+                      alt={chat.person?.name}
                     />
                     <AvatarFallback>
-                      {chat.person.name.charAt(0)}
+                      {chat.person.name?.charAt(0) || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div>

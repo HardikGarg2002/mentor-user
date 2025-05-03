@@ -5,59 +5,76 @@ import Link from "next/link";
 import { getSessionIcon, getStatusBadge, StarRating } from "./ui-helpers";
 
 export function MentorSessionCard({
-  session,
+  id,
+  name,
+  image,
+  type,
+  sessionDate,
+  sessionStatus,
+  sessionStartTime,
+  sessionDuration,
+  rating,
   formatDateTime,
   canJoinSession,
-  isPastSession,
+  isUpcoming,
 }: {
-  session: any;
+  id: string;
+  name: string;
+  image: string;
+  type: string;
+  sessionDate: string;
+  sessionStatus: string;
+  sessionStartTime: string;
+  sessionDuration: number;
+  rating: number;
   formatDateTime: (date: string, time: string) => string;
   canJoinSession: (date: string, startTime: string) => boolean;
-  isPastSession: boolean;
+  isUpcoming: boolean;
 }) {
   return (
     <div
-      key={session.id}
+      key={id}
       className="flex items-center justify-between p-4 border rounded-lg"
     >
       <div className="flex items-center space-x-4">
         <div className="bg-primary/10 p-2 rounded-full">
-          {getSessionIcon(session.type)}
+          {getSessionIcon(type)}
         </div>
         <div>
           <div className="flex items-center space-x-2">
             <Avatar className="h-6 w-6">
-              <AvatarImage src={session.menteeImage} alt={session.menteeName} />
-              <AvatarFallback>{session.menteeName.charAt(0)}</AvatarFallback>
+              <AvatarImage src={image} alt={name} />
+              <AvatarFallback>{name.charAt(0)}</AvatarFallback>
             </Avatar>
-            <h3 className="font-medium">{session.menteeName}</h3>
+            <h3 className="font-medium">{name}</h3>
           </div>
           <div className="flex items-center text-sm text-gray-500">
             <Calendar className="h-3 w-3 mr-1" />
-            <span>
-              {formatDateTime(String(session.date), session.startTime)}
-            </span>
+            <span>{formatDateTime(String(sessionDate), sessionStartTime)}</span>
           </div>
           <div className="text-sm text-gray-500">
             <Clock className="h-3 w-3 mr-1 inline" />
-            <span>{session.duration} minutes</span>
+            <span>{sessionDuration} minutes</span>
           </div>
-          {isPastSession && <StarRating rating={session.rating} />}
+          {!isUpcoming && <StarRating rating={rating} />}
         </div>
       </div>
-      {isPastSession ? (
-        <PreviousSessionButtons session={session} />
-      ) : (
+      {isUpcoming ? (
         <UpcomingSessionButtons
-          session={session}
+          sessionId={id}
+          sessionStatus={sessionStatus}
+          sessionDate={sessionDate}
+          sessionStartTime={sessionStartTime}
           canJoinSession={canJoinSession}
         />
+      ) : (
+        <PreviousSessionButtons sessionId={id} />
       )}
     </div>
   );
 }
 
-function PreviousSessionButtons({ session }: { session: any }) {
+function PreviousSessionButtons({ sessionId }: { sessionId: string }) {
   return (
     <div className="flex items-center space-x-2">
       <Button
@@ -66,7 +83,7 @@ function PreviousSessionButtons({ session }: { session: any }) {
         className="flex items-center space-x-1"
         asChild
       >
-        <Link href={`/sessions/${session.id}`}>
+        <Link href={`/sessions/${sessionId}`}>
           <Eye className="h-3 w-3" />
           <span>View Feedback</span>
         </Link>
@@ -76,29 +93,35 @@ function PreviousSessionButtons({ session }: { session: any }) {
 }
 
 function UpcomingSessionButtons({
-  session,
+  sessionId,
+  sessionStatus,
+  sessionDate,
+  sessionStartTime,
   canJoinSession,
 }: {
-  session: any;
+  sessionId: string;
+  sessionStatus: string;
+  sessionDate: string;
+  sessionStartTime: string;
   canJoinSession: (date: string, startTime: string) => boolean;
 }) {
   return (
     <div className="flex items-center space-x-2">
-      {getStatusBadge(session.status)}
+      {getStatusBadge(sessionStatus)}
       <Button variant="outline" size="sm" className="mr-2" asChild>
-        <Link href={`/sessions/${session.id}`}>View Details</Link>
+        <Link href={`/sessions/${sessionId}`}>View Details</Link>
       </Button>
       <Button
         variant={
-          canJoinSession(String(session.date), session.startTime)
+          canJoinSession(String(sessionDate), sessionStartTime)
             ? "default"
             : "outline"
         }
         size="sm"
-        disabled={!canJoinSession(String(session.date), session.startTime)}
+        disabled={!canJoinSession(String(sessionDate), sessionStartTime)}
         asChild
       >
-        <Link href={`/meeting/${session.id}`}>Join</Link>
+        <Link href={`/meeting/${sessionId}`}>Join</Link>
       </Button>
     </div>
   );

@@ -10,6 +10,7 @@ interface Session {
   duration: number;
   type: string;
   status: string;
+  rating: number;
 }
 
 interface MentorSessionsProps {
@@ -38,10 +39,18 @@ export function MentorSessions({
             {sessions.map((session) => (
               <MentorSessionCard
                 key={session.id}
-                session={session}
+                id={session.id}
+                name={session.menteeName}
+                image={session.menteeImage}
+                type={session.type}
+                sessionDate={session.date.toString()}
+                sessionStatus={session.status}
+                sessionStartTime={session.startTime}
+                sessionDuration={session.duration}
+                rating={session.rating}
                 formatDateTime={formatDateTime}
                 canJoinSession={canJoinSession}
-                isPastSession={isPastSession}
+                isUpcoming={!isPastSession}
               />
             ))}
           </div>

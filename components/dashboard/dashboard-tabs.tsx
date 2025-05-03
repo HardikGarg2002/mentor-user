@@ -6,7 +6,7 @@ import { EarningsOverview } from "./earnings-overview";
 import { Reviews } from "./reviews";
 import { ReactNode } from "react";
 import { MentorSessions } from "./mentor-sessions";
-import { SessionList } from "./session-list";
+import { SessionList } from "./mentee-sessions";
 
 interface DashboardTabsProps {
   isMentor?: boolean;
@@ -67,7 +67,6 @@ export function DashboardTabs({
             formatDateTime={formatDateTime}
             title="Upcoming Sessions"
             type="upcoming"
-            emptyStateMessage="No upcoming sessions"
             emptyStateAction={{
               label: "Find a Mentor",
               href: "/mentors",
@@ -93,7 +92,6 @@ export function DashboardTabs({
             formatDateTime={formatDateTime}
             title="Past Sessions"
             type="previous"
-            emptyStateMessage="No past sessions"
           />
         ),
     },
