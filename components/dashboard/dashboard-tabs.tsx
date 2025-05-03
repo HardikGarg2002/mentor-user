@@ -2,7 +2,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatHistory } from "./chat-history";
 import { PaymentHistory } from "./payment-history";
 import { Notifications } from "./notifications";
-import { MentorChatHistory } from "./mentor-chat-history";
 import { EarningsOverview } from "./earnings-overview";
 import { Reviews } from "./reviews";
 import { ReactNode } from "react";
@@ -101,18 +100,12 @@ export function DashboardTabs({
     {
       value: "chats",
       label: "Chat History",
-      content: (props) =>
-        props.isMentor ? (
-          <MentorChatHistory
-            chats={props.chatHistory}
-            formatTimeAgo={props.formatTimeAgo}
-          />
-        ) : (
-          <ChatHistory
-            chats={props.chatHistory}
-            formatTimeAgo={props.formatTimeAgo}
-          />
-        ),
+      content: (props) => (
+        <ChatHistory
+          chats={props.chatHistory}
+          formatTimeAgo={props.formatTimeAgo}
+        />
+      ),
     },
     {
       value: "payments",
