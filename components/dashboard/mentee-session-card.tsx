@@ -96,7 +96,7 @@ export function MenteeSessionCard(props: MenteeSessionCardProps) {
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border rounded-lg">
+    <div className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg gap-4">
       <div className="flex items-center space-x-4">
         <Avatar className="h-12 w-12">
           <AvatarImage src={image} alt={name} />
@@ -122,7 +122,7 @@ export function MenteeSessionCard(props: MenteeSessionCardProps) {
           )}
         </div>
       </div>
-      <div className="flex items-center space-x-4">
+      <div className="flex flex-wrap items-center gap-2 mt-3 md:mt-0">
         <div className="bg-primary/10 p-2 rounded-full">
           {getSessionIcon(type)}
         </div>

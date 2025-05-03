@@ -34,7 +34,7 @@ export function MentorSessionCard({
   return (
     <div
       key={id}
-      className="flex items-center justify-between p-4 border rounded-lg"
+      className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg gap-4"
     >
       <div className="flex items-center space-x-4">
         <div className="bg-primary/10 p-2 rounded-full">
@@ -76,7 +76,7 @@ export function MentorSessionCard({
 
 function PreviousSessionButtons({ sessionId }: { sessionId: string }) {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2 mt-3 md:mt-0">
       <Button
         variant="outline"
         size="sm"
@@ -106,9 +106,9 @@ function UpcomingSessionButtons({
   canJoinSession: (date: string, startTime: string) => boolean;
 }) {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex flex-wrap items-center gap-2 mt-3 md:mt-0">
       {getStatusBadge(sessionStatus)}
-      <Button variant="outline" size="sm" className="mr-2" asChild>
+      <Button variant="outline" size="sm" asChild>
         <Link href={`/sessions/${sessionId}`}>View Details</Link>
       </Button>
       <Button
