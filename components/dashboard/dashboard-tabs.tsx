@@ -157,13 +157,18 @@ export function DashboardTabs({
 
   return (
     <Tabs defaultValue="upcoming" className="mb-8">
-      <TabsList>
-        {visibleTabs.map((tab) => (
-          <TabsTrigger key={tab.value} value={tab.value}>
-            {typeof tab.label === "function" ? tab.label(isMentor) : tab.label}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      {/* Scrollable TabsList wrapper on mobile */}
+      <div className="sm:overflow-visible overflow-x-auto whitespace-nowrap px-2">
+        <TabsList className="w-max sm:w-auto">
+          {visibleTabs.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>
+              {typeof tab.label === "function"
+                ? tab.label(isMentor)
+                : tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
 
       {visibleTabs.map((tab) => (
         <TabsContent key={tab.value} value={tab.value}>

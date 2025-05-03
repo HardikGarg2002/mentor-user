@@ -16,6 +16,7 @@ import {
   formatDate,
   formatTimeAgo,
 } from "@/components/dashboard/date-formatting";
+// import { MentorView } from "@/components/dashboard/mobile-view";
 
 export default async function MenteeDashboard() {
   // Get the current authenticated user
@@ -59,6 +60,7 @@ export default async function MenteeDashboard() {
         formatDate={formatDate}
         formatTimeAgo={formatTimeAgo}
       />
+      {/* <MentorView /> */}
     </div>
   );
 }
