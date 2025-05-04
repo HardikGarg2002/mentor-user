@@ -3,12 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import Link from "next/link";
 import { JoinSessionButton } from "./join-session-button";
+import { FeedbackDialog } from "./feedback-dialog";
+
 // Card Action Buttons Component
 interface CardActionsProps {
   id: string;
   isUpcoming: boolean;
   sessionStatus: string;
   sessionType: string;
+  menteeName?: string;
+  rating?: number;
+  review?: string;
 }
 
 export const MentorCardActions = ({
@@ -16,6 +21,9 @@ export const MentorCardActions = ({
   isUpcoming,
   sessionStatus,
   sessionType,
+  menteeName = "Mentee",
+  rating,
+  review,
 }: CardActionsProps) => {
   if (isUpcoming) {
     return (
@@ -29,19 +37,39 @@ export const MentorCardActions = ({
     );
   }
 
+  const hasRatingOrCompletedSession = rating || sessionStatus === "completed";
+
   return (
     <div className="flex items-center space-x-2 mt-3 md:mt-0">
-      <Button
-        variant="outline"
-        size="sm"
-        className="flex items-center space-x-1"
-        asChild
-      >
-        <Link href={`/sessions/${id}`}>
-          <Eye className="h-3 w-3" />
-          <span>View Feedback</span>
-        </Link>
-      </Button>
+      {hasRatingOrCompletedSession ? (
+        <FeedbackDialog
+          sessionId={id}
+          menteeName={menteeName}
+          rating={rating}
+          review={review}
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center space-x-1"
+          >
+            <Eye className="h-3 w-3" />
+            <span>View Feedback</span>
+          </Button>
+        </FeedbackDialog>
+      ) : (
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center space-x-1"
+          asChild
+        >
+          <Link href={`/sessions/${id}`}>
+            <Eye className="h-3 w-3" />
+            <span>View Details</span>
+          </Link>
+        </Button>
+      )}
     </div>
   );
 };
