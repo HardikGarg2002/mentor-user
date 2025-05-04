@@ -22,7 +22,6 @@ interface DashboardTabsProps {
   formatDateTime: (date: string, time: string) => string;
   formatDate: (date: string | Date) => string;
   formatTimeAgo: (date: string | Date) => string;
-  canJoinSession?: (date: string, startTime: string) => boolean;
 }
 
 interface TabDefinition {
@@ -46,7 +45,6 @@ export function DashboardTabs({
   formatDateTime,
   formatDate,
   formatTimeAgo,
-  canJoinSession,
 }: DashboardTabsProps) {
   const tabDefinitions: TabDefinition[] = [
     {
@@ -59,7 +57,6 @@ export function DashboardTabs({
             sessions={props.upcomingSessions}
             isPastSession={false}
             formatDateTime={props.formatDateTime}
-            canJoinSession={props.canJoinSession}
           />
         ) : (
           <SessionList
@@ -84,7 +81,6 @@ export function DashboardTabs({
             sessions={props.pastSessions || []}
             isPastSession={true}
             formatDateTime={props.formatDateTime}
-            canJoinSession={() => false}
           />
         ) : (
           <SessionList
@@ -177,7 +173,6 @@ export function DashboardTabs({
             formatDateTime,
             formatDate,
             formatTimeAgo,
-            canJoinSession,
           })}
         </TabsContent>
       ))}

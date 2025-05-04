@@ -22,7 +22,6 @@ import {
   formatDate,
   formatTimeAgo,
 } from "@/components/dashboard/date-formatting";
-import { canJoinSession } from "@/components/dashboard/session-utils";
 
 export default async function MentorDashboard() {
   // Get the current authenticated user
@@ -68,7 +67,6 @@ export default async function MentorDashboard() {
         formatDateTime={formatDateTime}
         formatDate={formatDate}
         formatTimeAgo={formatTimeAgo}
-        canJoinSession={canJoinSession}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

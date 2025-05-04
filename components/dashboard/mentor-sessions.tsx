@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MentorSessionCard } from "./mentor-session-card";
+import { SessionCard } from "./sessioncard/session-card";
 
 interface Session {
   id: string;
@@ -17,7 +17,6 @@ interface MentorSessionsProps {
   header: string;
   sessions: Session[];
   formatDateTime: (date: string, time: string) => string;
-  canJoinSession: (date: string, startTime: string) => boolean;
   isPastSession: boolean;
 }
 
@@ -26,7 +25,6 @@ export function MentorSessions({
   sessions,
   isPastSession,
   formatDateTime,
-  canJoinSession,
 }: MentorSessionsProps) {
   return (
     <Card>
@@ -37,10 +35,11 @@ export function MentorSessions({
         {sessions.length > 0 ? (
           <div className="space-y-4">
             {sessions.map((session) => (
-              <MentorSessionCard
+              <SessionCard
                 key={session.id}
                 id={session.id}
                 name={session.menteeName}
+                title={undefined}
                 image={session.menteeImage}
                 type={session.type}
                 sessionDate={session.date.toString()}
@@ -48,9 +47,8 @@ export function MentorSessions({
                 sessionStartTime={session.startTime}
                 sessionDuration={session.duration}
                 rating={session.rating}
-                formatDateTime={formatDateTime}
-                canJoinSession={canJoinSession}
                 isUpcoming={!isPastSession}
+                isMentor={true}
               />
             ))}
           </div>
