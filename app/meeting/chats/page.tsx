@@ -9,7 +9,7 @@ export default async function ChatsPage() {
     return redirect("/auth/signin");
   }
 
-  const basePath = "/dashboard/chats";
+  const basePath = "/chats";
 
   return (
     <div className="container mx-auto px-4 py-8">

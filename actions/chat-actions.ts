@@ -94,13 +94,8 @@ export async function sendMessage(formData: MessageFormData) {
     await chat.save();
 
     // Revalidate paths for both users
-    revalidatePath(`/dashboard/chats/${chat._id.toString()}`);
-    revalidatePath(`/dashboard/chats`);
-    // For backward compatibility
-    revalidatePath(`/dashboard/mentor/chats/${menteeId}`);
-    revalidatePath(`/dashboard/mentee/chats/${mentorId}`);
-    revalidatePath(`/dashboard/mentor/chats`);
-    revalidatePath(`/dashboard/mentee/chats`);
+    revalidatePath(`/chats/${chat._id.toString()}`);
+    revalidatePath(`/chats`);
 
     return {
       success: true,
@@ -187,13 +182,13 @@ export async function markMessagesAsRead(chatId: string) {
       await chat.save();
 
       // Revalidate paths
-      revalidatePath(`/dashboard/chats/${chat._id.toString()}`);
-      revalidatePath(`/dashboard/chats`);
+      revalidatePath(`/chats/${chat._id.toString()}`);
+      revalidatePath(`/chats`);
       // For backward compatibility
-      revalidatePath(`/dashboard/mentor/chats/${chat.menteeId}`);
-      revalidatePath(`/dashboard/mentee/chats/${chat.mentorId}`);
-      revalidatePath(`/dashboard/mentor/chats`);
-      revalidatePath(`/dashboard/mentee/chats`);
+      revalidatePath(`/mentor/chats/${chat.menteeId}`);
+      revalidatePath(`/mentee/chats/${chat.mentorId}`);
+      revalidatePath(`/mentor/chats`);
+      revalidatePath(`/mentee/chats`);
     }
 
     return {
