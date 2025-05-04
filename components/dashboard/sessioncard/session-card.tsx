@@ -15,6 +15,7 @@ interface SessionCardProps {
   rating: number;
   isUpcoming: boolean;
   isMentor: boolean;
+  review?: string;
 }
 
 export function SessionCard({
@@ -30,6 +31,7 @@ export function SessionCard({
   rating,
   isUpcoming,
   isMentor,
+  review,
 }: SessionCardProps) {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg gap-4">
@@ -49,6 +51,9 @@ export function SessionCard({
           isUpcoming={isUpcoming}
           sessionStatus={sessionStatus}
           sessionType={type}
+          menteeName={name}
+          rating={rating}
+          review={review}
         />
       ) : (
         <MenteeCardActions
@@ -56,6 +61,8 @@ export function SessionCard({
           isUpcoming={isUpcoming}
           sessionStatus={sessionStatus}
           type={type}
+          rating={rating}
+          mentorName={name}
         />
       )}
     </div>

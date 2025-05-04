@@ -1,7 +1,9 @@
+"use client";
 import { getSessionIcon, getStatusBadge } from "../ui-helpers";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { JoinSessionButton } from "./join-session-button";
+import { ReviewDialog } from "./review-dialog";
 
 // Card Action Buttons Component
 interface CardActionsProps {
@@ -10,6 +12,7 @@ interface CardActionsProps {
   sessionStatus: string;
   type: string;
   rating?: number;
+  mentorName: string;
 }
 
 export const MenteeCardActions = ({
@@ -18,6 +21,7 @@ export const MenteeCardActions = ({
   sessionStatus,
   type,
   rating,
+  mentorName,
 }: CardActionsProps) => {
   return (
     <div className="flex flex-wrap items-center gap-2 mt-3 md:mt-0">
@@ -27,9 +31,9 @@ export const MenteeCardActions = ({
       {isUpcoming && getStatusBadge(sessionStatus)}
 
       {!isUpcoming && !rating && (
-        <Button size="sm" asChild>
-          <Link href={`/sessions/${id}/review`}>Leave Review</Link>
-        </Button>
+        <ReviewDialog sessionId={id} mentorName={mentorName}>
+          <Button size="sm">Leave Review</Button>
+        </ReviewDialog>
       )}
 
       <Button variant="outline" size="sm" asChild>
