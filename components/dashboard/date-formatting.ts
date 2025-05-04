@@ -1,11 +1,26 @@
 import { format, formatDistanceToNow, parseISO } from "date-fns";
 
-export function formatDateTime(date: string, time: string) {
-  try {
-    return format(new Date(`${date}T${time}`), "MMM d, yyyy h:mm a");
-  } catch (error) {
-    return `${date} ${time}`;
-  }
+export function formatDateTime(
+  sessionDate: Date | string,
+  startTime: string
+): string {
+  const [hours, minutes] = startTime.split(":").map(Number);
+
+  // Set time on the session date
+  const dateTime = new Date(sessionDate);
+  dateTime.setHours(hours, minutes, 0, 0);
+
+  // Format using toLocaleString with Indian locale and timezone
+  return dateTime.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
 }
 
 export function formatDate(dateString: string | Date) {
