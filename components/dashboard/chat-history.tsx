@@ -86,7 +86,7 @@ export function ChatHistory({ chats, formatTimeAgo }: ChatHistoryProps) {
                   </div>
                 </div>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href={`/chats/${chat.id}`}>View Chat</Link>
+                  <Link href={`/meeting/chats/${chat.id}`}>View Chat</Link>
                 </Button>
               </div>
             ))}

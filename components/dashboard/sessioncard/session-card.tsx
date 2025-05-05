@@ -15,6 +15,8 @@ interface SessionCardProps {
   rating: number;
   isUpcoming: boolean;
   isMentor: boolean;
+  isJoinable: boolean;
+  otherUserId: string;
   review?: string;
 }
 
@@ -31,6 +33,8 @@ export function SessionCard({
   rating,
   isUpcoming,
   isMentor,
+  isJoinable,
+  otherUserId,
   review,
 }: SessionCardProps) {
   return (
@@ -54,6 +58,10 @@ export function SessionCard({
           menteeName={name}
           rating={rating}
           review={review}
+          sessionDate={sessionDate}
+          sessionStartTime={sessionStartTime}
+          otherUserId={otherUserId}
+          isJoinable={isJoinable}
         />
       ) : (
         <MenteeCardActions
@@ -63,6 +71,10 @@ export function SessionCard({
           type={type}
           rating={rating}
           mentorName={name}
+          sessionDate={sessionDate.toString()}
+          sessionStartTime={sessionStartTime}
+          isJoinable={isJoinable}
+          otherUserId={otherUserId}
         />
       )}
     </div>

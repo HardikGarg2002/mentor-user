@@ -14,6 +14,10 @@ interface CardActionsProps {
   menteeName?: string;
   rating?: number;
   review?: string;
+  sessionDate: string | Date;
+  sessionStartTime: string;
+  isJoinable: boolean;
+  otherUserId: string;
 }
 
 export const MentorCardActions = ({
@@ -24,6 +28,10 @@ export const MentorCardActions = ({
   menteeName = "Mentee",
   rating,
   review,
+  sessionDate,
+  sessionStartTime,
+  isJoinable,
+  otherUserId,
 }: CardActionsProps) => {
   if (isUpcoming) {
     return (
@@ -32,7 +40,15 @@ export const MentorCardActions = ({
         <Button variant="outline" size="sm" asChild>
           <Link href={`/sessions/${id}`}>View Details</Link>
         </Button>
-        <JoinSessionButton sessionType={sessionType} />
+        <JoinSessionButton
+          sessionId={id}
+          sessionStatus={sessionStatus}
+          sessionDate={sessionDate.toString()}
+          sessionStartTime={sessionStartTime}
+          sessionType={sessionType as "video" | "call" | "chat"}
+          otherUserId={otherUserId}
+          isJoinable={isJoinable}
+        />
       </div>
     );
   }

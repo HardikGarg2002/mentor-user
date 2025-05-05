@@ -62,7 +62,7 @@ export function DashboardTabs({
           <SessionList
             sessions={upcomingSessions}
             formatDateTime={formatDateTime}
-            title="Upcoming Sessions"
+            header="Upcoming Sessions"
             type="upcoming"
             emptyStateAction={{
               label: "Find a Mentor",
@@ -86,21 +86,21 @@ export function DashboardTabs({
           <SessionList
             sessions={pastSessions}
             formatDateTime={formatDateTime}
-            title="Past Sessions"
+            header="Past Sessions"
             type="previous"
           />
         ),
     },
-    {
-      value: "chats",
-      label: "Chat History",
-      content: (props) => (
-        <ChatHistory
-          chats={props.chatHistory}
-          formatTimeAgo={props.formatTimeAgo}
-        />
-      ),
-    },
+    // {
+    //   value: "chats",
+    //   label: "Chat History",
+    //   content: (props) => (
+    //     <ChatHistory
+    //       chats={props.chatHistory}
+    //       formatTimeAgo={props.formatTimeAgo}
+    //     />
+    //   ),
+    // },
     {
       value: "payments",
       label: (isMentor) => (isMentor ? "Earnings" : "Payments"),
