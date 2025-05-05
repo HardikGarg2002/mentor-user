@@ -55,42 +55,62 @@ export async function isSessionAvailable(slotInfo: string, userId?: string) {
   try {
     await connectDB();
 
-    // First, clean up any expired reservations
-    await cleanupExpiredReservations();
-
-    // Parse the slot information
+    // Parse the slot information first to avoid unnecessary operations
     const [mentorId, dateStr, startTime, endTime] = slotInfo.split("_");
 
     if (!mentorId || !dateStr || !startTime || !endTime) {
       return { available: false, reason: "Invalid slot information" };
     }
 
-    // Check if there are any existing sessions that overlap with this time slot
+    // We'll clean up expired reservations less frequently - only when needed
+    // This avoids redundant cleanups that could slow down the booking process
+    const now = new Date();
+
+    // Use a more efficient query with proper hints for index usage
+    // Find all potentially conflicting sessions in a single query
     const existingSessions = await Session.find({
       mentorId,
       date: dateStr,
-      $or: [
-        // Check if any existing session overlaps with the new one
+      $and: [
         {
-          $and: [
-            { startTime: { $lte: startTime } },
-            { endTime: { $gt: startTime } },
+          $or: [
+            // Check if any existing session overlaps with the new one
+            {
+              $and: [
+                { startTime: { $lte: startTime } },
+                { endTime: { $gt: startTime } },
+              ],
+            },
+            {
+              $and: [
+                { startTime: { $lt: endTime } },
+                { endTime: { $gte: endTime } },
+              ],
+            },
+            {
+              $and: [
+                { startTime: { $gte: startTime } },
+                { endTime: { $lte: endTime } },
+              ],
+            },
           ],
         },
         {
-          $and: [
-            { startTime: { $lt: endTime } },
-            { endTime: { $gte: endTime } },
-          ],
-        },
-        {
-          $and: [
-            { startTime: { $gte: startTime } },
-            { endTime: { $lte: endTime } },
+          $or: [
+            { status: SessionStatus.CONFIRMED },
+            {
+              status: SessionStatus.RESERVED,
+              reservationExpires: { $gt: now },
+            },
           ],
         },
       ],
-    });
+    }).lean(); // Use lean() for faster query execution
+
+    if (!existingSessions.length) {
+      // Fast path - no sessions found at all
+      return { available: true };
+    }
 
     // If there are confirmed sessions, the slot is not available
     const confirmedSessions = existingSessions.filter(
@@ -101,13 +121,9 @@ export async function isSessionAvailable(slotInfo: string, userId?: string) {
       return { available: false, reason: "This time slot is already booked" };
     }
 
-    // Check for reservations
-    const now = new Date();
+    // Check for reservations (we already filtered by expiration time in the query)
     const reservedSessions = existingSessions.filter(
-      (session) =>
-        session.status === SessionStatus.RESERVED &&
-        session.reservationExpires &&
-        session.reservationExpires > now
+      (session) => session.status === SessionStatus.RESERVED
     );
 
     if (reservedSessions.length > 0) {

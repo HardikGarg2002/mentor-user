@@ -270,16 +270,9 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
         ]);
 
         setWeeklyAvailability(availabilityData);
-        // Convert Date objects to strings in bookedSlotsData if needed
-        const formattedBookedSlots = bookedSlotsData.map((slot) => ({
-          date:
-            typeof slot.date === "string"
-              ? slot.date
-              : format(new Date(slot.date), "yyyy-MM-dd"),
-          startTime: slot.startTime,
-          endTime: slot.endTime,
-        }));
-        setBookedSlots(formattedBookedSlots);
+
+        // bookedSlotsData is now directly usable without mapping
+        setBookedSlots(bookedSlotsData);
       } catch (error) {
         console.error("Error fetching mentor data:", error);
         toast.error("Error", {
@@ -410,15 +403,7 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
 
       // Refresh the available slots
       const bookedSlotsData = await getMentorBookedSlots(mentor.userId);
-      const formattedBookedSlots = bookedSlotsData.map((slot) => ({
-        date:
-          typeof slot.date === "string"
-            ? slot.date
-            : format(new Date(slot.date), "yyyy-MM-dd"),
-        startTime: slot.startTime,
-        endTime: slot.endTime,
-      }));
-      setBookedSlots(formattedBookedSlots);
+      setBookedSlots(bookedSlotsData);
 
       return;
     }

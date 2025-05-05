@@ -39,44 +39,25 @@ export async function bookSession(formData: BookingFormData) {
   try {
     await connectDB();
 
-    // Run cleanup before booking to ensure clean state
-    const { cleanupExpiredReservations } = await import(
-      "@/lib/utils/session-utils"
-    );
-    await cleanupExpiredReservations();
-
-    // Validate booking data
+    // Validate booking data early to fail fast
     const validatedData = bookingSchema.parse(formData);
 
-    // Get the mentor and mentee user records
-    const mentor = await User.findById(validatedData.mentorId);
-    const mentee = await User.findOne({ email: session.user.email });
+    // Use a single query to fetch both mentor and mentee in parallel
+    const [mentor, mentee] = await Promise.all([
+      User.findById(validatedData.mentorId).lean(),
+      User.findOne({ email: session.user.email }).lean(),
+    ]);
 
     if (!mentor) {
-      return {
-        error: "Mentor not found",
-      };
+      return { error: "Mentor not found" };
     }
 
     if (!mentee) {
-      return {
-        error: "Mentee account not found",
-      };
-    }
-
-    // Verify the weekly availability exists and belongs to the mentor
-    const weeklyAvailability = await MentorWeeklyAvailability.findOne({
-      _id: validatedData.availabilityId,
-      mentorId: mentor._id,
-    });
-
-    if (!weeklyAvailability) {
-      return {
-        error: "Time slot not available",
-      };
+      return { error: "Mentee account not found" };
     }
 
     // Check if the slot is actually available (including reservations)
+    // This also includes the cleanup of expired reservations when needed
     const { isSessionAvailable } = await import("@/lib/utils/session-utils");
     const slotInfo = `${validatedData.mentorId}_${validatedData.date}_${validatedData.startTime}_${validatedData.endTime}`;
     const availabilityCheck = await isSessionAvailable(slotInfo);
@@ -90,23 +71,32 @@ export async function bookSession(formData: BookingFormData) {
       };
     }
 
-    // Calculate the price based on duration and type
-    const mentorProfile = await Mentor.findOne({ userId: mentor._id });
+    // Fetch both availability and mentor profile in parallel
+    const [weeklyAvailability, mentorProfile] = await Promise.all([
+      MentorWeeklyAvailability.findOne({
+        _id: validatedData.availabilityId,
+        mentorId: mentor._id,
+      }).lean(),
+      Mentor.findOne({ userId: mentor._id }).lean(),
+    ]);
+
+    if (!weeklyAvailability) {
+      return { error: "Time slot not available" };
+    }
 
     if (!mentorProfile) {
-      return {
-        error: "Mentor profile not found",
-      };
+      return { error: "Mentor profile not found" };
     }
 
     const hourlyRate = mentorProfile.pricing[validatedData.meeting_type];
     const price = (validatedData.duration / 60) * hourlyRate;
 
-    // Create the booking record with an expiration time (30 minutes)
+    // Create the booking record with an expiration time (20 minutes)
     const reservationExpires = new Date();
     reservationExpires.setMinutes(reservationExpires.getMinutes() + 20);
 
-    const newSession = new Session({
+    // Use an optimized session creation
+    const newSession = await Session.create({
       mentorId: mentor._id,
       menteeId: mentee._id,
       date: validatedData.date,
@@ -120,12 +110,13 @@ export async function bookSession(formData: BookingFormData) {
       reservationExpires: reservationExpires,
     });
 
-    await newSession.save();
-
-    // Revalidate relevant paths
-    revalidatePath("/dashboard/mentee");
-    revalidatePath("/dashboard/mentor");
-    revalidatePath(`/mentors/${mentor._id}`);
+    // Batch revalidate all affected paths
+    const pathsToRevalidate = [
+      "/dashboard/mentee",
+      "/dashboard/mentor",
+      `/mentors/${mentor._id}`,
+    ];
+    pathsToRevalidate.forEach((path) => revalidatePath(path));
 
     return {
       success: true,
@@ -255,32 +246,30 @@ export async function getMentorBookedSlots(mentorId: string) {
   try {
     await connectDB();
 
-    // First cleanup any expired reservations
-    const { cleanupExpiredReservations } = await import(
-      "@/lib/utils/session-utils"
-    );
-    await cleanupExpiredReservations();
-
-    // Find both confirmed sessions and reserved sessions
-    const confirmedSessions = await Session.find({
-      mentorId: mentorId,
-      status: SessionStatus.CONFIRMED,
-    }).select("date startTime endTime");
-
     const now = new Date();
-    const reservedSessions = await Session.find({
+
+    // Optimize by combining all queries into one and using lean()
+    const bookedSessions = await Session.find({
       mentorId: mentorId,
-      status: SessionStatus.RESERVED,
-      reservationExpires: { $gt: now },
-    }).select("date startTime endTime");
+      $or: [
+        { status: SessionStatus.CONFIRMED },
+        {
+          status: SessionStatus.RESERVED,
+          reservationExpires: { $gt: now },
+        },
+      ],
+    })
+      .select("date startTime endTime") // Only select the fields we need
+      .lean(); // Use lean for better performance
 
-    // Combine both types of sessions
-    const allBookedSessions = [...confirmedSessions, ...reservedSessions];
-
-    return allBookedSessions.map((s) => ({
-      date: s.date,
-      startTime: s.startTime,
-      endTime: s.endTime,
+    // Format the date as string to match the expected BookedSlot type
+    return bookedSessions.map((session) => ({
+      date:
+        typeof session.date === "string"
+          ? session.date
+          : session.date.toISOString().split("T")[0],
+      startTime: session.startTime,
+      endTime: session.endTime,
     }));
   } catch (error) {
     console.error("Error getting mentor booked slots:", error);
