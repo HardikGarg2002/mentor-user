@@ -8,6 +8,7 @@ import User from "@/models/User";
 import Mentor from "@/models/Mentor";
 import { SessionStatus } from "@/types/session";
 import { PaymentStatus } from "@/types/payment";
+import { canJoinSession } from "./canJoin";
 
 /**
  * Fetch upcoming sessions for a mentee
@@ -64,18 +65,10 @@ export async function getUpcomingSessions(menteeId: string) {
         session.startTime <= currentTime &&
         session.endTime > currentTime;
 
-      // Check accessibility for different features
-      const chatAccessible = isSessionAccessible(
+      const isJoinable = canJoinSession(
         session.date,
         session.startTime,
-        session.meeting_type,
-        "chat"
-      );
-      const videoAccessible = isSessionAccessible(
-        session.date,
-        session.startTime,
-        session.meeting_type,
-        "video"
+        session.endTime
       );
 
       return {
@@ -92,8 +85,7 @@ export async function getUpcomingSessions(menteeId: string) {
         status: session.status,
         price: session.price,
         isOngoing: isOngoing,
-        chatAccessible: chatAccessible,
-        videoAccessible: videoAccessible,
+        isJoinable: isJoinable,
       };
     });
   } catch (error) {
@@ -525,17 +517,15 @@ export async function getOngoingSessions(menteeId: string) {
       );
 
       // Check accessibility for different features
-      const chatAccessible = isSessionAccessible(
+      const chatAccessible = canJoinSession(
         session.date,
         session.startTime,
-        session.meeting_type,
-        "chat"
+        session.endTime
       );
-      const videoAccessible = isSessionAccessible(
+      const videoAccessible = canJoinSession(
         session.date,
         session.startTime,
-        session.meeting_type,
-        "video"
+        session.endTime
       );
 
       return {
@@ -560,49 +550,6 @@ export async function getOngoingSessions(menteeId: string) {
     console.error("Error fetching ongoing sessions:", error);
     return [];
   }
-}
-
-/**
- * Check if a session is accessible for video/chat
- * - For chat sessions: always accessible
- * - For video/call sessions: accessible 10 minutes before start time until 10 minutes after
- * @param sessionDate - Date of the session
- * @param startTime - Start time of the session (HH:MM format)
- * @param sessionType - Type of session (chat, video, call)
- * @param feature - Feature trying to access (chat or video)
- */
-function isSessionAccessible(
-  sessionDate: Date,
-  startTime: string,
-  sessionType: string,
-  feature: "chat" | "video" = "video"
-): boolean {
-  // Chat is always accessible for chat sessions
-  if (feature === "chat") {
-    return true;
-  }
-
-  // For video features, check time window
-  if (
-    feature === "video" &&
-    (sessionType === "video" || sessionType === "call")
-  ) {
-    const now = new Date();
-    const sessionDateTime = new Date(sessionDate);
-
-    // Set the session time on the session date
-    const [hours, minutes] = startTime.split(":").map(Number);
-    sessionDateTime.setHours(hours, minutes, 0, 0);
-
-    // Calculate time difference in minutes
-    const diffMs = sessionDateTime.getTime() - now.getTime();
-    const diffMinutes = Math.round(diffMs / (1000 * 60));
-
-    // Access is allowed from 10 minutes before to 10 minutes after session start
-    return diffMinutes >= -10 && diffMinutes <= 10;
-  }
-
-  return false;
 }
 
 /**
@@ -657,17 +604,15 @@ export async function getMentorUpcomingSessions(mentorId: string) {
         session.endTime > currentTime;
 
       // Check accessibility for different features
-      const chatAccessible = isSessionAccessible(
+      const chatAccessible = canJoinSession(
         session.date,
         session.startTime,
-        session.meeting_type,
-        "chat"
+        session.endTime
       );
-      const videoAccessible = isSessionAccessible(
+      const videoAccessible = canJoinSession(
         session.date,
         session.startTime,
-        session.meeting_type,
-        "video"
+        session.endTime
       );
 
       return {
@@ -726,18 +671,10 @@ export async function getMentorOngoingSessions(mentorId: string) {
         (u) => u._id.toString() === session.menteeId.toString()
       );
 
-      // Check accessibility for different features
-      const chatAccessible = isSessionAccessible(
+      const isJoinable = canJoinSession(
         session.date,
         session.startTime,
-        session.meeting_type,
-        "chat"
-      );
-      const videoAccessible = isSessionAccessible(
-        session.date,
-        session.startTime,
-        session.meeting_type,
-        "video"
+        session.endTime
       );
 
       return {
@@ -753,8 +690,7 @@ export async function getMentorOngoingSessions(mentorId: string) {
         status: session.status,
         price: session.price,
         isOngoing: true,
-        chatAccessible: chatAccessible,
-        videoAccessible: videoAccessible,
+        isJoinable: isJoinable,
       };
     });
   } catch (error) {
@@ -798,18 +734,10 @@ export async function getSessionById(sessionId: string) {
       session.startTime <= currentTime &&
       session.endTime > currentTime;
 
-    // Check accessibility for different features
-    const chatAccessible = isSessionAccessible(
+    const isJoinable = canJoinSession(
       session.date,
       session.startTime,
-      session.meeting_type,
-      "chat"
-    );
-    const videoAccessible = isSessionAccessible(
-      session.date,
-      session.startTime,
-      session.meeting_type,
-      "video"
+      session.endTime
     );
 
     return {
@@ -829,8 +757,7 @@ export async function getSessionById(sessionId: string) {
       status: session.status,
       price: session.price,
       isOngoing: isOngoing,
-      chatAccessible: chatAccessible,
-      videoAccessible: videoAccessible,
+      isJoinable: isJoinable,
     };
   } catch (error) {
     console.error("Error fetching session details:", error);

@@ -14,7 +14,7 @@ export default async function ChatPage({
   }
 
   const { chatId } = await params;
-  const basePath = "/dashboard/chats";
+  const basePath = "/chats";
 
   return (
     <div className="container mx-auto px-4 py-8">

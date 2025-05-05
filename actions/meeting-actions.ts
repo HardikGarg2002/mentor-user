@@ -12,7 +12,7 @@ export async function createVideoLink({
 }): Promise<string> {
   try {
     // 4️⃣ Construct Jitsi Meeting Link
-    const meetingId = `gym-meeting-${mentorId}-${bookedBy}-${scheduledAt.toString()}`;
+    const meetingId = `aricious-meeting-${mentorId}-${bookedBy}-${scheduledAt.toString()}`;
     // const meetingLink = `https://meet.jit.si/${meetingId}#userInfo.displayName=${encodeURIComponent(
     //   menteeName
     // )}`;

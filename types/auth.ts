@@ -10,6 +10,7 @@ export interface UserSession {
   name: string;
   email: string;
   image?: string;
+  phone?: string;
   role: UserRole;
 }
 
@@ -17,6 +18,7 @@ export interface IUser extends UserSession {
   _id?: string | mongoose.Types.ObjectId;
   emailVerified?: boolean;
   password: string;
+  phone?: string;
   createdAt: Date;
   updatedAt: Date;
 }

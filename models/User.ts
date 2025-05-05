@@ -8,6 +8,7 @@ const UserSchema = new Schema<IUser>(
     image: { type: String },
     emailVerified: { type: Boolean, default: false },
     password: { type: String, required: true, select: true },
+    phone: { type: String },
     role: {
       type: String,
       enum: UserRole,
