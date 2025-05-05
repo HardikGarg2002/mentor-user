@@ -123,6 +123,8 @@ export async function POST(req: NextRequest) {
         revalidatePath(`/sessions/${receipt}`);
         revalidatePath(`/payment/success/${receipt}`);
         revalidatePath(`/profile`);
+        revalidatePath("/dashboard/mentee");
+        revalidatePath("/dashboard/mentor");
       } else {
         // Update existing payment
         paymentRecord.status = status;
@@ -143,6 +145,8 @@ export async function POST(req: NextRequest) {
           revalidatePath(`/sessions/${receipt}`);
           revalidatePath(`/payment/success/${receipt}`);
           revalidatePath(`/profile`);
+          revalidatePath("/dashboard/mentee");
+          revalidatePath("/dashboard/mentor");
         }
       }
     } else if (event === "payment.failed") {

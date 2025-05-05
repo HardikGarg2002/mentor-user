@@ -96,7 +96,7 @@ export async function createMentor(formData: MentorFormData) {
     await newMentor.save();
 
     revalidatePath("/mentors");
-    revalidatePath("/become-mentor");
+    revalidatePath("/auth/signup/become-mentor");
 
     return {
       success: true,

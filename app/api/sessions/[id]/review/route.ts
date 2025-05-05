@@ -91,6 +91,8 @@ export async function POST(
     // Revalidate paths
     revalidatePath(`/sessions/${sessionId}`);
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/mentor");
+    revalidatePath("/dashboard/mentee");
 
     return NextResponse.json({ success: true });
   } catch (error) {

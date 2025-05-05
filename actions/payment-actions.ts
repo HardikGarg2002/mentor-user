@@ -80,6 +80,8 @@ export async function createPayment(sessionId: string, paymentMethod: string) {
 
     revalidatePath(`/sessions/${sessionId}`);
     revalidatePath(`/profile`);
+    revalidatePath("/dashboard/mentee");
+    revalidatePath("/dashboard/mentor");
 
     return {
       success: true,
@@ -328,6 +330,8 @@ export async function verifyRazorpayPayment(
 
     revalidatePath(`/sessions/${sessionId}`);
     revalidatePath(`/profile`);
+    revalidatePath("/dashboard/mentee");
+    revalidatePath("/dashboard/mentor");
 
     return {
       success: true,

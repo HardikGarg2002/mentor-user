@@ -74,6 +74,8 @@ export async function submitReview(
     // Revalidate relevant pages
     revalidatePath(`/sessions/${sessionId}`);
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/mentor");
+    revalidatePath("/dashboard/mentee");
 
     return { success: true };
   } catch (error) {
