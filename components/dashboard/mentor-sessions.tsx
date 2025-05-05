@@ -3,10 +3,13 @@ import { SessionCard } from "./sessioncard/session-card";
 
 interface Session {
   id: string;
+  menteeId: string;
   menteeName: string;
   menteeImage: string;
   date: string | Date;
   startTime: string;
+  endTime: string;
+  isJoinable: boolean;
   duration: number;
   type: string;
   status: string;
@@ -46,6 +49,8 @@ export function MentorSessions({
                 sessionStatus={session.status}
                 sessionStartTime={session.startTime}
                 sessionDuration={session.duration}
+                otherUserId={session.menteeId}
+                isJoinable={session.isJoinable}
                 rating={session.rating}
                 isUpcoming={!isPastSession}
                 isMentor={true}

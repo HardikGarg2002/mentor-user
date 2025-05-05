@@ -5,12 +5,15 @@ import { SessionCard } from "./sessioncard/session-card";
 
 interface Session {
   id: string;
+  menteeId: string;
+  mentorId: string;
   mentorName: string;
   mentorTitle: string;
   mentorImage: string;
   date: string | Date;
   startTime: string;
   type: string;
+  isJoinable: boolean;
   rating?: number;
   rated?: boolean;
   duration: number;
@@ -20,7 +23,7 @@ interface Session {
 interface SessionListProps {
   sessions: Session[];
   formatDateTime: (date: string, time: string) => string;
-  title: string;
+  header: string;
   type: "upcoming" | "previous";
   emptyStateAction?: {
     label: string;
@@ -31,7 +34,7 @@ interface SessionListProps {
 export function SessionList({
   sessions,
   formatDateTime,
-  title,
+  header,
   type,
   emptyStateAction,
 }: SessionListProps) {
@@ -40,7 +43,7 @@ export function SessionList({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle>{header}</CardTitle>
       </CardHeader>
       <CardContent>
         {sessions.length > 0 ? (
@@ -57,6 +60,8 @@ export function SessionList({
                 sessionDuration={session.duration}
                 sessionStatus={session.status}
                 type={session.type}
+                isJoinable={session.isJoinable}
+                otherUserId={session.mentorId}
                 isUpcoming={isUpcoming}
                 rating={session.rating}
                 isMentor={false}
@@ -72,7 +77,7 @@ export function SessionList({
           </div>
         ) : (
           <div className="text-center py-4">
-            <p className="text-gray-500 mb-4">No {title}</p>
+            <p className="text-gray-500 mb-4">No {header}</p>
             {emptyStateAction && (
               <Button asChild>
                 <Link href={emptyStateAction.href}>

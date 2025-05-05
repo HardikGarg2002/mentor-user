@@ -10,7 +10,11 @@ interface CardActionsProps {
   id: string;
   isUpcoming: boolean;
   sessionStatus: string;
+  sessionDate: string;
+  sessionStartTime: string;
   type: string;
+  isJoinable: boolean;
+  otherUserId: string;
   rating?: number;
   mentorName: string;
 }
@@ -19,7 +23,11 @@ export const MenteeCardActions = ({
   id,
   isUpcoming,
   sessionStatus,
+  sessionDate,
+  sessionStartTime,
   type,
+  isJoinable,
+  otherUserId,
   rating,
   mentorName,
 }: CardActionsProps) => {
@@ -41,7 +49,15 @@ export const MenteeCardActions = ({
       </Button>
 
       {isUpcoming && sessionStatus === "confirmed" && (
-        <JoinSessionButton sessionType={type} />
+        <JoinSessionButton
+          sessionId={id}
+          sessionStatus={sessionStatus}
+          sessionDate={sessionDate}
+          sessionStartTime={sessionStartTime}
+          sessionType={type as "video" | "call" | "chat"}
+          isJoinable={isJoinable}
+          otherUserId={otherUserId}
+        />
       )}
     </div>
   );

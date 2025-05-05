@@ -68,10 +68,18 @@ export function ReviewSystemDemo() {
             <h3 className="text-sm font-medium mb-2">
               Past Session (Leave a Review)
             </h3>
-            <SessionCard {...demoMenteeSession} />
+            <SessionCard
+              {...demoMenteeSession}
+              isJoinable={true}
+              otherUserId={demoMenteeSession.id}
+            />
 
             <h3 className="text-sm font-medium mb-2 mt-6">Upcoming Session</h3>
-            <SessionCard {...upcomingSession} />
+            <SessionCard
+              {...upcomingSession}
+              isJoinable={true}
+              otherUserId={upcomingSession.id}
+            />
 
             <div className="p-4 mt-4 border rounded bg-amber-50/50">
               <p className="text-sm text-amber-700">
@@ -87,7 +95,11 @@ export function ReviewSystemDemo() {
             <h3 className="text-sm font-medium mb-2">
               Past Session (View Feedback)
             </h3>
-            <SessionCard {...demoMentorSession} />
+            <SessionCard
+              {...demoMentorSession}
+              isJoinable={true}
+              otherUserId={demoMentorSession.id}
+            />
 
             <div className="p-4 mt-4 border rounded bg-amber-50/50">
               <p className="text-sm text-amber-700">

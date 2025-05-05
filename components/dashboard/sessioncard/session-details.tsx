@@ -33,7 +33,7 @@ export function SessionDetails({
         <p className="text-sm text-gray-500">{title}</p>
         <div className="flex items-center text-sm text-gray-500 mt-1">
           <Calendar className="h-3 w-3 mr-1" />
-          <span>{formatDateTime(String(sessionDate), sessionStartTime)}</span>
+          <span>{formatDateTime(sessionDate, sessionStartTime)}</span>
         </div>
         {isUpcoming && (
           <div className="text-sm text-gray-500">
