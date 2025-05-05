@@ -31,7 +31,7 @@ export function StartChatButton({
       const result = await getOrCreateChat(otherUserId);
       console.log("get or create chat result", result);
       if (result.success) {
-        const basePath = "/chats";
+        const basePath = "/meeting/chats";
 
         router.push(`${basePath}/${result.chatId}`);
       } else {
