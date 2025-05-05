@@ -178,7 +178,7 @@ export default async function PaymentSuccessPage({
             <Link href={`/sessions/${session.id}`}>View Session Details</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href="/sessions">Go to My Sessions</Link>
+            <Link href="/dashboard">Go to My Sessions</Link>
           </Button>
         </CardFooter>
       </Card>

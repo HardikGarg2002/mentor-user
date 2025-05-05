@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Facebook, X, Instagram, Linkedin, Youtube } from "lucide-react";
 import { NewsletterForm } from "@/components/newsletter/newsletter-form";
 
 export function Footer() {
@@ -24,15 +24,15 @@ export function Footer() {
                 href="#"
                 className="text-gray-500 hover:text-primary transition-colors"
               >
-                <Facebook className="h-5 w-5" />
-                <span className="sr-only">Facebook</span>
+                <Youtube className="h-6 w-6" />
+                <span className="sr-only">Youtube</span>
               </a>
               <a
                 href="#"
                 className="text-gray-500 hover:text-primary transition-colors"
               >
-                <Twitter className="h-5 w-5" />
-                <span className="sr-only">Twitter</span>
+                <X className="h-5 w-5" />
+                <span className="sr-only">X</span>
               </a>
               <a
                 href="#"

@@ -1,11 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
-// import { auth } from "@/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-// import { VideoCallButton } from "@/components/video-call/video-call-button";
-import { StartChatButton } from "@/components/chat/start-chat-button";
 import { PaymentForm } from "@/components/payment/payment-form";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
@@ -126,14 +122,6 @@ export default async function SessionDetailsPage({
                   <p className="text-lg">{sessionRecord.timezone}</p>
                 </div>
               </div>
-
-              {sessionRecord.status === "confirmed" &&
-                sessionRecord.meeting_type === "video" && (
-                  <div className="flex gap-4 mt-6">
-                    {/* <VideoCallButton sessionId={params.id} /> */}
-                    <StartChatButton otherUserId={otherUser._id.toString()} />
-                  </div>
-                )}
             </CardContent>
           </Card>
         </div>
@@ -179,7 +167,7 @@ export default async function SessionDetailsPage({
                   </div>
                 )}
 
-                <div className="mt-4">
+                {/* <div className="mt-4">
                   <h3 className="text-sm font-medium text-gray-500 mb-2">
                     Session Actions
                   </h3>
@@ -194,7 +182,7 @@ export default async function SessionDetailsPage({
                       </Button>
                     )}
                   </div>
-                </div>
+                </div> */}
               </CardContent>
             </Card>
           )}

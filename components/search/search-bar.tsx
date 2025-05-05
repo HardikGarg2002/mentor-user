@@ -27,9 +27,9 @@ export function SearchBar({
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setQuery(initialQuery);
-  }, [initialQuery]);
+  // useEffect(() => {
+  //   setQuery(initialQuery);
+  // }, [initialQuery]);
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) {
