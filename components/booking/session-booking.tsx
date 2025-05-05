@@ -80,6 +80,9 @@ function generateTimeSlotsForDate(
 ): TimeSlot[] {
   const dayOfWeek = getDay(date); // 0 = Sunday, 6 = Saturday
   const dateStr = format(date, "yyyy-MM-dd");
+  const now = new Date();
+  const isToday = format(date, "yyyy-MM-dd") === format(now, "yyyy-MM-dd");
+  const currentMinutes = isToday ? now.getHours() * 60 + now.getMinutes() : 0;
 
   // Filter availability for the day of week
   const dayAvailability = weeklyAvailability.filter(
@@ -105,6 +108,9 @@ function generateTimeSlotsForDate(
       if (slotStart + 30 > endMinutes) break;
 
       const slotEnd = slotStart + 30;
+
+      // Skip slots that have already passed for today
+      if (isToday && slotEnd <= currentMinutes) continue;
 
       const startTimeStr = `${Math.floor(slotStart / 60)
         .toString()

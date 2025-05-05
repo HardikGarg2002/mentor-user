@@ -21,7 +21,7 @@ export default function HeroSection() {
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Find Your Perfect Mentor
+            Be Greedy To Ask
           </h1>
           <p className="text-xl mb-8">
             Connect with industry experts who can help you grow your skills and

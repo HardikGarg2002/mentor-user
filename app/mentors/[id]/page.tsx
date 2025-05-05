@@ -115,9 +115,9 @@ export default async function MentorProfile({
                   ))}
                 </div>
               </div>
-              <div className="flex gap-3">
+              {/* <div className="flex gap-3">
                 <StartChatButton otherUserId={mentor.userId} />
-              </div>
+              </div> */}
             </div>
           </div>
 
