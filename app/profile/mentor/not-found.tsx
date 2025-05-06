@@ -16,7 +16,7 @@ export default function MentorProfileNotFound() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild variant="default">
-            <Link href="/become-mentor">Create Your Profile</Link>
+            <Link href="/auth/signup/become-mentor">Create Your Profile</Link>
           </Button>
           <Button asChild variant="outline">
             <Link href="/dashboard">Return to Dashboard</Link>

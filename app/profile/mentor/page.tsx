@@ -9,7 +9,7 @@ async function fetchMentorProfile(userId: string): Promise<MentorProfile> {
   const mentorProfile = await getMentorProfile(userId);
 
   if (!mentorProfile) {
-    redirect("/become-mentor");
+    redirect("/auth/signup/become-mentor");
   }
 
   // Serialize the data to avoid date serialization issues

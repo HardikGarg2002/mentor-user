@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
+import LocalDate from "@/components/local-date";
 
 async function getSessionData(sessionId: string) {
   try {
@@ -158,7 +159,7 @@ export default async function PaymentSuccessPage({
                 <div className="grid grid-cols-3 gap-1">
                   <p className="text-gray-600 col-span-1">Payment Date:</p>
                   <p className="font-medium col-span-2">
-                    {new Date(payment.paymentDate).toLocaleString()}
+                    <LocalDate date={new Date(payment.paymentDate)} />
                   </p>
                 </div>
               </div>
