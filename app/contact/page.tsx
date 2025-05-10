@@ -46,7 +46,7 @@ export default function ContactPage() {
                     <Mail className="h-6 w-6 text-primary mr-3 flex-shrink-0 mt-1" />
                     <div>
                       <h3 className="font-semibold">Email</h3>
-                      <p className="text-gray-700">contact@aricious.com</p>
+                      <p className="text-gray-700">support@aricious.com</p>
                     </div>
                   </div>
 
@@ -88,7 +88,7 @@ export default function ContactPage() {
 
                 <div className="flex space-x-4 mt-8">
                   <a
-                    href="https://instagram.com"
+                    href="https://www.instagram.com/aricious__?igsh=MW9rcGw5Z254NXcyOA=="
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-primary/10 text-primary p-3 rounded-full hover:bg-primary hover:text-white transition-colors"

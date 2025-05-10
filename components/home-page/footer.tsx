@@ -21,32 +21,22 @@ export function Footer() {
             </p>
             <div className="flex space-x-4">
               <a
-                href="#"
+                href="https://youtube.com/@aricious?si=mNJEzv4JhNB2GqtI"
                 className="text-gray-500 hover:text-primary transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Youtube className="h-6 w-6" />
                 <span className="sr-only">Youtube</span>
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/aricious__?igsh=MW9rcGw5Z254NXcyOA=="
                 className="text-gray-500 hover:text-primary transition-colors"
-              >
-                <X className="h-5 w-5" />
-                <span className="sr-only">X</span>
-              </a>
-              <a
-                href="#"
-                className="text-gray-500 hover:text-primary transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Instagram className="h-5 w-5" />
                 <span className="sr-only">Instagram</span>
-              </a>
-              <a
-                href="#"
-                className="text-gray-500 hover:text-primary transition-colors"
-              >
-                <Linkedin className="h-5 w-5" />
-                <span className="sr-only">LinkedIn</span>
               </a>
             </div>
           </div>
