@@ -25,6 +25,7 @@ export function MainNav() {
   const navItems = [
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
+    { name: "Team", path: "/team" },
     { name: "Mentors", path: "/mentors" },
     { name: "Blog", path: "/blog" },
     { name: "FAQ", path: "/faq" },
