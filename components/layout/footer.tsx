@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { Facebook, X, Instagram, Linkedin, Youtube } from "lucide-react";
 import { NewsletterForm } from "@/components/newsletter/newsletter-form";
+import {
+  SOCIAL_LINKS,
+  LEGAL_LINKS,
+  SUPPORT_LINKS,
+  RESOURCE_LINKS,
+} from "@/config/constants";
 
 export function Footer() {
   return (
@@ -21,7 +27,7 @@ export function Footer() {
             </p>
             <div className="flex space-x-4">
               <a
-                href="https://youtube.com/@aricious?si=mNJEzv4JhNB2GqtI"
+                href={SOCIAL_LINKS.YOUTUBE}
                 className="text-gray-500 hover:text-primary transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -30,13 +36,33 @@ export function Footer() {
                 <span className="sr-only">Youtube</span>
               </a>
               <a
-                href="https://www.instagram.com/aricious__?igsh=MW9rcGw5Z254NXcyOA=="
+                href={SOCIAL_LINKS.INSTAGRAM}
                 className="text-gray-500 hover:text-primary transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Instagram className="h-5 w-5" />
                 <span className="sr-only">Instagram</span>
+              </a>
+              <a
+                href={SOCIAL_LINKS.LINKEDIN}
+                className="text-gray-500 hover:text-primary transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Linkedin className="h-5 w-5" />
+                <span className="sr-only">LinkedIn</span>
+              </a>
+              <a
+                href={SOCIAL_LINKS.TWITTER}
+                className="text-gray-500 hover:text-primary transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                <span className="sr-only">X</span>
               </a>
             </div>
           </div>
@@ -79,7 +105,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/contact"
+                  href={SUPPORT_LINKS.CONTACT}
                   className="text-gray-600 hover:text-primary transition-colors"
                 >
                   Contact Us
@@ -94,7 +120,7 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/blog"
+                  href={RESOURCE_LINKS.BLOG}
                   className="text-gray-600 hover:text-primary transition-colors"
                 >
                   Blog
@@ -102,7 +128,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/faq"
+                  href={SUPPORT_LINKS.FAQ}
                   className="text-gray-600 hover:text-primary transition-colors"
                 >
                   FAQ
@@ -110,7 +136,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/privacy"
+                  href={LEGAL_LINKS.PRIVACY}
                   className="text-gray-600 hover:text-primary transition-colors"
                 >
                   Privacy Policy
@@ -118,7 +144,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/terms"
+                  href={LEGAL_LINKS.TERMS}
                   className="text-gray-600 hover:text-primary transition-colors"
                 >
                   Terms of Service

@@ -1,6 +1,7 @@
 import { ISession } from "@/types";
 import { SessionStatus } from "@/types/session";
 import mongoose, { Schema, type Model } from "mongoose";
+import { Constants, DATETIME } from "@/config";
 
 const SessionSchema = new Schema<ISession>(
   {
@@ -15,15 +16,28 @@ const SessionSchema = new Schema<ISession>(
     date: { type: Date, required: true },
     startTime: { type: String, required: true },
     endTime: { type: String, required: true },
-    duration: { type: Number, required: true, default: 60 }, // default to 60 minutes
-    timezone: { type: String, required: true, default: "UTC" },
+    duration: {
+      type: Number,
+      required: true,
+      default: 60,
+      enum: Constants.SESSION_DURATIONS,
+    }, // in minutes
+    timezone: {
+      type: String,
+      required: true,
+      default: DATETIME.DEFAULT_TIMEZONE,
+    },
     status: {
       type: String,
-      enum: Object.values(SessionStatus),
+      enum: Object.values(Constants.SESSION_STATUS),
       default: SessionStatus.RESERVED,
     },
     price: { type: Number, required: true },
-    rating: { type: Number, min: 1, max: 5 },
+    rating: {
+      type: Number,
+      min: Constants.RATING_LEVELS.POOR,
+      max: Constants.RATING_LEVELS.EXCELLENT,
+    },
     review: { type: String },
     reservationExpires: { type: Date },
   },

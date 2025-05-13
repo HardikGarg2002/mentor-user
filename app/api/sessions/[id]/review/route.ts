@@ -5,6 +5,7 @@ import Mentor from "@/models/Mentor";
 import { SessionStatus } from "@/types/session";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { Constants, API, PATHS } from "@/config";
 
 // POST /api/sessions/[id]/review
 export async function POST(
@@ -18,8 +19,11 @@ export async function POST(
 
     if (!user || !user.id) {
       return NextResponse.json(
-        { error: "You must be logged in to submit a review" },
-        { status: 401 }
+        {
+          error: "You must be logged in to submit a review",
+          code: Constants.ERROR_CODES.AUTH_FAILED,
+        },
+        { status: Constants.API_RESPONSES.UNAUTHORIZED.CODE }
       );
     }
 
@@ -27,39 +31,62 @@ export async function POST(
     const { rating, review } = await req.json();
 
     // Validate input
-    if (!rating || typeof rating !== "number" || rating < 1 || rating > 5) {
+    if (
+      !rating ||
+      typeof rating !== "number" ||
+      rating < Constants.RATING_LEVELS.POOR ||
+      rating > Constants.RATING_LEVELS.EXCELLENT
+    ) {
       return NextResponse.json(
-        { error: "Rating must be between 1 and 5" },
-        { status: 400 }
+        {
+          error: `Rating must be between ${Constants.RATING_LEVELS.POOR} and ${Constants.RATING_LEVELS.EXCELLENT}`,
+          code: Constants.ERROR_CODES.VALIDATION_ERROR,
+        },
+        { status: Constants.API_RESPONSES.BAD_REQUEST.CODE }
       );
     }
 
     if (!review || typeof review !== "string") {
       return NextResponse.json(
-        { error: "Review text is required" },
-        { status: 400 }
+        {
+          error: "Review text is required",
+          code: Constants.ERROR_CODES.VALIDATION_ERROR,
+        },
+        { status: Constants.API_RESPONSES.BAD_REQUEST.CODE }
       );
     }
 
     // Find the session
     const sessionDoc = await Session.findById(sessionId);
     if (!sessionDoc) {
-      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: "Session not found",
+          code: Constants.ERROR_CODES.SESSION_NOT_FOUND,
+        },
+        { status: Constants.API_RESPONSES.NOT_FOUND.CODE }
+      );
     }
 
     // Verify that the session belongs to the current user
     if (sessionDoc.menteeId.toString() !== user.id) {
       return NextResponse.json(
-        { error: "You are not authorized to review this session" },
-        { status: 403 }
+        {
+          error: "You are not authorized to review this session",
+          code: Constants.ERROR_CODES.AUTH_FAILED,
+        },
+        { status: Constants.API_RESPONSES.FORBIDDEN.CODE }
       );
     }
 
     // Verify that the session is completed
     if (sessionDoc.status !== SessionStatus.COMPLETED) {
       return NextResponse.json(
-        { error: "You can only review completed sessions" },
-        { status: 400 }
+        {
+          error: "You can only review completed sessions",
+          code: Constants.ERROR_CODES.VALIDATION_ERROR,
+        },
+        { status: Constants.API_RESPONSES.BAD_REQUEST.CODE }
       );
     }
 
@@ -89,17 +116,23 @@ export async function POST(
     );
 
     // Revalidate paths
-    revalidatePath(`/sessions/${sessionId}`);
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/mentor");
-    revalidatePath("/dashboard/mentee");
+    revalidatePath(`${PATHS.SESSIONS}/${sessionId}`);
+    revalidatePath(PATHS.DASHBOARD);
+    revalidatePath(`${PATHS.DASHBOARD}/mentor`);
+    revalidatePath(`${PATHS.DASHBOARD}/mentee`);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: "Review submitted successfully",
+    });
   } catch (error) {
     console.error("Error submitting review:", error);
     return NextResponse.json(
-      { error: "Failed to submit review" },
-      { status: 500 }
+      {
+        error: "Failed to submit review",
+        code: Constants.ERROR_CODES.DATABASE_ERROR,
+      },
+      { status: Constants.API_RESPONSES.SERVER_ERROR.CODE }
     );
   }
 }
@@ -119,14 +152,23 @@ export async function GET(
       .lean();
 
     if (!sessionDoc) {
-      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: "Session not found",
+          code: Constants.ERROR_CODES.SESSION_NOT_FOUND,
+        },
+        { status: Constants.API_RESPONSES.NOT_FOUND.CODE }
+      );
     }
 
     // If there's no review, return appropriate response
     if (!sessionDoc.rating || !sessionDoc.review) {
       return NextResponse.json(
-        { error: "No review exists for this session" },
-        { status: 404 }
+        {
+          error: "No review exists for this session",
+          code: Constants.ERROR_CODES.SESSION_NOT_FOUND,
+        },
+        { status: Constants.API_RESPONSES.NOT_FOUND.CODE }
       );
     }
 
@@ -142,8 +184,11 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching review:", error);
     return NextResponse.json(
-      { error: "Failed to fetch review" },
-      { status: 500 }
+      {
+        error: "Failed to fetch review",
+        code: Constants.ERROR_CODES.DATABASE_ERROR,
+      },
+      { status: Constants.API_RESPONSES.SERVER_ERROR.CODE }
     );
   }
 }

@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
+import { Constants } from "@/config";
 
-export enum UserRole {
-  USER = "user",
-  MENTOR = "mentor",
-  ADMIN = "admin",
-}
+// Create UserRole type from Constants.ROLES
+export type UserRole = (typeof Constants.ROLES)[keyof typeof Constants.ROLES];
+
 export interface UserSession {
   id: string;
   name: string;

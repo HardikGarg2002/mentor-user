@@ -19,6 +19,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { PasswordInput } from "@/components/ui/password-input";
+import { APP, AUTH, PATHS, API, Constants } from "@/config";
 
 export default function SignIn() {
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function SignIn() {
         setShowResendVerification(true);
       }
     } else {
-      router.push("/");
+      router.push(PATHS.DASHBOARD);
     }
   };
 
@@ -60,7 +61,7 @@ export default function SignIn() {
     setResendMessage("");
 
     try {
-      const res = await fetch("/api/auth/resend-verification", {
+      const res = await fetch(`${API.ENDPOINTS.AUTH}/resend-verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -88,7 +89,7 @@ export default function SignIn() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Sign In
+            Sign In to {APP.NAME}
           </CardTitle>
           <CardDescription className="text-center">
             Enter your credentials to access your account
@@ -127,9 +128,7 @@ export default function SignIn() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() =>
-                signIn("google", { callbackUrl: "/dashboard/mentee" })
-              }
+              onClick={() => signIn("google", { callbackUrl: PATHS.DASHBOARD })}
             >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
@@ -181,7 +180,7 @@ export default function SignIn() {
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
                 <Link
-                  href="/auth/forgot-password"
+                  href={AUTH.ROUTES.FORGOT_PASSWORD}
                   className="text-sm text-primary hover:underline"
                 >
                   Forgot password?
@@ -206,7 +205,7 @@ export default function SignIn() {
               Dont have an account?{" "}
               <button
                 type="button"
-                onClick={() => router.push("/auth/signup")}
+                onClick={() => router.push(AUTH.ROUTES.SIGN_UP)}
                 className="text-primary hover:underline"
               >
                 Register
