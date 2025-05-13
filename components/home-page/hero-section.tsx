@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { APP, PATHS, UI } from "@/config";
 
 export default function HeroSection() {
   const router = useRouter();
@@ -12,7 +13,9 @@ export default function HeroSection() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/mentors?search=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(
+        `${PATHS.MENTORS}?search=${encodeURIComponent(searchQuery.trim())}`
+      );
     }
   };
 
@@ -25,7 +28,7 @@ export default function HeroSection() {
           </h1>
           <p className="text-xl mb-8">
             Connect with industry experts who can help you grow your skills and
-            advance your career
+            advance your career with {APP.NAME}
           </p>
           <form onSubmit={handleSearch} className="relative max-w-xl mx-auto">
             <div className="flex items-center bg-white rounded-lg overflow-hidden shadow-lg">

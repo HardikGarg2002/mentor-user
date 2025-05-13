@@ -126,6 +126,7 @@ export const ERROR_CODES = {
   DATABASE_ERROR: "database_error",
   VALIDATION_ERROR: "validation_error",
   RATE_LIMIT_EXCEEDED: "rate_limit_exceeded",
+  NOT_FOUND: "not_found",
 };
 
 // Feedback rating levels
@@ -135,4 +136,42 @@ export const RATING_LEVELS = {
   GOOD: 3,
   VERY_GOOD: 4,
   EXCELLENT: 5,
+};
+
+// Social media links
+export const SOCIAL_LINKS = {
+  TWITTER: "https://x.com/ARicious_",
+  TWITTER_HANDLE: "@aricious",
+  FACEBOOK: "https://facebook.com/aricious",
+  INSTAGRAM: "https://www.instagram.com/aricious__?igsh=MW9rcGw5Z254NXcyOA==",
+  INSTAGRAM_HANDLE: "@aricious__",
+  LINKEDIN: "http://www.linkedin.com/in/aricious-9183a0365",
+  GITHUB: "https://github.com/aricious",
+  YOUTUBE: "https://youtube.com/@aricious?si=mNJEzv4JhNB2GqtI",
+};
+
+// Legal and policy links
+export const LEGAL_LINKS = {
+  TERMS: "/legal/terms",
+  PRIVACY: "/legal/privacy",
+  COOKIES: "/legal/cookies",
+  COPYRIGHT: "/legal/copyright",
+  DISCLAIMER: "/legal/disclaimer",
+};
+
+// Support and help links
+export const SUPPORT_LINKS = {
+  HELP_CENTER: "/support",
+  CONTACT: "/contact",
+  FAQ: "/faq",
+  FEEDBACK: "/feedback",
+  REPORT_ISSUE: "/report-issue",
+};
+
+// Blog and resource links
+export const RESOURCE_LINKS = {
+  BLOG: "/blog",
+  RESOURCES: "/resources",
+  GUIDES: "/guides",
+  COMMUNITY: "/community",
 };

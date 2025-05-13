@@ -3,23 +3,21 @@
  * Types related to mentoring session formats and interactions
  */
 import mongoose, { type Document } from "mongoose";
+import { Constants, DATETIME } from "@/config";
 
 // Session types available for booking
 export type SessionType = "chat" | "video" | "call";
 
-// Session status values
+// Session status values - derive from Constants
 export type SessionStatus =
-  | "reserved"
-  | "confirmed"
-  | "completed"
-  | "cancelled";
+  (typeof Constants.SESSION_STATUS)[keyof typeof Constants.SESSION_STATUS];
 
-// Create enum-like objects with TypeScript
+// Create enum-like objects with TypeScript using the Constants
 export const SessionStatus = {
-  RESERVED: "reserved" as SessionStatus,
+  RESERVED: Constants.SESSION_STATUS.SCHEDULED,
   CONFIRMED: "confirmed" as SessionStatus,
-  COMPLETED: "completed" as SessionStatus,
-  CANCELLED: "cancelled" as SessionStatus,
+  COMPLETED: Constants.SESSION_STATUS.COMPLETED,
+  CANCELLED: Constants.SESSION_STATUS.CANCELLED,
 };
 
 // Basic session information

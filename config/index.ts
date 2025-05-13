@@ -119,22 +119,10 @@ export const UI = {
 
 // External links
 export const LINKS = {
-  SOCIAL: {
-    TWITTER: "https://twitter.com/aricious",
-    FACEBOOK: "https://facebook.com/aricious",
-    INSTAGRAM: "https://instagram.com/aricious",
-    LINKEDIN: "https://linkedin.com/company/aricious",
-  },
-  LEGAL: {
-    TERMS: "/legal/terms",
-    PRIVACY: "/legal/privacy",
-    COOKIES: "/legal/cookies",
-  },
-  SUPPORT: {
-    HELP_CENTER: "/support",
-    CONTACT: "/contact",
-    FAQ: "/faq",
-  },
+  SOCIAL: Constants.SOCIAL_LINKS,
+  LEGAL: Constants.LEGAL_LINKS,
+  SUPPORT: Constants.SUPPORT_LINKS,
+  RESOURCES: Constants.RESOURCE_LINKS,
 };
 
 // Feature flags

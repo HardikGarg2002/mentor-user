@@ -1,4 +1,5 @@
 import { format, formatDistanceToNow, parseISO } from "date-fns";
+import { DATETIME } from "@/config";
 
 export function formatDateTime(
   sessionDate: Date | string,
@@ -10,9 +11,9 @@ export function formatDateTime(
   const dateTime = new Date(sessionDate);
   dateTime.setHours(hours, minutes, 0, 0);
 
-  // Format using toLocaleString with Indian locale and timezone
+  // Format using toLocaleString with configured timezone
   return dateTime.toLocaleString("en-IN", {
-    timeZone: "Asia/Kolkata",
+    timeZone: DATETIME.DEFAULT_TIMEZONE,
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -27,7 +28,37 @@ export function formatDate(dateString: string | Date) {
   try {
     const date =
       typeof dateString === "string" ? new Date(dateString) : dateString;
-    return format(date, "MMM d, yyyy");
+    return format(date, DATETIME.DISPLAY_DATE_FORMAT);
+  } catch (error) {
+    return String(dateString);
+  }
+}
+
+export function formatTime(timeString: string | Date) {
+  try {
+    const time =
+      typeof timeString === "string" ? new Date(timeString) : timeString;
+    return format(time, DATETIME.DISPLAY_TIME_FORMAT);
+  } catch (error) {
+    return String(timeString);
+  }
+}
+
+export function formatStandardDate(dateString: string | Date) {
+  try {
+    const date =
+      typeof dateString === "string" ? new Date(dateString) : dateString;
+    return format(date, DATETIME.DATE_FORMAT);
+  } catch (error) {
+    return String(dateString);
+  }
+}
+
+export function formatStandardDateTime(dateString: string | Date) {
+  try {
+    const date =
+      typeof dateString === "string" ? new Date(dateString) : dateString;
+    return format(date, DATETIME.DATETIME_FORMAT);
   } catch (error) {
     return String(dateString);
   }

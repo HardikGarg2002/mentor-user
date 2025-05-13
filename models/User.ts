@@ -1,5 +1,6 @@
-import { IUser, UserRole } from "@/types/auth";
+import { IUser } from "@/types/auth";
 import mongoose, { Schema, type Model } from "mongoose";
+import { Constants } from "@/config";
 
 const UserSchema = new Schema<IUser>(
   {
@@ -11,8 +12,8 @@ const UserSchema = new Schema<IUser>(
     phone: { type: String },
     role: {
       type: String,
-      enum: UserRole,
-      default: UserRole.USER,
+      enum: Object.values(Constants.ROLES),
+      default: Constants.ROLES.USER,
     },
   },
   {

@@ -4,16 +4,16 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 // import { ThemeProvider } from "@/components/theme-provider"
 import { SessionProvider } from "@/providers/session-provider";
-import { MainNav } from "@/components/main-nav";
-import { Footer } from "@/components/home-page/footer";
+import { MainNav } from "@/components/layout/main-nav";
+import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/ui/sonner";
+import { APP } from "@/config";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ARicious",
-  description:
-    "ARicious is a platform for connecting with expert mentors in your field",
+  title: APP.NAME,
+  description: APP.DESCRIPTION,
   keywords: [
     "mentorship",
     "career development",
@@ -21,10 +21,10 @@ export const metadata: Metadata = {
     "professional guidance",
     "skill development",
   ],
-  authors: [{ name: "ARicious Team", url: "https://aricious.com" }],
-  creator: "ARicious",
-  publisher: "ARicious",
-  metadataBase: new URL("https://aricious.com"),
+  authors: [{ name: `${APP.NAME} Team`, url: APP.BASE_URL }],
+  creator: APP.NAME,
+  publisher: APP.NAME,
+  metadataBase: new URL(APP.BASE_URL),
   alternates: {
     canonical: "/",
   },
@@ -35,23 +35,23 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://aricious.com",
-    title: "ARicious - Connect with Expert Mentors",
+    url: APP.BASE_URL,
+    title: `${APP.NAME} - Connect with Expert Mentors`,
     description:
       "Connect with industry experts who can help you grow your skills and advance your career.",
-    siteName: "ARicious",
+    siteName: APP.NAME,
     images: [
       {
         url: "/images/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "ARicious - Connect with Expert Mentors",
+        alt: `${APP.NAME} - Connect with Expert Mentors`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ARicious - Connect with Expert Mentors",
+    title: `${APP.NAME} - Connect with Expert Mentors`,
     description:
       "Connect with industry experts who can help you grow your skills and advance your career.",
     images: ["/images/twitter-image.jpg"],

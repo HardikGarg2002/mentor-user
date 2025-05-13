@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import ses from "nodemailer-ses-transport";
+import { EMAIL, APP, UI } from "@/config";
 
 interface EmailOptions {
   to: string;
@@ -25,8 +26,21 @@ const createTransporter = async () => {
     );
   }
 
-  // Fallback to test account if AWS credentials aren't available
-  console.warn("AWS SES credentials not found, using test account instead");
+  // Fallback to SMTP if credentials are provided
+  if (EMAIL.SMTP.HOST && EMAIL.SMTP.USER && EMAIL.SMTP.PASSWORD) {
+    return nodemailer.createTransport({
+      host: EMAIL.SMTP.HOST,
+      port: EMAIL.SMTP.PORT,
+      secure: EMAIL.SMTP.PORT === 465, // true for 465, false for other ports
+      auth: {
+        user: EMAIL.SMTP.USER,
+        pass: EMAIL.SMTP.PASSWORD,
+      },
+    });
+  }
+
+  // Fallback to test account if other credentials aren't available
+  console.warn("Email credentials not found, using test account instead");
   const testAccount = await nodemailer.createTestAccount();
 
   return nodemailer.createTransport({
@@ -44,12 +58,11 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
   try {
     const transporter = await createTransporter();
 
-    // Get the from address from environment variable or use a default
-    const fromAddress =
-      process.env.AWS_SES_FROM_EMAIL || "no-reply@aricious.com";
+    // Get the from address from config
+    const fromAddress = EMAIL.FROM;
 
     const info = await transporter.sendMail({
-      from: `"ARicious" <${fromAddress}>`,
+      from: `"${APP.NAME}" <${fromAddress}>`,
       to,
       subject,
       html,
@@ -83,18 +96,18 @@ export function createVerificationEmailHtml(
   verificationUrl: string
 ) {
   return `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Welcome to ARicious!</h2>
+    <div style="font-family: ${UI.TYPOGRAPHY.fontFamily.sans}; max-width: 600px; margin: 0 auto;">
+      <h2>Welcome to ${APP.NAME}!</h2>
       <p>Hello ${name},</p>
-      <p>Thank you for registering with ARicious. To complete your registration and verify your email address, please click the button below:</p>
+      <p>Thank you for registering with ${APP.NAME}. To complete your registration and verify your email address, please click the button below:</p>
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${verificationUrl}" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Verify Email Address</a>
+        <a href="${verificationUrl}" style="background-color: ${UI.COLORS.primary[500]}; color: white; padding: 12px 24px; text-decoration: none; border-radius: ${UI.BORDER_RADIUS.md}; font-weight: bold;">Verify Email Address</a>
       </div>
       <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
       <p style="word-break: break-all;">${verificationUrl}</p>
       <p>This verification link will expire in 24 hours.</p>
       <p>If you didn't create this account, you can safely ignore this email.</p>
-      <p>Best regards,<br>The ARicious Team</p>
+      <p>Best regards,<br>The ${APP.NAME} Team</p>
     </div>
   `;
 }

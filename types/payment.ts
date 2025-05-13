@@ -1,13 +1,16 @@
 import mongoose from "mongoose";
+import { Constants, PAYMENT } from "@/config";
 
-// Payment status values
-export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
-// Create enum-like objects
+// Payment status values - derive from Constants
+export type PaymentStatus =
+  (typeof Constants.PAYMENT_STATUS)[keyof typeof Constants.PAYMENT_STATUS];
+
+// Create enum-like objects using Constants
 export const PaymentStatus = {
-  PENDING: "pending" as PaymentStatus,
-  COMPLETED: "completed" as PaymentStatus,
-  FAILED: "failed" as PaymentStatus,
-  REFUNDED: "refunded" as PaymentStatus,
+  PENDING: Constants.PAYMENT_STATUS.PENDING as PaymentStatus,
+  COMPLETED: Constants.PAYMENT_STATUS.COMPLETED as PaymentStatus,
+  FAILED: Constants.PAYMENT_STATUS.FAILED as PaymentStatus,
+  REFUNDED: Constants.PAYMENT_STATUS.REFUNDED as PaymentStatus,
 };
 
 export interface IPayment extends Document {

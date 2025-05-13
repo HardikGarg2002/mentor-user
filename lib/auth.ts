@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import clientPromise from "@/lib/mongodb";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
+import { AUTH, Constants } from "@/config";
 
 export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),
@@ -82,13 +83,13 @@ export const authOptions = {
     },
   },
   pages: {
-    signIn: "/auth/signin",
+    signIn: AUTH.ROUTES.SIGN_IN,
     error: "/auth/error",
   },
   session: {
     strategy: "jwt" as const,
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: AUTH.JWT_SECRET,
 };
 
 const handler = NextAuth(authOptions);

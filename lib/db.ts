@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { DATABASE, Constants } from "@/config";
 
-const MONGODB_URI = process.env.MONGODB_URI!;
+const MONGODB_URI = DATABASE.MONGODB_URI;
 
 if (!MONGODB_URI) {
   throw new Error(
@@ -13,7 +14,17 @@ if (!MONGODB_URI) {
  * in development. This prevents connections growing exponentially
  * during API Route usage.
  */
-let cached = global.mongoose;
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
+// Define a type for the global object with mongoose
+declare global {
+  var mongoose: MongooseCache | undefined;
+}
+
+let cached: MongooseCache = global.mongoose || { conn: null, promise: null };
 
 if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
@@ -30,6 +41,7 @@ async function connectDB() {
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      console.log("MongoDB connected successfully");
       return mongoose;
     });
   }
@@ -38,7 +50,8 @@ async function connectDB() {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
-    throw e;
+    console.error("MongoDB connection error:", e);
+    throw new Error(Constants.ERROR_CODES.DATABASE_ERROR);
   }
 
   return cached.conn;
