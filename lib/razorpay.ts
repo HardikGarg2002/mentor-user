@@ -14,8 +14,7 @@ export async function createOrder(
   amount: number,
   currency: string = PAYMENT.CURRENCY,
   receipt: string,
-  notes: Record<string, string> = {},
-  description: string = PAYMENT.DEFAULT_DESCRIPTION
+  notes: Record<string, string> = {}
 ) {
   try {
     const options = {
@@ -23,7 +22,6 @@ export async function createOrder(
       currency,
       receipt,
       notes,
-      description,
       payment_capture: 1, // auto-capture
     };
 
