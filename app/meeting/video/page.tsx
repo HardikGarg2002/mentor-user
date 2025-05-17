@@ -11,7 +11,7 @@ export default async function page({
   searchParams: SearchParams;
 }) {
   const { meetingId } = await searchParams;
-  // const meetingUrl = `https://vdo.ninja/?room=${meetingId || "aric-test"}`;
-  const meetingUrl = `https://meet.jit.si/${meetingId || "aric-test"}?lang=en`;
+  const meetingUrl = `https://vdo.ninja/?room=${meetingId || "aric-test"}`;
+  // const meetingUrl = `https://meet.jit.si/${meetingId || "aric-test"}?lang=en`;
   return <VideoCall meetingUrl={meetingUrl} />;
 }
