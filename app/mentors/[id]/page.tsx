@@ -14,6 +14,9 @@ import { StartChatButton } from "@/components/chat/start-chat-button";
 import { getMentorByUserId } from "@/lib/mentors";
 import { notFound } from "next/navigation";
 import { getMentorWeeklyAvailabilityById } from "@/actions/availability-actions";
+import { getMentorReviews } from "@/actions/review-actions";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { formatDistanceToNow } from "date-fns";
 
 const DAYS_OF_WEEK = [
   { value: 1, label: "Monday" },
@@ -32,6 +35,62 @@ function formatTimeDisplay(time: string) {
   return `${formattedHours}:${minutes} ${amPm}`;
 }
 
+function formatReviewDate(date: Date | string) {
+  if (!date) return "";
+  const reviewDate = typeof date === "string" ? new Date(date) : date;
+  return formatDistanceToNow(reviewDate, { addSuffix: true });
+}
+
+// Group reviews by mentee to handle multiple reviews from the same user
+function groupReviewsByUser(reviews: any[]) {
+  if (!reviews || reviews.length === 0) {
+    return [];
+  }
+
+  const userMap = new Map();
+
+  reviews.forEach((review) => {
+    // Use menteeId as the unique identifier
+    const menteeId = review.menteeName || review.id; // Using menteeName as fallback for grouping
+
+    if (!userMap.has(menteeId)) {
+      // First review from this user
+      userMap.set(menteeId, {
+        id: review.id,
+        menteeName: review.menteeName,
+        menteeImage: review.menteeImage,
+        reviews: [
+          {
+            id: review.id,
+            date: review.date,
+            rating: review.rating,
+            review: review.review,
+          },
+        ],
+      });
+    } else {
+      // Additional review from this user
+      const existingUser = userMap.get(menteeId);
+      existingUser.reviews.push({
+        id: review.id,
+        date: review.date,
+        rating: review.rating,
+        review: review.review,
+      });
+
+      // Sort reviews by date (newest first)
+      existingUser.reviews.sort((a: any, b: any) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB.getTime() - dateA.getTime();
+      });
+    }
+  });
+
+  // Convert the Map back to an array
+  return Array.from(userMap.values());
+}
+
 export default async function MentorProfile({
   params,
 }: {
@@ -44,34 +103,16 @@ export default async function MentorProfile({
   }
   const mentorData = JSON.parse(JSON.stringify(mentor));
   const slots = await getMentorWeeklyAvailabilityById({ mentorId: id });
+  const reviewsData = await getMentorReviews(id);
 
-  // Mock reviews data - in a real app, this would come from a database
-  const reviews = [
-    {
-      id: 1,
-      user: "Jane Smith",
-      rating: 5,
-      date: "October 15, 2023",
-      comment:
-        "This mentor was incredibly helpful in guiding me through complex concepts. Their explanations were clear and they provided practical examples that helped me understand.",
-    },
-    {
-      id: 2,
-      user: "Michael Brown",
-      rating: 5,
-      date: "September 28, 2023",
-      comment:
-        "I had a great session discussing best practices. They shared valuable insights from their experience that I've already started implementing in my projects.",
-    },
-    {
-      id: 3,
-      user: "Sarah Lee",
-      rating: 4,
-      date: "August 10, 2023",
-      comment:
-        "They provided excellent career advice and helped me prepare for my interviews. Their feedback on my resume was particularly helpful.",
-    },
-  ];
+  // Log reviews structure for debugging
+  console.log(
+    "Reviews data structure:",
+    reviewsData && reviewsData.length > 0 ? reviewsData[0] : "No reviews"
+  );
+
+  // Group reviews by mentee
+  const groupedReviews = groupReviewsByUser(reviewsData);
 
   // Extract only the mentor properties needed by SessionBooking
   const bookingMentorData = {
@@ -185,32 +226,59 @@ export default async function MentorProfile({
                   <CardTitle>Client Reviews</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-6">
-                    {reviews.map((review) => (
-                      <li
-                        key={review.id}
-                        className="border-b pb-6 last:border-0 last:pb-0"
-                      >
-                        <div className="flex justify-between mb-2">
-                          <p className="font-medium">{review.user}</p>
-                          <span className="text-gray-500">{review.date}</span>
-                        </div>
-                        <div className="flex items-center mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-4 w-4 ${
-                                i < review.rating
-                                  ? "text-yellow-500 fill-yellow-500"
-                                  : "text-gray-300"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <p className="text-gray-700">{review.comment}</p>
-                      </li>
-                    ))}
-                  </ul>
+                  {groupedReviews.length > 0 ? (
+                    <ul className="space-y-8">
+                      {groupedReviews.map((user) => (
+                        <li
+                          key={user.id}
+                          className="border-b pb-6 last:border-0 last:pb-0"
+                        >
+                          <div className="flex items-center gap-2 mb-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage
+                                src={user.menteeImage}
+                                alt={user.menteeName}
+                              />
+                              <AvatarFallback>
+                                {user.menteeName.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <p className="font-medium">{user.menteeName}</p>
+                          </div>
+
+                          {/* Show each review by this user */}
+                          <div className="space-y-4 pl-10">
+                            {user.reviews.map((review: any) => (
+                              <div key={review.id} className="pb-4 last:pb-0">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`h-4 w-4 ${
+                                          i < review.rating
+                                            ? "text-yellow-500 fill-yellow-500"
+                                            : "text-gray-300"
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="text-sm text-gray-500">
+                                    {formatReviewDate(review.date)}
+                                  </span>
+                                </div>
+                                <p className="text-gray-700">{review.review}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-center py-4 text-gray-500">
+                      No reviews yet
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

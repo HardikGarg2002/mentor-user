@@ -43,9 +43,9 @@ export default function BlogPage() {
                   I'd find myself scouring Google and YouTube for answers, only
                   to end up with more questions than solutions.
                 </p>
-                <Link href="/blog/birth-of-aricious">
+                {/* <Link href="/blog/birth-of-aricious">
                   <Button variant="outline">Read More</Button>
-                </Link>
+                </Link> */}
               </div>
             </div>
           </Card>

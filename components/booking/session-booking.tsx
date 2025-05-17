@@ -427,8 +427,9 @@ export default function SessionBooking({ mentor }: SessionBookingProps) {
           });
           console.log("Booking failed", result.error);
         } else {
-          toast.success("Booking Successful", {
-            description: "Your session has been booked",
+          toast.success("Booking Reserved", {
+            description:
+              "Your session has been reserved, Please complete your payment to Book the session",
           });
           router.push(`/sessions/${result.sessionId}`);
           setIsDialogOpen(false);
