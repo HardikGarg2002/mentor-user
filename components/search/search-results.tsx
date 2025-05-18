@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import { searchMentors } from "@/actions/search-actions";
 import type { MentorProfile } from "@/types/mentor";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 interface SearchResultsProps {
   query: string;
@@ -89,15 +90,14 @@ export function SearchResults({ query }: SearchResultsProps) {
               <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gray-100">
                 {mentor.image ? (
                   <Image
-                    src={mentor.image || "/placeholder.svg"}
+                    src={mentor.image}
                     alt={mentor.name}
-                    fill
-                    className="object-cover"
+                    width={64}
+                    height={64}
+                    className="rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-                    {mentor.name.charAt(0).toUpperCase()}
-                  </div>
+                  <FallbackImage className="w-16 h-16 rounded-full" text="" />
                 )}
               </div>
               <div className="flex-1 min-w-0">

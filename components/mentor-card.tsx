@@ -17,7 +17,6 @@ const getPlaceholderImage = (name: string) => {
 };
 
 export function MentorCard({ mentor }: MentorCardProps) {
-  console.log("mentor id in mentor card", mentor.userId);
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
       <CardContent className="p-0">

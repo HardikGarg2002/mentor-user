@@ -1,6 +1,6 @@
 import type React from "react";
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 // import { ThemeProvider } from "@/components/theme-provider"
 import { SessionProvider } from "@/providers/session-provider";
@@ -10,6 +10,12 @@ import { Toaster } from "@/components/ui/sonner";
 import { APP } from "@/config";
 
 const inter = Inter({ subsets: ["latin"] });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   title: APP.NAME,
@@ -75,11 +81,6 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/site.webmanifest",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
   verification: {
     google: "google-site-verification-code",
   },

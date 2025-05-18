@@ -14,6 +14,7 @@ import {
 import { User, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 export function MainNav() {
   const pathname = usePathname();
@@ -66,13 +67,14 @@ export function MainNav() {
                   >
                     {session.user?.image ? (
                       <Image
+                        src={session.user.image}
                         alt={session.user.name || "User"}
-                        src={session.user.image || "/placeholder.svg"}
-                        fill
-                        className="h-8 w-8 rounded-full"
+                        width={32}
+                        height={32}
+                        className="rounded-full object-cover"
                       />
                     ) : (
-                      <User className="h-5 w-5" />
+                      <FallbackImage className="w-8 h-8 rounded-full" text="" />
                     )}
                   </Button>
                 </DropdownMenuTrigger>

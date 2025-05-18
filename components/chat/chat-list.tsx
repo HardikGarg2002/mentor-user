@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ChatListShadow } from "./chat-list-shadow";
 import ChatListSkeleton from "./chat-list-skeleton";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 type ChatPreview = {
   id: string;
@@ -89,15 +90,14 @@ export function ChatList({
                 <div className="relative h-12 w-12 rounded-full overflow-hidden bg-muted">
                   {chat.otherUser.image ? (
                     <Image
-                      src={chat.otherUser.image || "/placeholder.svg"}
+                      src={chat.otherUser.image}
                       alt={chat.otherUser.name}
-                      fill
-                      className="object-cover"
+                      width={40}
+                      height={40}
+                      className="rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-                      {chat.otherUser.name.charAt(0).toUpperCase()}
-                    </div>
+                    <FallbackImage className="w-10 h-10 rounded-full" text="" />
                   )}
                 </div>
 

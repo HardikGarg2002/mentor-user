@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { Pencil, Loader2 } from "lucide-react";
 import { updateMentorProfileImage } from "@/actions/mentor-actions";
+import { FallbackImage } from "@/components/ui/fallback-image";
+import Image from "next/image";
 
 interface AvatarUploadProps {
   initialImage?: string;
@@ -101,10 +103,17 @@ export function AvatarUpload({
   return (
     <div className="relative">
       <Avatar className="h-32 w-32">
-        <AvatarImage
-          src={image || "/placeholder.svg?height=128&width=128&query=person"}
-          alt={name}
-        />
+        {image ? (
+          <Image
+            src={image}
+            alt="Profile"
+            width={128}
+            height={128}
+            className="rounded-full object-cover"
+          />
+        ) : (
+          <FallbackImage className="w-32 h-32 rounded-full" text="Profile" />
+        )}
         <AvatarFallback className="text-4xl">{name.charAt(0)}</AvatarFallback>
       </Avatar>
 

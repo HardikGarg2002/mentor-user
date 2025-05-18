@@ -22,6 +22,7 @@ import {
   markMessagesAsRead,
 } from "@/actions/chat-actions";
 import { useRouter } from "next/navigation";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 type Message = {
   id: string;
@@ -179,15 +180,14 @@ export function ChatInterface({
             <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted">
               {chatData.otherUser.image ? (
                 <Image
-                  src={chatData.otherUser.image || "/placeholder.svg"}
+                  src={chatData.otherUser.image}
                   alt={chatData.otherUser.name}
-                  fill
-                  className="object-cover"
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-                  {chatData.otherUser.name.charAt(0).toUpperCase()}
-                </div>
+                <FallbackImage className="w-10 h-10 rounded-full" text="" />
               )}
             </div>
             <CardTitle>{chatData.otherUser.name}</CardTitle>

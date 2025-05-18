@@ -10,13 +10,13 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SessionBooking from "@/components/booking/session-booking";
-import { StartChatButton } from "@/components/chat/start-chat-button";
 import { getMentorByUserId } from "@/lib/mentors";
 import { notFound } from "next/navigation";
 import { getMentorWeeklyAvailabilityById } from "@/actions/availability-actions";
 import { getMentorReviews } from "@/actions/review-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 const DAYS_OF_WEEK = [
   { value: 1, label: "Monday" },
@@ -128,12 +128,20 @@ export default async function MentorProfile({
         <div className="lg:col-span-2">
           <div className="flex flex-col md:flex-row gap-8 mb-8">
             <div className="relative h-64 w-64 rounded-lg overflow-hidden">
-              <Image
-                src={mentor.image || "/placeholder.svg?height=400&width=400"}
-                alt={mentor.name}
-                fill
-                className="object-cover"
-              />
+              {mentor.image ? (
+                <Image
+                  src={mentor.image}
+                  alt={mentor.name}
+                  width={400}
+                  height={400}
+                  className="rounded-lg object-cover"
+                />
+              ) : (
+                <FallbackImage
+                  className="w-[400px] h-[400px]"
+                  text="Mentor Image"
+                />
+              )}
             </div>
             <div className="flex-1">
               <h1 className="text-3xl font-bold mb-2">{mentor.name}</h1>
