@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,8 @@ import { PasswordInput } from "@/components/ui/password-input";
 
 export default function SignUp() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -152,9 +154,7 @@ export default function SignUp() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() =>
-                signIn("google", { callbackUrl: "/dashboard/mentee" })
-              }
+              onClick={() => signIn("google", { callbackUrl })}
             >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path

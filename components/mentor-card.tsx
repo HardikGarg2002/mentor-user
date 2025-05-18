@@ -1,16 +1,18 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Star } from "lucide-react";
+import { Star, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MentorListItem } from "@/types";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type MentorCardProps = {
   mentor: MentorListItem;
 };
 
 const getPlaceholderImage = (name: string) => {
+  console.log("name in mentor card", name, encodeURIComponent(name));
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(
     name
   )}&background=random`;
@@ -21,12 +23,18 @@ export function MentorCard({ mentor }: MentorCardProps) {
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
       <CardContent className="p-0">
         <div className="relative h-48 w-full">
-          <Image
-            src={mentor.image || getPlaceholderImage(mentor.name)}
-            alt={mentor.name}
-            fill
-            className="object-cover"
-          />
+          {mentor.image ? (
+            <Image
+              src={mentor.image}
+              alt={mentor.name}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <Avatar className="w-full h-full ">
+              <AvatarFallback>{mentor.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+          )}
         </div>
         <div className="p-6">
           <h3 className="text-xl font-semibold mb-1">{mentor.name}</h3>

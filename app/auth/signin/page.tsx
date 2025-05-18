@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,8 @@ import { APP, AUTH, PATHS, API, Constants } from "@/config";
 
 export default function SignIn() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -41,6 +43,7 @@ export default function SignIn() {
       email,
       password,
       redirect: false,
+      callbackUrl,
     });
 
     if (result?.error) {
@@ -52,7 +55,7 @@ export default function SignIn() {
         setShowResendVerification(true);
       }
     } else {
-      router.push(PATHS.DASHBOARD);
+      router.push(callbackUrl);
     }
   };
 
@@ -128,7 +131,7 @@ export default function SignIn() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => signIn("google", { callbackUrl: PATHS.DASHBOARD })}
+              onClick={() => signIn("google", { callbackUrl })}
             >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
