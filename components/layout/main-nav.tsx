@@ -74,7 +74,7 @@ export function MainNav() {
                         className="rounded-full object-cover"
                       />
                     ) : (
-                      <FallbackImage className="w-8 h-8 rounded-full" text="" />
+                      <User className="w-8 h-8" />
                     )}
                   </Button>
                 </DropdownMenuTrigger>
