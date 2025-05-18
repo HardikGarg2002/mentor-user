@@ -15,7 +15,7 @@ export type SessionStatus =
 // Create enum-like objects with TypeScript using the Constants
 export const SessionStatus = {
   RESERVED: Constants.SESSION_STATUS.SCHEDULED,
-  CONFIRMED: "confirmed" as SessionStatus,
+  CONFIRMED: Constants.SESSION_STATUS.CONFIRMED,
   COMPLETED: Constants.SESSION_STATUS.COMPLETED,
   CANCELLED: Constants.SESSION_STATUS.CANCELLED,
 };

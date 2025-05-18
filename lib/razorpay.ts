@@ -75,3 +75,21 @@ export async function verifyPayment(
     };
   }
 }
+
+export async function verifyRazorpayWebhook(payload: any, signature: string) {
+  try {
+    // Create a signature verification string
+    const text = JSON.stringify(payload);
+
+    // Verify the signature
+    const generated_signature = crypto
+      .createHmac("sha256", PAYMENT.RAZORPAY.WEBHOOK_SECRET)
+      .update(text)
+      .digest("hex");
+
+    return generated_signature === signature;
+  } catch (error) {
+    console.error("Error verifying Razorpay webhook:", error);
+    return false;
+  }
+}

@@ -6,50 +6,25 @@ import Session from "@/models/Session";
 import { revalidatePath } from "next/cache";
 import { SessionStatus } from "@/types/session";
 import { PaymentStatus } from "@/types/payment";
+import { verifyRazorpayWebhook } from "@/lib/razorpay";
+import { sendSessionConfirmationEmails } from "@/lib/session-emails";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const payload = await req.json();
+    const signature = req.headers.get("x-razorpay-signature");
 
-    // First run cleanup to ensure clean state
-    const { cleanupExpiredReservations } = await import(
-      "@/lib/utils/session-utils"
-    );
-    await cleanupExpiredReservations();
-
-    // Verify webhook signature
-    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      console.error("Razorpay webhook secret not configured");
-      return NextResponse.json(
-        { error: "Webhook secret not configured" },
-        { status: 500 }
-      );
-    }
-
-    // Get the Razorpay signature from headers
-    const razorpaySignature = req.headers.get("x-razorpay-signature");
-    if (!razorpaySignature) {
-      console.error("Missing Razorpay signature in webhook request");
+    if (!signature) {
       return NextResponse.json({ error: "Missing signature" }, { status: 400 });
     }
 
-    // Verify signature
-    const expectedSignature = crypto
-      .createHmac("sha256", webhookSecret)
-      .update(JSON.stringify(body))
-      .digest("hex");
-
-    if (expectedSignature !== razorpaySignature) {
-      console.error("Invalid Razorpay signature in webhook request");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    // Verify webhook signature
+    const isValid = await verifyRazorpayWebhook(payload, signature);
+    if (!isValid) {
+      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
-    // Process the webhook based on event type
-    const { event, payload } = body;
-    console.log(`Processing Razorpay webhook event: ${event}`);
-
-    await connectDB();
+    const event = payload.event;
 
     if (event === "payment.authorized" || event === "payment.captured") {
       const { payment } = payload;
@@ -117,6 +92,15 @@ export async function POST(req: NextRequest) {
           sessionRecord.reservationExpires = undefined; // Clear reservation expiry
           await sessionRecord.save();
           console.log(`Updated session ${receipt} status to CONFIRMED`);
+
+          // Send confirmation emails
+          try {
+            await sendSessionConfirmationEmails(receipt);
+            console.log(`Sent confirmation emails for session ${receipt}`);
+          } catch (emailError) {
+            console.error("Error sending confirmation emails:", emailError);
+            // Don't fail the webhook if email sending fails
+          }
         }
 
         // Revalidate relevant pages
@@ -140,6 +124,15 @@ export async function POST(req: NextRequest) {
           sessionRecord.reservationExpires = undefined; // Clear reservation expiry
           await sessionRecord.save();
           console.log(`Updated session ${receipt} status to CONFIRMED`);
+
+          // Send confirmation emails
+          try {
+            await sendSessionConfirmationEmails(receipt);
+            console.log(`Sent confirmation emails for session ${receipt}`);
+          } catch (emailError) {
+            console.error("Error sending confirmation emails:", emailError);
+            // Don't fail the webhook if email sending fails
+          }
 
           // Revalidate relevant pages
           revalidatePath(`/sessions/${receipt}`);

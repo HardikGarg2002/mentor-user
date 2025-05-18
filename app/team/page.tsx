@@ -14,7 +14,7 @@ export const metadata = {
 export default function TeamPage() {
   const teamMembers = [
     {
-      name: "Rishika Bhambla",
+      name: "Rishika Rampal",
       role: "Founder & Visionary",
       image: "/images/team/rishika-bhambla.jpg", // Add actual image when available
       bio: "Rishika is the brain behind ARicious. Her vision to connect mentees with industry experts stemmed from her own experiences and the realization that personalized guidance can significantly accelerate growth. She conceptualized the ARicious platform to bridge the gap between those seeking knowledge and those willing to share it.",

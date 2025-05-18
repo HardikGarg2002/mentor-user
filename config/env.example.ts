@@ -28,6 +28,11 @@ export const ENV_REFERENCE = {
   EMAIL_SERVER_USER: "",
   EMAIL_SERVER_PASSWORD: "",
 
+  // AWS SES
+  AWS_SES_ACCESS_KEY: "",
+  AWS_SES_SECRET_KEY: "",
+  AWS_SES_REGION: "us-east-1",
+
   // Payment
   RAZORPAY_KEY_ID: "",
   RAZORPAY_KEY_SECRET: "",
@@ -42,6 +47,9 @@ export const ENV_REFERENCE = {
   ENABLE_PAYMENTS: "false",
   ENABLE_NOTIFICATIONS: "true",
   MAINTENANCE_MODE: "false",
+
+  // Cron Jobs
+  CRON_SECRET: "your-cron-secret-key",
 };
 
 // Instructions for setting up environment variables

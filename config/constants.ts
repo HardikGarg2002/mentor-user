@@ -23,6 +23,7 @@ export const USER_STATUS = {
 // Session status
 export const SESSION_STATUS = {
   SCHEDULED: "scheduled",
+  CONFIRMED: "confirmed",
   COMPLETED: "completed",
   CANCELLED: "cancelled",
   RESCHEDULED: "rescheduled",
