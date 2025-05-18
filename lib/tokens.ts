@@ -3,7 +3,7 @@ import connectDB from "@/lib/db";
 import mongoose, { Document, Model } from "mongoose";
 
 // Define the interface for the token document
-interface IToken extends Document {
+export interface IToken extends Document {
   userId: mongoose.Types.ObjectId;
   token: string;
   type: "emailVerification" | "passwordReset";

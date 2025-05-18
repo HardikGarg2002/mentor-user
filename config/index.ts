@@ -24,8 +24,8 @@ export const AUTH = {
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
   },
   ROUTES: {
-    SIGN_IN: "/auth/sign-in",
-    SIGN_UP: "/auth/sign-up",
+    SIGN_IN: "/auth/signin",
+    SIGN_UP: "/auth/signup",
     FORGOT_PASSWORD: "/auth/forgot-password",
     RESET_PASSWORD: "/auth/reset-password",
     VERIFY_EMAIL: "/auth/verify-email",
