@@ -22,7 +22,6 @@ interface Session {
 
 interface SessionListProps {
   sessions: Session[];
-  formatDateTime: (date: string, time: string) => string;
   header: string;
   type: "upcoming" | "previous";
   emptyStateAction?: {
@@ -33,7 +32,6 @@ interface SessionListProps {
 
 export function SessionList({
   sessions,
-  formatDateTime,
   header,
   type,
   emptyStateAction,

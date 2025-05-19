@@ -19,7 +19,6 @@ interface DashboardTabsProps {
   paymentHistory?: any[];
   notifications: any[];
   reviews?: any[];
-  formatDateTime: (date: string, time: string) => string;
   formatDate: (date: string | Date) => string;
   formatTimeAgo: (date: string | Date) => string;
 }
@@ -42,7 +41,6 @@ export function DashboardTabs({
   paymentHistory = [],
   notifications,
   reviews = [],
-  formatDateTime,
   formatDate,
   formatTimeAgo,
 }: DashboardTabsProps) {
@@ -56,12 +54,10 @@ export function DashboardTabs({
             header="Upcoming Sessions"
             sessions={props.upcomingSessions}
             isPastSession={false}
-            formatDateTime={props.formatDateTime}
           />
         ) : (
           <SessionList
             sessions={upcomingSessions}
-            formatDateTime={formatDateTime}
             header="Upcoming Sessions"
             type="upcoming"
             emptyStateAction={{
@@ -80,12 +76,10 @@ export function DashboardTabs({
             header="Previous Sessions"
             sessions={props.pastSessions || []}
             isPastSession={true}
-            formatDateTime={props.formatDateTime}
           />
         ) : (
           <SessionList
             sessions={pastSessions}
-            formatDateTime={formatDateTime}
             header="Past Sessions"
             type="previous"
           />
@@ -170,7 +164,6 @@ export function DashboardTabs({
             paymentHistory,
             notifications,
             reviews,
-            formatDateTime,
             formatDate,
             formatTimeAgo,
           })}

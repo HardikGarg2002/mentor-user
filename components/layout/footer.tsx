@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Facebook, X, Instagram, Linkedin, Youtube } from "lucide-react";
+import { Instagram, Linkedin, Youtube } from "lucide-react";
 import { NewsletterForm } from "@/components/newsletter/newsletter-form";
 import {
   SOCIAL_LINKS,

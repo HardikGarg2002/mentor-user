@@ -56,7 +56,6 @@ export default async function MenteeDashboard() {
         chatHistory={chatHistory}
         payments={payments}
         notifications={notifications}
-        formatDateTime={formatDateTime}
         formatDate={formatDate}
         formatTimeAgo={formatTimeAgo}
       />

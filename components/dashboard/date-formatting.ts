@@ -40,6 +40,7 @@ export function formatTime(timeString: string | Date) {
       typeof timeString === "string" ? new Date(timeString) : timeString;
     return format(time, DATETIME.DISPLAY_TIME_FORMAT);
   } catch (error) {
+    console.error("Error formatting time:", error);
     return String(timeString);
   }
 }
@@ -50,6 +51,7 @@ export function formatStandardDate(dateString: string | Date) {
       typeof dateString === "string" ? new Date(dateString) : dateString;
     return format(date, DATETIME.DATE_FORMAT);
   } catch (error) {
+    console.error("Error formatting date:", error);
     return String(dateString);
   }
 }
@@ -60,6 +62,7 @@ export function formatStandardDateTime(dateString: string | Date) {
       typeof dateString === "string" ? new Date(dateString) : dateString;
     return format(date, DATETIME.DATETIME_FORMAT);
   } catch (error) {
+    console.error("Error formatting date:", error);
     return String(dateString);
   }
 }

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { Pencil, Loader2 } from "lucide-react";
 import { updateMentorProfileImage } from "@/actions/mentor-actions";

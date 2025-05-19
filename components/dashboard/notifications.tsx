@@ -1,13 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Calendar,
-  MessageCircle,
-  IndianRupee,
-  Bell,
-  Clock,
-  CheckCircle,
-} from "lucide-react";
+import { Calendar, IndianRupee, Bell, Clock, CheckCircle } from "lucide-react";
 
 interface Notification {
   id: string;

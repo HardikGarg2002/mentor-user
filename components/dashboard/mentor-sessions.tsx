@@ -19,7 +19,6 @@ interface Session {
 interface MentorSessionsProps {
   header: string;
   sessions: Session[];
-  formatDateTime: (date: string, time: string) => string;
   isPastSession: boolean;
 }
 
@@ -27,7 +26,6 @@ export function MentorSessions({
   header,
   sessions,
   isPastSession,
-  formatDateTime,
 }: MentorSessionsProps) {
   return (
     <Card>

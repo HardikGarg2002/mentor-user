@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
-import connectDB from "@/lib/db";
 import Payment from "@/models/Payment";
 import Session from "@/models/Session";
 import { revalidatePath } from "next/cache";

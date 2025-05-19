@@ -1,11 +1,4 @@
-import {
-  MessageCircle,
-  MessageCircleIcon,
-  Phone,
-  PhoneIcon,
-  Video,
-  VideoIcon,
-} from "lucide-react";
+import { MessageCircle, Phone, PhoneIcon, VideoIcon } from "lucide-react";
 import { Button } from "../../ui/button";
 import Link from "next/link";
 import { StartChatButton } from "@/components/chat/start-chat-button";

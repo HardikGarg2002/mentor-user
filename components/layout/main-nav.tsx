@@ -13,8 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
-import Image from "next/image";
-import { FallbackImage } from "@/components/ui/fallback-image";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 
 export function MainNav() {

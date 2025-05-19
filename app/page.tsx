@@ -4,7 +4,7 @@ import PopularTopics from "@/components/home-page/popular-topics";
 import FeaturedMentors from "@/components/home-page/featured-mentors";
 import HowItWorks from "@/components/home-page/how-it-works";
 import HeroSection from "@/components/home-page/hero-section";
-import { PATHS, APP, AUTH, LINKS } from "@/config";
+import { APP, AUTH } from "@/config";
 
 export default async function Home() {
   return (

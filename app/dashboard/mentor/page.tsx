@@ -15,7 +15,6 @@ import { MentorStats } from "@/components/dashboard/mentor-stats";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 import { AvailabilityCard } from "@/components/dashboard/service-cards";
 import {
-  formatDateTime,
   formatDate,
   formatTimeAgo,
 } from "@/components/dashboard/date-formatting";
@@ -62,7 +61,6 @@ export default async function MentorDashboard() {
         paymentHistory={paymentHistory}
         notifications={notifications}
         reviews={reviews}
-        formatDateTime={formatDateTime}
         formatDate={formatDate}
         formatTimeAgo={formatTimeAgo}
       />

@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import clientPromise from "@/lib/mongodb";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
-import { AUTH, Constants } from "@/config";
+import { AUTH } from "@/config";
 
 export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),

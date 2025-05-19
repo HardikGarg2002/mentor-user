@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Star, User } from "lucide-react";
+import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,12 @@ type MentorCardProps = {
   mentor: MentorListItem;
 };
 
-const getPlaceholderImage = (name: string) => {
-  console.log("name in mentor card", name, encodeURIComponent(name));
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    name
-  )}&background=random`;
-};
+// const getPlaceholderImage = (name: string) => {
+//   console.log("name in mentor card", name, encodeURIComponent(name));
+//   return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+//     name
+//   )}&background=random`;
+// };
 
 export function MentorCard({ mentor }: MentorCardProps) {
   return (

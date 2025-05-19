@@ -4,7 +4,7 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { APP, PATHS, UI } from "@/config";
+import { APP, PATHS } from "@/config";
 
 export default function HeroSection() {
   const router = useRouter();

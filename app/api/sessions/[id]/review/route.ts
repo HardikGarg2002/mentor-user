@@ -5,7 +5,7 @@ import Mentor from "@/models/Mentor";
 import { SessionStatus } from "@/types/session";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { Constants, API, PATHS } from "@/config";
+import { Constants, PATHS } from "@/config";
 
 // POST /api/sessions/[id]/review
 export async function POST(

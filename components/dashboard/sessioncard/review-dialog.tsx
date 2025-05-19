@@ -96,7 +96,7 @@ export function ReviewDialog({
     },
   });
 
-  const rating = form.watch("rating");
+  // const rating = form.watch("rating");
 
   async function onSubmit(data: ReviewFormValues) {
     try {
