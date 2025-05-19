@@ -2,7 +2,7 @@ import { formatDateTime } from "../date-formatting";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Clock } from "lucide-react";
 import { StarRating } from "../ui-helpers";
-
+import LocalDate from "@/components/local-date";
 export function SessionDetails({
   name,
   title,
@@ -33,7 +33,13 @@ export function SessionDetails({
         <p className="text-sm text-gray-500">{title}</p>
         <div className="flex items-center text-sm text-gray-500 mt-1">
           <Calendar className="h-3 w-3 mr-1" />
-          <span>{formatDateTime(sessionDate, sessionStartTime)}</span>
+          <span className="mx-1">
+            {formatDateTime(sessionDate, sessionStartTime)}
+            {" |"}
+          </span>
+          <div className="mx-1">
+            <LocalDate date={sessionDate} /> at {sessionStartTime}
+          </div>
         </div>
         {isUpcoming && (
           <div className="text-sm text-gray-500">

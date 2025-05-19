@@ -15,6 +15,7 @@ import { User, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import { FallbackImage } from "@/components/ui/fallback-image";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 
 export function MainNav() {
   const pathname = usePathname();
@@ -22,7 +23,7 @@ export function MainNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const isActive = (path: string) => pathname === path;
-
+  console.log("session", session);
   const navItems = [
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
@@ -63,19 +64,15 @@ export function MainNav() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-8 w-8 rounded-full"
+                    className="relative h-10 w-10 rounded-full"
                   >
-                    {session.user?.image ? (
-                      <Image
-                        src={session.user.image}
-                        alt={session.user.name || "User"}
-                        width={32}
-                        height={32}
-                        className="rounded-full object-cover"
-                      />
-                    ) : (
-                      <User className="w-8 h-8" />
-                    )}
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={session.user.image} />
+                      <AvatarFallback>
+                        {/* {session.user.name?.charAt(0)} */}
+                        <User className="w-8 h-8" />
+                      </AvatarFallback>
+                    </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

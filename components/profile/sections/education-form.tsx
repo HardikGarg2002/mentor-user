@@ -99,7 +99,7 @@ export function EducationForm({ mentorProfile }: EducationFormProps) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between p-3 md:p-6">
         <div>
           <CardTitle>Education</CardTitle>
           <CardDescription>
@@ -113,7 +113,7 @@ export function EducationForm({ mentorProfile }: EducationFormProps) {
           {isEditing ? "Cancel" : "Edit"}
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-3 md:p-6">
         {isEditing ? (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

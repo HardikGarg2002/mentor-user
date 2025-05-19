@@ -13,10 +13,7 @@ import {
 import { redirect } from "next/navigation";
 import { MentorStats } from "@/components/dashboard/mentor-stats";
 import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
-import {
-  AvailabilityCard,
-  PricingCard,
-} from "@/components/dashboard/service-cards";
+import { AvailabilityCard } from "@/components/dashboard/service-cards";
 import {
   formatDateTime,
   formatDate,
@@ -35,7 +32,7 @@ export default async function MentorDashboard() {
   const mentor = await getMentorByUserId(session.user.id);
 
   if (!mentor) {
-    redirect("/dashboard");
+    redirect("/dashboard/mentee");
   }
 
   // Get dashboard data
@@ -50,8 +47,9 @@ export default async function MentorDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Mentor Dashboard</h1>
-
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-8">
+        Mentor Dashboard
+      </h1>
       <MentorStats earnings={earnings} stats={stats} />
 
       <DashboardTabs
@@ -71,7 +69,7 @@ export default async function MentorDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <AvailabilityCard />
-        <PricingCard pricing={mentor.pricing} />
+        {/* <PricingCard pricing={mentor.pricing} /> */}
       </div>
     </div>
   );

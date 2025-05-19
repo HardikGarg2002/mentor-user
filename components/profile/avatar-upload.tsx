@@ -114,7 +114,7 @@ export function AvatarUpload({
         ) : (
           <FallbackImage className="w-32 h-32 rounded-full" text="Profile" />
         )}
-        <AvatarFallback className="text-4xl">{name.charAt(0)}</AvatarFallback>
+        {/* <AvatarFallback className="text-4xl">{name.charAt(0)}</AvatarFallback> */}
       </Avatar>
 
       <Button

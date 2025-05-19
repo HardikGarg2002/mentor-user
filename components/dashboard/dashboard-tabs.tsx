@@ -145,7 +145,7 @@ export function DashboardTabs({
   return (
     <Tabs defaultValue="upcoming" className="mb-8">
       {/* Scrollable TabsList wrapper on mobile */}
-      <div className="sm:overflow-visible overflow-x-auto whitespace-nowrap px-2">
+      <div className="sm:overflow-visible overflow-x-auto whitespace-nowrap md:px-2">
         <TabsList className="w-max sm:w-auto">
           {visibleTabs.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>

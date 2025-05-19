@@ -19,8 +19,8 @@ export function AvailabilityCard() {
       <CardHeader>
         <CardTitle>Manage Availability</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="text-center p-8">
+      <CardContent className="p-3">
+        <div className="text-center md:p-8">
           <Calendar className="h-12 w-12 mx-auto mb-4 text-primary" />
           <h3 className="font-medium mb-2">Set Your Schedule</h3>
           <p className="text-gray-500 mb-4">
@@ -42,7 +42,7 @@ export function PricingCard({ pricing }: ServiceCardsProps) {
       <CardHeader>
         <CardTitle>Service Pricing</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-3">
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div className="flex items-center">
