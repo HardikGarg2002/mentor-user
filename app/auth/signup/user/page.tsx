@@ -20,8 +20,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { CheckCircle2, ExternalLink } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
+import { Suspense } from "react";
 
-export default function SignUp() {
+function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
@@ -38,8 +39,6 @@ export default function SignUp() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
-    // Register new user
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -48,7 +47,6 @@ export default function SignUp() {
       });
 
       const data = await res.json();
-
       if (!res.ok) {
         throw new Error(data.message || "Something went wrong");
       }
@@ -93,7 +91,6 @@ export default function SignUp() {
                 We&apos;ve sent a verification link to <strong>{email}</strong>.
                 Please check both your inbox and spam folder.
               </p>
-
               {emailPreviewUrl && (
                 <div className="mt-4 w-full p-4 bg-blue-50 rounded-md">
                   <p className="text-sm font-semibold text-center mb-2">
@@ -149,7 +146,6 @@ export default function SignUp() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-
           <div className="flex justify-center mb-6">
             <Button
               variant="outline"
@@ -178,7 +174,6 @@ export default function SignUp() {
               Continue with Google
             </Button>
           </div>
-
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300" />
@@ -189,7 +184,6 @@ export default function SignUp() {
               </span>
             </div>
           </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -201,7 +195,6 @@ export default function SignUp() {
                 required
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -212,7 +205,6 @@ export default function SignUp() {
                 required
               />
             </div>
-
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
@@ -230,7 +222,6 @@ export default function SignUp() {
                 required
               />
             </div>
-
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Loading..." : "Register"}
             </Button>
@@ -246,5 +237,13 @@ export default function SignUp() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export default function SignUp() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignUpForm />
+    </Suspense>
   );
 }
