@@ -6,6 +6,7 @@ import { SessionStatus } from "@/types/session";
 import { PaymentStatus } from "@/types/payment";
 import { verifyRazorpayWebhook } from "@/lib/razorpay";
 import { sendSessionConfirmationEmails } from "@/lib/session-emails";
+import { sendPushNotification } from "@/lib/utils/send-push";
 
 export async function POST(req: NextRequest) {
   try {
@@ -95,9 +96,19 @@ export async function POST(req: NextRequest) {
           try {
             await sendSessionConfirmationEmails(receipt);
             console.log(`Sent confirmation emails for session ${receipt}`);
+            // Send push notification
+            await sendPushNotification({
+              title: "Session Booked!",
+              body: "Your session has been booked and confirmed.",
+              url: `/sessions/${receipt}`,
+            });
+            console.log("Push notification sent for session booking");
           } catch (emailError) {
-            console.error("Error sending confirmation emails:", emailError);
-            // Don't fail the webhook if email sending fails
+            console.error(
+              "Error sending confirmation emails or push notification:",
+              emailError
+            );
+            // Don't fail the webhook if email or push fails
           }
         }
 
@@ -127,9 +138,19 @@ export async function POST(req: NextRequest) {
           try {
             await sendSessionConfirmationEmails(receipt);
             console.log(`Sent confirmation emails for session ${receipt}`);
+            // Send push notification
+            await sendPushNotification({
+              title: "Session Booked!",
+              body: "Your session has been booked and confirmed.",
+              url: `/sessions/${receipt}`,
+            });
+            console.log("Push notification sent for session booking");
           } catch (emailError) {
-            console.error("Error sending confirmation emails:", emailError);
-            // Don't fail the webhook if email sending fails
+            console.error(
+              "Error sending confirmation emails or push notification:",
+              emailError
+            );
+            // Don't fail the webhook if email or push fails
           }
 
           // Revalidate relevant pages
