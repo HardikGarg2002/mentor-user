@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import { generateToken, saveToken } from "@/lib/tokens";
-import { sendEmail } from "@/lib/email";
+import { sendEmail } from "@/lib/utils/emailOptions/Resend";
 import { APP, AUTH } from "@/config";
 
 export async function POST(req: NextRequest) {

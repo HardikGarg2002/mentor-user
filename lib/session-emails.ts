@@ -1,12 +1,12 @@
-import {
-  sendEmail,
-  createSessionConfirmationEmailHtml,
-  createSessionReminderEmailHtml,
-} from "./email";
+import { sendEmail } from "./utils/emailOptions/Resend";
 import connectDB from "./db";
 import User from "@/models/User";
 import Session from "@/models/Session";
 import { format } from "date-fns";
+import {
+  createSessionConfirmationEmailHtml,
+  createSessionReminderEmailHtml,
+} from "./utils/emailOptions/SES";
 
 export async function sendSessionConfirmationEmails(sessionId: string) {
   try {

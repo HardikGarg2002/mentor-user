@@ -3,7 +3,7 @@ import { z } from "zod";
 import connectDB from "@/lib/db";
 import NewsletterSubscriber from "@/models/Newsletter";
 import { generateToken, hashToken } from "@/lib/tokens";
-import { sendEmail } from "@/lib/email";
+import { sendEmail } from "@/lib/utils/emailOptions/Resend";
 
 // Schema for validation
 const subscribeSchema = z.object({

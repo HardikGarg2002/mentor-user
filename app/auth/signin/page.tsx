@@ -19,7 +19,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { PasswordInput } from "@/components/ui/password-input";
-import { APP, AUTH, PATHS, API, Constants } from "@/config";
+import { APP, AUTH, API } from "@/config";
 
 function SignInForm() {
   const router = useRouter();

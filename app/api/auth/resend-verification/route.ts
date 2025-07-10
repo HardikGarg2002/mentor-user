@@ -2,7 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import { generateToken, saveToken } from "@/lib/tokens";
-import { sendEmail, createVerificationEmailHtml } from "@/lib/email";
+import { sendEmail } from "@/lib/utils/emailOptions/Resend";
+import { createVerificationEmailHtml } from "@/lib/utils/emailOptions/SES";
 
 export async function POST(req: NextRequest) {
   try {
